@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Subsystems/BoidsManager.h"
 #include "Boids_Project/Globals.h"
 #include "VisualBoidManager.generated.h"
 
@@ -24,28 +23,24 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AVisualBoid> VisualBoidClass;
-		
-public:	
-	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FORCEINLINE float GetBoidPerceptionRadius() { return BoidsManager::PERCEPTION_DISTANCE; }
-	
 private:
 
 	void InitializeBoids();
-	void UpdateBoids();
 
+	UFUNCTION()
 	void HandleBoidsUpdate();
-	void HandleBoidsNumberUpdate(EBoidType BoidType, int32 NewBoidNumber);
-	void HandleBoidsColorUpdate(EBoidType BoidType, FColor NewBoidColor);
 	
-	TWeakObjectPtr<UBoidManagerSubsystem> BoidManagerSubsystem;
+	UFUNCTION()
+	void HandleBoidsNumberUpdate(EBoidType BoidType, int32 NewBoidNumber);
+	
+	UFUNCTION()
+	void HandleBoidsColorUpdate(EBoidType BoidType, FColor NewBoidColor);
+
 	
 	UPROPERTY(VisibleInstanceOnly)
 	TArray<TObjectPtr<AVisualBoid>> VisualBoids;
-
-	TSharedPtr<BoidsManager> LogicalBoidsManager;
 	
+	TWeakObjectPtr<UBoidManagerSubsystem> BoidManagerSubsystem;
 };
 

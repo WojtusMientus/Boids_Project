@@ -1,5 +1,5 @@
 #include "Internal Logic/Boid.h"
-#include "Subsystems/BoidsManager.h"
+#include "Subsystems/BoidManagerSubsystem.h"
 
 
 Boid::Boid()
@@ -15,7 +15,7 @@ Boid::Boid(const int& MaxBounds)
 	float RandomPositionZ = FMath::RandRange(-HalfWidth, HalfWidth);
 	Position = FVector(RandomPositionX, RandomPositionY, RandomPositionZ);
 
-	Velocity = FMath::VRand() * BoidsManager::BOID_MAX_SPEED;
+	Velocity = FMath::VRand() * UBoidManagerSubsystem::BOID_MAX_SPEED;
 }
 
 Boid::~Boid()

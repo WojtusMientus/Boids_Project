@@ -3,30 +3,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Internal Logic/Bounds/Bounds.h"
 
-/**
- * 
- */
-class BOIDS_PROJECT_API FBounds
+
+class BOIDS_PROJECT_API FOctTreeBounds: public FBounds
 {
-	
 public:
-	
-	FBounds();
-	FBounds(const FVector& UpperForwardRightCorner, const FVector& BottomBackLeftCorner);
-	~FBounds();
+	FOctTreeBounds();
+	FOctTreeBounds(const FVector& UpperForwardRightCorner, const FVector& BottomBackLeftCorner);
+	~FOctTreeBounds();
 
 	bool IsInBounds(const FVector& Position);
-	void UpdateBounds(const FVector& Center, const FVector& BoxExtent);
-	
-	FVector BoundsBottomLeftBackCorner;
-	FVector BoundsUpperRightForwardCorner;
 
-private:
 	bool IsInAxisRange(float MinBound, float MaxBound, float CoordinateToCheck);
 
 	bool IsInAxesX(float CoordinateToCheck);
 	bool IsInAxesY(float CoordinateToCheck);
 	bool IsInAxesZ(float CoordinateToCheck);
+	
+
 	
 };

@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Visual/VisualBounds.h"
+#include "Visual/VisualWorldBounds.h"
 #include "Subsystems/BoidManagerSubsystem.h"
 
-AVisualBounds::AVisualBounds()
+AVisualWorldBounds::AVisualWorldBounds()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -16,7 +16,7 @@ AVisualBounds::AVisualBounds()
 	
 }
 
-void AVisualBounds::BeginPlay()
+void AVisualWorldBounds::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -26,12 +26,12 @@ void AVisualBounds::BeginPlay()
 
 		if (BoidManagerSubsystem)
 		{
-			BoidManagerSubsystem->OnBoundsUpdate.AddDynamic(this, &AVisualBounds::HandleBoundsUpdate);
+			BoidManagerSubsystem->OnBoundsUpdate.AddDynamic(this, &AVisualWorldBounds::HandleBoundsUpdate);
 		}
 	}
 }
 
-void AVisualBounds::HandleBoundsUpdate(const FVector& Center, const FVector& Extent)
+void AVisualWorldBounds::HandleBoundsUpdate(const FVector& Center, const FVector& Extent)
 {
 	// TODO - IMPLEMENTATION
 }

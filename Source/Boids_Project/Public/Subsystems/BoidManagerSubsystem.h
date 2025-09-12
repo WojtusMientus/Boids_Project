@@ -6,7 +6,9 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "Boids_Project/Globals.h"
 #include "Internal Logic/Boid.h"
+#include "Internal Logic/Bounds/WorldBounds.h"
 #include "BoidManagerSubsystem.generated.h"
+
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBoidsUpdateSignature);
@@ -44,13 +46,46 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual TStatId GetStatId() const override;
 
-	FORCEINLINE const TArray<TSharedPtr<Boid>>& GetBoids() { return Boids; }
 
+	
+	static constexpr float SEPARATION_FORCE = .7;  
+	static constexpr float ALIGNMENT_FORCE = .5;  
+	static constexpr float COHESION_FORCE = .35;  
+
+	static constexpr int32 PERCEPTION_DISTANCE = 125;
+	static constexpr float BOID_MAX_SPEED = 4;
+	
+	static constexpr int32 BOIDS_COUNT = 100;
+	static constexpr int32 BOIDS_BOUNDS = 1000;
+
+	void InitializeBoids();
+	void UpdateBoids();
+
+	FVector GetBoidPositionAt(int32 Index);
+	FVector GetBoidVelocityAt(int32 Index);
+	
 private:
 
-	void UpdateBoids();
+	TArray<TSharedPtr<Boid>> GetNeighbourBoids(int32 BoidIndexToCheckNeighbours);
+	void CheckBoidsSubarrayForValidBoids(int32 StartIndex, int32 EndIndex, int32 BoidIndexToCheckNeighbours, TArray<TSharedPtr<Boid>>& ValidBoids);
+
+	void TestUpdateAllInOne();
+	
+	void UpdateSeparation();
+	FVector SeparationResultPerBoid(int32 BoidIndexToCalculate);
+	
+	void UpdateAlignment();
+	FVector AlignmentResultPerBoid(int32 BoidIndexToCalculate);
+	
+	void UpdateCohesion();
+	FVector CohesionResultPerBoid(int32 BoidIndexToCalculate);
+
+	bool IsInRange(int32 FirstIndex, int32 SecondIndex);
+	void CheckOutOfBounds();
+
 	
 	TArray<TSharedPtr<Boid>> Boids;
+	TArray<FVector> NewCalculatedVelocityPerBoid;
 	
-	TArray<FVector> NewCalculatedVelocityPerBoid;	
+	TUniquePtr<FWorldBounds> WorldBounds;
 };

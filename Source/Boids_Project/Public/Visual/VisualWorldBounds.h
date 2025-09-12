@@ -4,19 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "VisualBounds.generated.h"
+#include "VisualWorldBounds.generated.h"
 
 class UBoidManagerSubsystem;
 class Bounds;
 
 
 UCLASS()
-class BOIDS_PROJECT_API AVisualBounds : public AActor
+class BOIDS_PROJECT_API AVisualWorldBounds : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
-	AVisualBounds();
+	AVisualWorldBounds();
 
 	virtual void BeginPlay() override;
 
