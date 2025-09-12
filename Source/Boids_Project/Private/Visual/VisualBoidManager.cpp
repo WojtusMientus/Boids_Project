@@ -1,6 +1,10 @@
-#include "VisualBoidManager.h"
-#include "BoidsManager.h"
-#include "VisualBoid.h"
+#include "Visual/VisualBoidManager.h"
+
+#include "Subsystems/BoidManagerSubsystem.h"
+#include "Subsystems/BoidsManager.h"
+#include "Visual/VisualBoid.h"
+#include "Boids_Project/Globals.h"
+
 
 AVisualBoidManager::AVisualBoidManager()
 {
@@ -12,6 +16,19 @@ AVisualBoidManager::AVisualBoidManager()
 void AVisualBoidManager::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (UWorld* World = GetWorld())
+	{
+		BoidManagerSubsystem = World->GetSubsystem<UBoidManagerSubsystem>();
+	
+		if (BoidManagerSubsystem.IsValid())
+		{
+			BoidManagerSubsystem->OnBoidsUpdate.AddDynamic(this, &AVisualBoidManager::HandleBoidsUpdate);
+			BoidManagerSubsystem->OnBoidsNumberUpdate.AddDynamic(this, &AVisualBoidManager::HandleBoidsNumberUpdate);
+			BoidManagerSubsystem->OnBoidsColorUpdate.AddDynamic(this, &AVisualBoidManager::HandleBoidsColorUpdate);
+		}
+	}
+	
 	LogicalBoidsManager->InitializeBoids();
 	InitializeBoids();
 }
@@ -40,6 +57,7 @@ void AVisualBoidManager::InitializeBoids()
 		FVector StartingVelocity = LogicalBoidsManager->GetBoidVelocityAt(i);
 
 		VisualBoid->UpdateBoid(StartingLocation, StartingVelocity);
+		VisualBoid->AssignID(i);
 		VisualBoids.Add(VisualBoid);
 	}
 }
@@ -52,5 +70,27 @@ void AVisualBoidManager::UpdateBoids()
 		FVector NewVelocity = LogicalBoidsManager->GetBoidVelocityAt(i);
 		VisualBoids[i]->UpdateBoid(NewLocation, NewVelocity);
 	}
+}
+
+void AVisualBoidManager::HandleBoidsUpdate()
+{
+	if (!BoidManagerSubsystem.IsValid())
+	{
+		return;
+	}
+	
+	const TArray<TSharedPtr<Boid>>& Boids = BoidManagerSubsystem->GetBoids();
+
+	// TODO -> IMPLEMENTATION 
+}
+
+void AVisualBoidManager::HandleBoidsNumberUpdate(EBoidType BoidType, int32 NewBoidNumber)
+{
+	// TODO -> IMPLEMENT THIS
+}
+
+void AVisualBoidManager::HandleBoidsColorUpdate(EBoidType BoidType, FColor NewBoidColor)
+{
+	// TODO -> IMPLEMENT THIS
 }
 

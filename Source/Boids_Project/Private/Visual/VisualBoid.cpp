@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "VisualBoid.h"
+#include "Visual/VisualBoid.h"
 #include "Components/ArrowComponent.h"
 
 
@@ -9,13 +9,13 @@ AVisualBoid::AVisualBoid()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-	SetRootComponent(Root);
+	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Scene Root"));
+	SetRootComponent(SceneRoot);
 
-	BoidMeshCompoenent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BoidMesh"));
-	BoidMeshCompoenent->SetupAttachment(GetRootComponent());
+	BoidMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Boid Mesh"));
+	BoidMeshComponent->SetupAttachment(GetRootComponent());
 
-	ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComponent"));
+	ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("Arrow Component"));
 	ArrowComponent->SetupAttachment(GetRootComponent());
 }
 
@@ -24,6 +24,12 @@ void AVisualBoid::UpdateBoid(const FVector& NewPosition, const FVector& NewVeloc
 	SetActorLocation(NewPosition);
 	AlignRotationToVelocity(NewVelocity);
 }
+
+void AVisualBoid::AssignID(int ID)
+{
+	BoidID = ID;
+}
+
 
 void AVisualBoid::AlignRotationToVelocity(const FVector& Velocity)
 {

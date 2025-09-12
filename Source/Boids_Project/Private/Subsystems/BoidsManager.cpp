@@ -1,12 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "BoidsManager.h"
-#include "Boid.h"
+#include "Subsystems/BoidsManager.h"
+#include "Internal Logic/Boid.h"
 
 BoidsManager::BoidsManager()
 {
-	InitializeBoids();
 }
 
 BoidsManager::~BoidsManager()
@@ -18,30 +17,37 @@ void BoidsManager::InitializeBoids()
 	for (int i = 0; i < BOIDS_COUNT; i++)
 	{
 		Boids.Add(MakeShared<Boid>(BOIDS_BOUNDS));
+		NewCalculatedVelocityPerBoid.Add(Boids[i]->Velocity);
 	}
 }
 
 void BoidsManager::UpdateBoids()
 {
-	UpdateAlignment();
-	UpdateCohesion();
-	UpdateSeparation();
+	CheckOutOfBounds();
+
+	TestUpdateAllInOne();
+	
+	// UpdateAlignment();
+	// UpdateCohesion();
+	// UpdateSeparation();
 	
 	for (int i = 0; i < BOIDS_COUNT; i++)
 	{
+		Boids[i]->Velocity = NewCalculatedVelocityPerBoid[i];
+		
 		if (Boids[i]->Velocity.Size() > BOID_MAX_SPEED)
 		{
 			Boids[i]->Velocity.Normalize();
 			Boids[i]->Velocity *= BOID_MAX_SPEED;
 		}
+		
+		NewCalculatedVelocityPerBoid[i] = Boids[i]->Velocity;
 	}
 	
 	for (auto CurrentBoid: Boids)
 	{
 		CurrentBoid->Update();
 	}
-	
-	CheckOutOfBounds();
 }
 
 FVector BoidsManager::GetBoidPositionAt(int Index)
@@ -64,13 +70,83 @@ FVector BoidsManager::GetBoidVelocityAt(int Index)
 	return Boids[Index]->Velocity;
 }
 
+TArray<TSharedPtr<Boid>> BoidsManager::GetNeighbourBoids(int BoidIndexToCheckNeighbours)
+{
+	TArray<TSharedPtr<Boid>> NeighbourBoids;
+	CheckBoidsSubarrayForValidBoids(0, BoidIndexToCheckNeighbours, BoidIndexToCheckNeighbours, NeighbourBoids);
+	CheckBoidsSubarrayForValidBoids(BoidIndexToCheckNeighbours + 1, BOIDS_COUNT, BoidIndexToCheckNeighbours, NeighbourBoids);
+	
+	return NeighbourBoids;
+}
+
+void BoidsManager::CheckBoidsSubarrayForValidBoids(int StartIndex, int EndIndex, int BoidIndexToCheckNeighbours, TArray<TSharedPtr<Boid>>& ValidBoids)
+{
+	for (int i = StartIndex; i < EndIndex; i++)
+	{
+		float DistanceToOtherBoid = FVector::Dist(Boids[BoidIndexToCheckNeighbours]->Position, Boids[i]->Position);
+
+		if (DistanceToOtherBoid <= PERCEPTION_DISTANCE)
+		{
+			ValidBoids.Add(Boids[i]);
+		}
+	}
+}
+
+void BoidsManager::TestUpdateAllInOne()
+{
+	for (int i = 0; i < BOIDS_COUNT; i++)
+	{
+		// TODO: PUT EVERYTHING INTO IT AND SEE THE PERFORMANCE LATER PROPERLY :>
+		TArray<TSharedPtr<Boid>> NeighbourBoids = GetNeighbourBoids(i);
+
+		if (NeighbourBoids.Num() == 0)
+		{
+			continue;
+		}
+		
+		FVector SeparationVector = FVector::ZeroVector;
+		FVector AlignmentVector = FVector::ZeroVector;
+		FVector CohesionVector = FVector::ZeroVector;
+				
+		for (int j = 0; j < NeighbourBoids.Num(); j++)
+		{
+			float DistanceToOtherBoid = FVector::Dist(Boids[i]->Position, NeighbourBoids[j]->Position);
+			
+			FVector DesiredSeparationDirection = Boids[i]->Position - NeighbourBoids[j]->Position;
+			DesiredSeparationDirection.Normalize();
+			DesiredSeparationDirection *= 1.5 - DistanceToOtherBoid / PERCEPTION_DISTANCE;
+			SeparationVector += DesiredSeparationDirection;
+
+			FVector OtherBoidVelocity = NeighbourBoids[j]->Velocity;
+			OtherBoidVelocity.Normalize();
+			AlignmentVector += OtherBoidVelocity;
+
+			CohesionVector += NeighbourBoids[j]->Position;
+		}
+		
+		SeparationVector /= NeighbourBoids.Num();
+		SeparationVector *= SEPARATION_FORCE;
+		
+		AlignmentVector /= NeighbourBoids.Num();
+		AlignmentVector *= ALIGNMENT_FORCE;
+		
+		CohesionVector /= NeighbourBoids.Num();
+		CohesionVector -= Boids[i]->Position;
+		CohesionVector.Normalize();
+		CohesionVector *= COHESION_FORCE;
+
+		NewCalculatedVelocityPerBoid[i] += SeparationVector + AlignmentVector + CohesionVector;
+	}
+}
+
 void BoidsManager::UpdateSeparation()
 {
 	for (int i = 0; i < Boids.Num(); i++)
 	{
 		FVector SeparationVector = SeparationResultPerBoid(i);
-
-		Boids[i]->Velocity += SeparationVector;
+		
+		NewCalculatedVelocityPerBoid[i] += SeparationVector;
+		// Boids[i]->Velocity += SeparationVector;
 	}	
 }
 
@@ -91,7 +167,8 @@ FVector BoidsManager::SeparationResultPerBoid(int BoidIndexToCalculate)
 		if (DistanceToOtherBoid <= PERCEPTION_DISTANCE)
 		{
 			FVector DesiredDirection = Boids[BoidIndexToCalculate]->Position - Boids[i]->Position;
-			DesiredDirection *= (1 - FMath::Pow(DistanceToOtherBoid / PERCEPTION_DISTANCE, 2));
+			DesiredDirection.Normalize();
+			DesiredDirection *= 1.5 - DistanceToOtherBoid / PERCEPTION_DISTANCE;
 			
 			FinalSeparationVector += DesiredDirection;	
 			TotalCalculatedNeighbours++;
@@ -111,9 +188,10 @@ void BoidsManager::UpdateAlignment()
 {
 	for (int i = 0; i < Boids.Num(); i++)
 	{
-		FVector AllignmetVector = AlignmentResultPerBoid(i);
+		FVector AlignmentVector = AlignmentResultPerBoid(i);
 
-		Boids[i]->Velocity += AllignmetVector;
+		NewCalculatedVelocityPerBoid[i] += AlignmentVector;
+		// Boids[i]->Velocity += AlignmentVector;
 	}	
 }
 
@@ -133,7 +211,10 @@ FVector BoidsManager::AlignmentResultPerBoid(int BoidIndexToCalculate)
 
 		if (DistanceToOtherBoid <= PERCEPTION_DISTANCE)
 		{
-			FinalAlignmentVector += Boids[i]->Velocity;				
+			FVector NormalizedBoidVelocity = Boids[i]->Velocity;
+			NormalizedBoidVelocity.Normalize();
+			
+			FinalAlignmentVector += NormalizedBoidVelocity;			
 			TotalCalculatedNeighbours++;
 		}
 	}
@@ -152,8 +233,9 @@ void BoidsManager::UpdateCohesion()
 	for (int i = 0; i < Boids.Num(); i++)
 	{
 		FVector CohesionVector = CohesionResultPerBoid(i);
-
-		Boids[i]->Velocity += CohesionVector;
+		
+		NewCalculatedVelocityPerBoid[i] += CohesionVector;
+		//Boids[i]->Velocity += CohesionVector;
 	}	
 }
 
@@ -182,6 +264,7 @@ FVector BoidsManager::CohesionResultPerBoid(int BoidIndexToCalculate)
 	{
 		FinalCohesionVector /= TotalCalculatedNeighbours;
 		FinalCohesionVector -= Boids[BoidIndexToCalculate]->Position;
+		FinalCohesionVector.Normalize();
 		FinalCohesionVector *= COHESION_FORCE;
 	}
 

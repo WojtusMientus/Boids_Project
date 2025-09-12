@@ -10,6 +10,7 @@ class USceneComponent;
 class UStaticMeshComponent;
 class UArrowComponent;
 
+
 UCLASS()
 class BOIDS_PROJECT_API AVisualBoid : public AActor
 {
@@ -19,15 +20,15 @@ public:
 	AVisualBoid();
 
 	void UpdateBoid(const FVector& NewPosition, const FVector& NewVelocity);
-
+	void AssignID(int ID);
 	
 protected:
 
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<USceneComponent> Root;
+	TObjectPtr<USceneComponent> SceneRoot;
 	
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UStaticMeshComponent> BoidMeshCompoenent;
+	TObjectPtr<UStaticMeshComponent> BoidMeshComponent;
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UArrowComponent> ArrowComponent;
@@ -35,5 +36,7 @@ protected:
 private:
 
 	void AlignRotationToVelocity(const FVector& Velocity);
+
+	int BoidID;
 	
 };

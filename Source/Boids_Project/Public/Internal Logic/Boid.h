@@ -19,6 +19,5 @@ public:
 	
 	FVector Position;
 	FVector Velocity;
-	FVector Acceleration;
 	
 };
