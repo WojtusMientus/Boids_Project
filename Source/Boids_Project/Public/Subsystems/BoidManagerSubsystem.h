@@ -42,18 +42,26 @@ public:
 
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
-	
+		
 	virtual void Tick(float DeltaTime) override;
 	virtual TStatId GetStatId() const override;
+	
+	UFUNCTION(BlueprintCallable)
+	void PostAllActorsBeginPlay();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FORCEINLINE float GetPerceptionRadius() { return PERCEPTION_DISTANCE; }
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FORCEINLINE FVector GetBoidLocation(int32 Index) { return GetBoidPositionAt(Index); }
+	
 	
 	static constexpr float SEPARATION_FORCE = .7;  
 	static constexpr float ALIGNMENT_FORCE = .5;  
 	static constexpr float COHESION_FORCE = .35;  
 
 	static constexpr int32 PERCEPTION_DISTANCE = 125;
-	static constexpr float BOID_MAX_SPEED = 4;
+	static constexpr float BOID_MAX_SPEED = 250;
 	
 	static constexpr int32 BOIDS_COUNT = 100;
 	static constexpr int32 BOIDS_BOUNDS = 1000;
@@ -63,12 +71,15 @@ public:
 
 	FVector GetBoidPositionAt(int32 Index);
 	FVector GetBoidVelocityAt(int32 Index);
-	
+
 private:
 
 	TArray<TSharedPtr<Boid>> GetNeighbourBoids(int32 BoidIndexToCheckNeighbours);
 	void CheckBoidsSubarrayForValidBoids(int32 StartIndex, int32 EndIndex, int32 BoidIndexToCheckNeighbours, TArray<TSharedPtr<Boid>>& ValidBoids);
 
+	UFUNCTION(BlueprintCallable)
+	TArray<FVector> GetNeighbourBoidsLocations(int32 BoidIndexToCheckNeighbours);
+	
 	void TestUpdateAllInOne();
 	
 	void UpdateSeparation();
@@ -82,7 +93,9 @@ private:
 
 	bool IsInRange(int32 FirstIndex, int32 SecondIndex);
 	void CheckOutOfBounds();
+	
 
+	float RealDeltaTimeSpeed;
 	
 	TArray<TSharedPtr<Boid>> Boids;
 	TArray<FVector> NewCalculatedVelocityPerBoid;

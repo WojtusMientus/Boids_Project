@@ -13,7 +13,6 @@ AVisualWorldBounds::AVisualWorldBounds()
 
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Bounds Mesh"));
 	MeshComponent->SetupAttachment(GetRootComponent());
-	
 }
 
 void AVisualWorldBounds::BeginPlay()
@@ -33,7 +32,18 @@ void AVisualWorldBounds::BeginPlay()
 
 void AVisualWorldBounds::HandleBoundsUpdate(const FVector& Center, const FVector& Extent)
 {
-	// TODO - IMPLEMENTATION
+	SetActorLocation(Center);
+	UpdateMeshBounds(Extent);
+}
+
+void AVisualWorldBounds::UpdateMeshBounds(const FVector& NewBoundsExtent)
+{
+	const FVector NewBoundsSize = NewBoundsExtent / 100;
+
+	if (IsValid(MeshComponent))
+	{
+		MeshComponent->SetRelativeScale3D(NewBoundsSize);
+	}
 }
 
 

@@ -17,6 +17,7 @@ public:
 	FORCEINLINE FVector GetMaxCorner() { return BoundsUpperRightForwardCorner; } 
 	FORCEINLINE FVector GetMinCorner() { return BoundsBottomLeftBackCorner; }
 	FORCEINLINE FVector GetBoundsSize() { return BoundsUpperRightForwardCorner - BoundsBottomLeftBackCorner; }
+	FORCEINLINE FVector GetBoundsCenter() { return (BoundsUpperRightForwardCorner + BoundsBottomLeftBackCorner) / 2; }
 	
 protected:
 	

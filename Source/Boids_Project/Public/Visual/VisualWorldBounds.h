@@ -30,5 +30,11 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UStaticMeshComponent> MeshComponent;
+
+private:
+
+	void UpdateMeshBounds(const FVector& NewBoundsExtent);
 	
 };
+
+

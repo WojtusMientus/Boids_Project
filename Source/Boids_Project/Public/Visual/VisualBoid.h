@@ -4,15 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interfaces/SelectableBoid.h"
 #include "VisualBoid.generated.h"
 
+class UBoidManagerSubsystem;
 class USceneComponent;
 class UStaticMeshComponent;
 class UArrowComponent;
 
 
 UCLASS()
-class BOIDS_PROJECT_API AVisualBoid : public AActor
+class BOIDS_PROJECT_API AVisualBoid : public AActor, public ISelectableBoid
 {
 	GENERATED_BODY()
 	
@@ -20,7 +22,9 @@ public:
 	AVisualBoid();
 
 	void UpdateBoid(const FVector& NewPosition, const FVector& NewVelocity);
-	void AssignID(int ID);
+	void AssignID(int32 ID);
+
+	virtual FBoidSelection OnBoidSelection() override;
 	
 protected:
 
@@ -37,6 +41,7 @@ private:
 
 	void AlignRotationToVelocity(const FVector& Velocity);
 
-	int BoidID;
-	
+	int32 BoidID;
+
+	EBoidType BoidType;
 };

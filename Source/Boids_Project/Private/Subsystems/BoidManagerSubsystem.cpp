@@ -17,9 +17,15 @@ void UBoidManagerSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
+void UBoidManagerSubsystem::PostAllActorsBeginPlay()
+{
+	OnBoundsUpdate.Broadcast(WorldBounds->GetBoundsCenter(), WorldBounds->GetBoundsSize());
+}
+
 void UBoidManagerSubsystem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	RealDeltaTimeSpeed = BOID_MAX_SPEED * DeltaTime;	
 	UpdateBoids();
 	OnBoidsUpdate.Broadcast();
 }
@@ -53,13 +59,8 @@ void UBoidManagerSubsystem::UpdateBoids()
 	for (int i = 0; i < BOIDS_COUNT; i++)
 	{
 		Boids[i]->Velocity = NewCalculatedVelocityPerBoid[i];
-		
-		if (Boids[i]->Velocity.Size() > BOID_MAX_SPEED)
-		{
-			Boids[i]->Velocity.Normalize();
-			Boids[i]->Velocity *= BOID_MAX_SPEED;
-		}
-		
+		Boids[i]->Velocity.Normalize();
+		Boids[i]->Velocity *= RealDeltaTimeSpeed;
 		NewCalculatedVelocityPerBoid[i] = Boids[i]->Velocity;
 	}
 	
@@ -111,13 +112,27 @@ void UBoidManagerSubsystem::CheckBoidsSubarrayForValidBoids(int32 StartIndex, in
 	}
 }
 
+TArray<FVector> UBoidManagerSubsystem::GetNeighbourBoidsLocations(int32 BoidIndexToCheckNeighbours)
+{
+	TArray<TSharedPtr<Boid>> NeighbourBoids = GetNeighbourBoids(BoidIndexToCheckNeighbours);
+	
+	TArray<FVector> FinalLocations;
+
+	for (int i = 0; i < NeighbourBoids.Num(); i++)
+	{
+		FinalLocations.Add(NeighbourBoids[i]->Position);
+	}
+	
+	return FinalLocations;
+}
+
 void UBoidManagerSubsystem::TestUpdateAllInOne()
 {
 	for (int i = 0; i < BOIDS_COUNT; i++)
 	{
 		// TODO: PUT EVERYTHING INTO IT AND SEE THE PERFORMANCE LATER PROPERLY :>
 		TArray<TSharedPtr<Boid>> NeighbourBoids = GetNeighbourBoids(i);
-
+		
 		if (NeighbourBoids.Num() == 0)
 		{
 			continue;
@@ -291,35 +306,13 @@ bool UBoidManagerSubsystem::IsInRange(int32 FirstIndex, int32 SecondIndex)
 
 void UBoidManagerSubsystem::CheckOutOfBounds()
 {
-	int HalfBound = BOIDS_BOUNDS / 2;
+	if (!WorldBounds.IsValid())
+	{
+		return;
+	}
 	
 	for (auto CurrentBoid: Boids)
 	{
-		if (CurrentBoid->Position.X > HalfBound)
-		{
-			CurrentBoid->Position.X -= BOIDS_BOUNDS;
-		}
-		else if (CurrentBoid->Position.X < -HalfBound)
-		{
-			CurrentBoid->Position.X += BOIDS_BOUNDS;
-		}
-
-		if (CurrentBoid->Position.Y > HalfBound)
-		{
-			CurrentBoid->Position.Y -= BOIDS_BOUNDS;
-		}
-		else if (CurrentBoid->Position.Y < -HalfBound)
-		{
-			CurrentBoid->Position.Y += BOIDS_BOUNDS;
-		}
-
-		if (CurrentBoid->Position.Z > HalfBound)
-		{
-			CurrentBoid->Position.Z -= BOIDS_BOUNDS;
-		}
-		else if (CurrentBoid->Position.Z < -HalfBound)
-		{
-			CurrentBoid->Position.Z += BOIDS_BOUNDS;
-		}
+		WorldBounds->WrapPosition(CurrentBoid->Position);
 	}
 }
