@@ -6,7 +6,7 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "Boids_Project/Globals.h"
 #include "Internal Logic/Boid.h"
-#include "Internal Logic/Bounds/WorldBounds.h"
+#include "Internal Logic/Bounds/WorldCollisionBounds.h"
 #include "BoidManagerSubsystem.generated.h"
 
 
@@ -63,7 +63,7 @@ public:
 	static constexpr int32 PERCEPTION_DISTANCE = 125;
 	static constexpr float BOID_MAX_SPEED = 250;
 	
-	static constexpr int32 BOIDS_COUNT = 100;
+	static constexpr int32 BOIDS_COUNT = 0;
 	static constexpr int32 BOIDS_BOUNDS = 1000;
 
 	void InitializeBoids();
@@ -81,6 +81,7 @@ private:
 	TArray<FVector> GetNeighbourBoidsLocations(int32 BoidIndexToCheckNeighbours);
 	
 	void TestUpdateAllInOne();
+	void ApplyCollisionForce();
 	
 	void UpdateSeparation();
 	FVector SeparationResultPerBoid(int32 BoidIndexToCalculate);
@@ -92,13 +93,12 @@ private:
 	FVector CohesionResultPerBoid(int32 BoidIndexToCalculate);
 
 	bool IsInRange(int32 FirstIndex, int32 SecondIndex);
-	void CheckOutOfBounds();
 	
 
-	float RealDeltaTimeSpeed;
+	float DeltaTimeSpeedModifier;
 	
 	TArray<TSharedPtr<Boid>> Boids;
 	TArray<FVector> NewCalculatedVelocityPerBoid;
 	
-	TUniquePtr<FWorldBounds> WorldBounds;
+	TUniquePtr<FWorldCollisionBounds> WorldCollisionBounds;	
 };

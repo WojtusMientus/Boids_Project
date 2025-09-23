@@ -7,9 +7,10 @@
 void UBoidManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+	
 	InitializeBoids();
 	
-	WorldBounds = MakeUnique<FWorldBounds>(BOIDS_BOUNDS);
+	WorldCollisionBounds = MakeUnique<FWorldCollisionBounds>(BOIDS_BOUNDS);
 }
 
 void UBoidManagerSubsystem::Deinitialize()
@@ -19,13 +20,13 @@ void UBoidManagerSubsystem::Deinitialize()
 
 void UBoidManagerSubsystem::PostAllActorsBeginPlay()
 {
-	OnBoundsUpdate.Broadcast(WorldBounds->GetBoundsCenter(), WorldBounds->GetBoundsSize());
+	OnBoundsUpdate.Broadcast(WorldCollisionBounds->GetBoundsCenter(), WorldCollisionBounds->GetBoundsSize());
 }
 
 void UBoidManagerSubsystem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	RealDeltaTimeSpeed = BOID_MAX_SPEED * DeltaTime;	
+	DeltaTimeSpeedModifier = BOID_MAX_SPEED * DeltaTime;
 	UpdateBoids();
 	OnBoidsUpdate.Broadcast();
 }
@@ -48,19 +49,21 @@ void UBoidManagerSubsystem::InitializeBoids()
 
 void UBoidManagerSubsystem::UpdateBoids()
 {
-	CheckOutOfBounds();
+	// CheckOutOfBounds();
 
 	TestUpdateAllInOne();
 	
 	// UpdateAlignment();
 	// UpdateCohesion();
 	// UpdateSeparation();
+
+	ApplyCollisionForce();
 	
 	for (int i = 0; i < BOIDS_COUNT; i++)
 	{
 		Boids[i]->Velocity = NewCalculatedVelocityPerBoid[i];
 		Boids[i]->Velocity.Normalize();
-		Boids[i]->Velocity *= RealDeltaTimeSpeed;
+		Boids[i]->Velocity *= DeltaTimeSpeedModifier;
 		NewCalculatedVelocityPerBoid[i] = Boids[i]->Velocity;
 	}
 	
@@ -170,6 +173,14 @@ void UBoidManagerSubsystem::TestUpdateAllInOne()
 		CohesionVector *= COHESION_FORCE;
 
 		NewCalculatedVelocityPerBoid[i] += SeparationVector + AlignmentVector + CohesionVector;
+	}
+}
+
+void UBoidManagerSubsystem::ApplyCollisionForce()
+{
+	for (int i = 0; i < BOIDS_COUNT; i++)
+	{
+		NewCalculatedVelocityPerBoid[i] += WorldCollisionBounds->GetCollisionForceAt(Boids[i]->Position);
 	}
 }
 
@@ -302,17 +313,4 @@ bool UBoidManagerSubsystem::IsInRange(int32 FirstIndex, int32 SecondIndex)
 {
 	float DistanceBetweenBoids = FVector::Dist(Boids[FirstIndex]->Position, Boids[SecondIndex]->Position);
 	return DistanceBetweenBoids <= PERCEPTION_DISTANCE;
-}
-
-void UBoidManagerSubsystem::CheckOutOfBounds()
-{
-	if (!WorldBounds.IsValid())
-	{
-		return;
-	}
-	
-	for (auto CurrentBoid: Boids)
-	{
-		WorldBounds->WrapPosition(CurrentBoid->Position);
-	}
 }

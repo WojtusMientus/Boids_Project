@@ -14,10 +14,10 @@ public:
 	FBounds(const FVector& UpperForwardRightCorner, const FVector& BottomBackLeftCorner);
 	virtual ~FBounds();
 
-	FORCEINLINE FVector GetMaxCorner() { return BoundsUpperRightForwardCorner; } 
-	FORCEINLINE FVector GetMinCorner() { return BoundsBottomLeftBackCorner; }
-	FORCEINLINE FVector GetBoundsSize() { return BoundsUpperRightForwardCorner - BoundsBottomLeftBackCorner; }
-	FORCEINLINE FVector GetBoundsCenter() { return (BoundsUpperRightForwardCorner + BoundsBottomLeftBackCorner) / 2; }
+	FORCEINLINE FVector GetMaxCorner() const { return BoundsUpperRightForwardCorner; } 
+	FORCEINLINE FVector GetMinCorner() const { return BoundsBottomLeftBackCorner; }
+	FORCEINLINE FVector GetBoundsSize() const { return BoundsUpperRightForwardCorner - BoundsBottomLeftBackCorner; }
+	FORCEINLINE FVector GetBoundsCenter() const { return (BoundsUpperRightForwardCorner + BoundsBottomLeftBackCorner) / 2; }
 	
 protected:
 	
