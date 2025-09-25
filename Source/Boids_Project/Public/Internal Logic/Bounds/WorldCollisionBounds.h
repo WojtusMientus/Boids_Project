@@ -1,4 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+
+// Represents a voxelized collision boundary around the demo world.
+// Each voxel stores precomputed collision forces near the bounds.
+// This design can be extended later to support richer collision data.
+//
+//  Future extension: Store per-voxel data of static geometry collision
 
 #pragma once
 
@@ -8,59 +13,68 @@
 
 class BOIDS_PROJECT_API FWorldCollisionBounds: public FBounds
 {
-public:
 	
+public:
+
+	// ----- Constructors -----
 	FWorldCollisionBounds();
 	FWorldCollisionBounds(const FVector& UpperForwardRightCorner, const FVector& BottomBackLeftCorner);
 	FWorldCollisionBounds(const float BoundsSize);
-	~FWorldCollisionBounds();
+	~FWorldCollisionBounds() = default;
 
+	// ----- Public API ----- 
 	void UpdateBounds(const FVector& Center, const FVector& BoxExtent);
 	
-	FVector GetCollisionForceAt(const FVector& Location);
-	void AddForceAtIndex(const FVector& Force, const int32 Index);
-	void InitializeForcesNearBounds();
+	FVector GetCollisionForceAt(const FVector& Location) const;
+	FVector GetCellCenter(int32 IndexX, int32 IndexY, int32 IndexZ) const;
+	
+private:
 
-	FVector GetBoundCellCenter(int32 X, int32 Y, int32 Z);
-
+	// ----- Grid Configuration -----
 	static constexpr int32 DIMENSION_X = 35;
 	static constexpr int32 DIMENSION_Y = 35;
 	static constexpr int32 DIMENSION_Z = 35;
-	
-protected:
-		
-
 	static constexpr int32 DIMENSION_XY = DIMENSION_X * DIMENSION_Y;
-	static constexpr int32 COLLISION_ROWS = 3;
 	
-	float CELL_SIZE_X;
-	float CELL_SIZE_Y;
-	float CELL_SIZE_Z;
+	static constexpr int32 COLLISION_ROWS = 4;
+	static constexpr float COLLISION_MULTIPLIER = .15f;
 
-	static constexpr float COLLISION_MULTIPLIER = .2;
-	
+	// ----- Runtime Variables -----
+	float CellSizeX = 0.0f;
+	float CellSizeY = 0.0f;
+	float CellSizeZ = 0.0f;
 
-	void UpdateCellSizes();
+	// Stores precomputed per-voxel collision forces
+	TArray<FVector> VoxelCollisionGrid;	
 	
-	FORCEINLINE int32 ToArrayIndex(int32 X, int32 Y, int32 Z)
+	
+	// ----- Initialization -----
+	void InitializeForcesNearBounds();
+	void InitializeForcesAlongX(int StartIndex, int EndIndex, const FVector& ForceVector, bool bAtLowerBoundary);
+	void InitializeForcesAlongY(int StartIndex, int EndIndex, const FVector& ForceVector, bool bAtLowerBoundary);
+	void InitializeForcesAlongZ(int StartIndex, int EndIndex, const FVector& ForceVector, bool bAtLowerBoundary);
+	void InitializeCellSizes();
+	
+	// ----- Private Helpers -----
+	void AddForceAt(const FVector& Force, int32 Index);
+	
+	FORCEINLINE int32 ToArrayIndex(int32 X, int32 Y, int32 Z) const
 	{
 		return X + Y * DIMENSION_X + Z * DIMENSION_XY;
 	}
 
-	FORCEINLINE int32 CellIndexX(const FVector& Location)
+	FORCEINLINE int32 CellIndexX(const FVector& Location) const
 	{
-		return FMath::Clamp(FMath::FloorToInt32((Location.X - BoundsBottomLeftBackCorner.X) / CELL_SIZE_X), 0, DIMENSION_X - 1);
+		return FMath::Clamp(FMath::FloorToInt32((Location.X - BoundsBottomLeftBackCorner.X) / CellSizeX), 0, DIMENSION_X - 1);
 	}
 
-	FORCEINLINE int32 CellIndexY(const FVector& Location)
+	FORCEINLINE int32 CellIndexY(const FVector& Location) const
 	{
-		return FMath::Clamp(FMath::FloorToInt32((Location.Y - BoundsBottomLeftBackCorner.Y) / CELL_SIZE_Y), 0, DIMENSION_Y - 1);
+		return FMath::Clamp(FMath::FloorToInt32((Location.Y - BoundsBottomLeftBackCorner.Y) / CellSizeY), 0, DIMENSION_Y - 1);
 	}
 
-	FORCEINLINE int32 CellIndexZ(const FVector& Location)
+	FORCEINLINE int32 CellIndexZ(const FVector& Location) const
 	{
-		return FMath::Clamp(FMath::FloorToInt32((Location.Z - BoundsBottomLeftBackCorner.Z) / CELL_SIZE_Z), 0, DIMENSION_Z - 1);
+		return FMath::Clamp(FMath::FloorToInt32((Location.Z - BoundsBottomLeftBackCorner.Z) / CellSizeZ), 0, DIMENSION_Z - 1);
 	}
-	
-	TArray<FVector> VoxelCollisionGrid;	
 };

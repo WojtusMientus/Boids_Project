@@ -56,18 +56,18 @@ public:
 	FORCEINLINE FVector GetBoidLocation(int32 Index) { return GetBoidPositionAt(Index); }
 	
 	
-	static constexpr float SEPARATION_FORCE = .7;  
+	static constexpr float SEPARATION_FORCE = .75;  
 	static constexpr float ALIGNMENT_FORCE = .5;  
 	static constexpr float COHESION_FORCE = .35;  
 
 	static constexpr int32 PERCEPTION_DISTANCE = 125;
 	static constexpr float BOID_MAX_SPEED = 250;
 	
-	static constexpr int32 BOIDS_COUNT = 0;
+	static constexpr int32 BOIDS_COUNT = 100;
 	static constexpr int32 BOIDS_BOUNDS = 1000;
 
 	void InitializeBoids();
-	void UpdateBoids();
+	void UpdateBoids(float DeltaTime);
 
 	FVector GetBoidPositionAt(int32 Index);
 	FVector GetBoidVelocityAt(int32 Index);
@@ -94,8 +94,6 @@ private:
 
 	bool IsInRange(int32 FirstIndex, int32 SecondIndex);
 	
-
-	float DeltaTimeSpeedModifier;
 	
 	TArray<TSharedPtr<Boid>> Boids;
 	TArray<FVector> NewCalculatedVelocityPerBoid;

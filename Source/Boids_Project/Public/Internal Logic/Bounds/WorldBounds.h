@@ -1,4 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+
+// Represents world bounds around the demo world
+// Is currently being replaced with WorldCollisionBounds class
+// This class is deprecated and will be deleted in future development
 
 #pragma once
 
@@ -8,14 +11,16 @@
 
 class BOIDS_PROJECT_API FWorldBounds: public FBounds
 {
-public:
 	
+public:
+
+	// ----- Constructors -----
 	FWorldBounds();
 	FWorldBounds(const FVector& UpperForwardRightCorner, const FVector& BottomBackLeftCorner);
 	FWorldBounds(const float BoundsSize);
-	~FWorldBounds();
+	~FWorldBounds() = default;
 
+	// ----- Public API -----
 	void UpdateBounds(const FVector& Center, const FVector& BoxExtent);
 	void WrapPosition(FVector& Position);
-	
 };

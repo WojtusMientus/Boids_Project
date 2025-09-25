@@ -26,8 +26,7 @@ void UBoidManagerSubsystem::PostAllActorsBeginPlay()
 void UBoidManagerSubsystem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	DeltaTimeSpeedModifier = BOID_MAX_SPEED * DeltaTime;
-	UpdateBoids();
+	UpdateBoids(DeltaTime);
 	OnBoidsUpdate.Broadcast();
 }
 
@@ -47,7 +46,7 @@ void UBoidManagerSubsystem::InitializeBoids()
 	}
 }
 
-void UBoidManagerSubsystem::UpdateBoids()
+void UBoidManagerSubsystem::UpdateBoids(float DeltaTime)
 {
 	// CheckOutOfBounds();
 
@@ -62,14 +61,8 @@ void UBoidManagerSubsystem::UpdateBoids()
 	for (int i = 0; i < BOIDS_COUNT; i++)
 	{
 		Boids[i]->Velocity = NewCalculatedVelocityPerBoid[i];
-		Boids[i]->Velocity.Normalize();
-		Boids[i]->Velocity *= DeltaTimeSpeedModifier;
+		Boids[i]->Update(DeltaTime, BOID_MAX_SPEED);
 		NewCalculatedVelocityPerBoid[i] = Boids[i]->Velocity;
-	}
-	
-	for (auto CurrentBoid: Boids)
-	{
-		CurrentBoid->Update();
 	}
 }
 

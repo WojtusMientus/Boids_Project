@@ -6,24 +6,18 @@ Boid::Boid()
 {
 }
 
-Boid::Boid(const int& MaxBounds)
-{
-	int HalfWidth = MaxBounds / 2;
-
-	float RandomPositionX = FMath::RandRange(-HalfWidth, HalfWidth);
-	float RandomPositionY = FMath::RandRange(-HalfWidth, HalfWidth);
-	float RandomPositionZ = FMath::RandRange(-HalfWidth, HalfWidth);
-	Position = FVector(RandomPositionX, RandomPositionY, RandomPositionZ);
-
-	Velocity = FMath::VRand() * UBoidManagerSubsystem::BOID_MAX_SPEED;
-}
-
-Boid::~Boid()
+Boid::Boid(float MaxBounds)
+:	Position(FMath::RandRange(-MaxBounds / 2, MaxBounds / 2),
+				FMath::RandRange(-MaxBounds / 2, MaxBounds / 2),
+				FMath::RandRange(-MaxBounds / 2, MaxBounds / 2)),
+	  Velocity(FMath::VRand() * UBoidManagerSubsystem::BOID_MAX_SPEED)
 {
 }
 
-void Boid::Update()
+void Boid::Update(float DeltaTime, float MaxSpeed)
 {
+	Velocity.Normalize();
+	Velocity *= DeltaTime * MaxSpeed;
 	Position += Velocity;
 }
 

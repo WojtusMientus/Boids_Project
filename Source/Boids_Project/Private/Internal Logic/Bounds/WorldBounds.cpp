@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Internal Logic/Bounds/WorldBounds.h"
 
 
@@ -19,10 +16,6 @@ FWorldBounds::FWorldBounds(const float BoundsSize)
 	BoundsBottomLeftBackCorner = FVector(-HalfBoundsSize, -HalfBoundsSize, -HalfBoundsSize);
 }
 
-FWorldBounds::~FWorldBounds()
-{
-}
-
 void FWorldBounds::UpdateBounds(const FVector& Center, const FVector& BoxExtent)
 {
 	const FVector HalfExtent = BoxExtent / 2;
@@ -33,34 +26,10 @@ void FWorldBounds::UpdateBounds(const FVector& Center, const FVector& BoxExtent)
 
 void FWorldBounds::WrapPosition(FVector& Position)
 {
-	const FVector BoundsSize = GetBoundsSize();
 	const FVector MinCorner = GetMinCorner();
 	const FVector MaxCorner = GetMaxCorner();
 
-	if (Position.X >= MaxCorner.X)
-	{
-		Position.X -= BoundsSize.X;
-	}
-	else if (Position.X < MinCorner.X)
-	{
-		Position.X += BoundsSize.X;
-	}
-
-	if (Position.Y >= MaxCorner.Y)
-	{
-		Position.Y -= BoundsSize.Y;
-	}
-	else if (Position.Y < MinCorner.Y)
-	{
-		Position.Y += BoundsSize.Y;
-	}
-
-	if (Position.Z >= MaxCorner.Z)
-	{
-		Position.Z -= BoundsSize.Z;
-	}
-	else if (Position.Z < MinCorner.Z)
-	{
-		Position.Z += BoundsSize.Z;
-	}
+	Position.X = FMath::Wrap(Position.X, MinCorner.X, MaxCorner.X);
+	Position.Y = FMath::Wrap(Position.Y, MinCorner.Y, MaxCorner.Y);
+	Position.Z = FMath::Wrap(Position.Z, MinCorner.Z, MaxCorner.Z);
 }

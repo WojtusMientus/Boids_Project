@@ -1,4 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+
+// First iteration of octree nodes; checks if a point is inside.
+// Min-inclusive, max-exclusive bounds to avoid multiple leaf assignments.
+// This class will be deprecated and will be deleted in future development
+// Collision checks will be moved to VoxelGrid instead of OctTree
 
 #pragma once
 
@@ -8,19 +12,19 @@
 
 class BOIDS_PROJECT_API FOctTreeBounds: public FBounds
 {
+	
 public:
+
+	// ----- Constructors -----
 	FOctTreeBounds();
 	FOctTreeBounds(const FVector& UpperForwardRightCorner, const FVector& BottomBackLeftCorner);
-	~FOctTreeBounds();
+	~FOctTreeBounds() = default;
 
+	// ----- Public API -----
 	bool IsInBounds(const FVector& Position);
 
+private:
+
+	// ----- Private Helpers -----
 	bool IsInAxisRange(float MinBound, float MaxBound, float CoordinateToCheck);
-
-	bool IsInAxesX(float CoordinateToCheck);
-	bool IsInAxesY(float CoordinateToCheck);
-	bool IsInAxesZ(float CoordinateToCheck);
-	
-
-	
 };
