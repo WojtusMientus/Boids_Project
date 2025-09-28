@@ -1,9 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 
 #include "Visual/VisualBoid.h"
 #include "Components/ArrowComponent.h"
-#include "Structs/BoidSelection.h"
+#include "Core/BoidSelection.h"
 
 
 AVisualBoid::AVisualBoid()
@@ -26,22 +24,18 @@ void AVisualBoid::UpdateBoid(const FVector& NewPosition, const FVector& NewVeloc
 	AlignRotationToVelocity(NewVelocity);
 }
 
-void AVisualBoid::AssignID(int32 ID)
+void AVisualBoid::SetBoidID(int32 ID)
 {
 	BoidID = ID;
 }
 
-FBoidSelection AVisualBoid::OnBoidSelection()
+FBoidSelection AVisualBoid::GetBoidSelection() const
 {
 	return FBoidSelection(BoidID, BoidType);
 }
 
-
 void AVisualBoid::AlignRotationToVelocity(const FVector& Velocity)
 {
-	FRotator NewActorRotation = Velocity.Rotation();
+	const FRotator NewActorRotation = Velocity.Rotation();
 	SetActorRotation(NewActorRotation);
 }
-
-
-

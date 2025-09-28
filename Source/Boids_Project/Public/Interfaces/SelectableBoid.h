@@ -1,19 +1,19 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+
+// Boid-specific selection interface for runtime visualization
+//
+// Future: Could be generalized to ISeectable interface
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "Boids_Project/Globals.h"
 #include "SelectableBoid.generated.h"
 
-// This class does not need to be modified.
 UINTERFACE(MinimalAPI, NotBlueprintable)
 class USelectableBoid : public UInterface
 {
 	GENERATED_BODY()
 };
-
 
 class BOIDS_PROJECT_API ISelectableBoid
 {
@@ -22,6 +22,6 @@ class BOIDS_PROJECT_API ISelectableBoid
 public:
 	
 	UFUNCTION(BlueprintCallable)
-	virtual FBoidSelection OnBoidSelection();
+	virtual FBoidSelection GetBoidSelection() const = 0;
 	
 };

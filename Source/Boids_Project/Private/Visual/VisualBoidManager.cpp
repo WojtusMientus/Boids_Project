@@ -1,6 +1,6 @@
-#include "Visual/VisualBoidManager.h"
 
-#include "Subsystems/BoidManagerSubsystem.h"
+#include "Visual/VisualBoidManager.h"
+#include "Core/BoidManagerSubsystem.h"
 #include "Visual/VisualBoid.h"
 #include "Boids_Project/Globals.h"
 
@@ -29,6 +29,18 @@ void AVisualBoidManager::BeginPlay()
 	InitializeBoids();
 }
 
+void AVisualBoidManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	if (BoidManagerSubsystem.IsValid())
+	{			
+		BoidManagerSubsystem->OnBoidsUpdate.RemoveDynamic(this, &AVisualBoidManager::HandleBoidsUpdate);
+		BoidManagerSubsystem->OnBoidsNumberUpdate.RemoveDynamic(this, &AVisualBoidManager::HandleBoidsNumberUpdate);
+		BoidManagerSubsystem->OnBoidsColorUpdate.RemoveDynamic(this, &AVisualBoidManager::HandleBoidsColorUpdate);
+	}
+}
+
 void AVisualBoidManager::InitializeBoids()
 {
 	TObjectPtr<UWorld> World = GetWorld();
@@ -42,11 +54,16 @@ void AVisualBoidManager::InitializeBoids()
 	{
 		TObjectPtr<AVisualBoid> VisualBoid = World->SpawnActor<AVisualBoid>(VisualBoidClass, FVector(), FRotator());
 
+		if (!IsValid(VisualBoid))
+		{
+			continue;
+		}
+		
 		FVector StartingLocation = BoidManagerSubsystem->GetBoidPositionAt(i);
 		FVector StartingVelocity = BoidManagerSubsystem->GetBoidVelocityAt(i);
 		VisualBoid->UpdateBoid(StartingLocation, StartingVelocity);
+		VisualBoid->SetBoidID(i);
 		
-		VisualBoid->AssignID(i);
 		VisualBoids.Add(VisualBoid);
 	}
 }
@@ -66,14 +83,12 @@ void AVisualBoidManager::HandleBoidsUpdate()
 	}
 }
 
-
 void AVisualBoidManager::HandleBoidsNumberUpdate(EBoidType BoidType, int32 NewBoidNumber)
 {
-	// TODO -> IMPLEMENT THIS
+	// TODO: Implement spawning and despawning visual boids
 }
 
 void AVisualBoidManager::HandleBoidsColorUpdate(EBoidType BoidType, FColor NewBoidColor)
 {
-	// TODO -> IMPLEMENT THIS
+	// TODO: Implement visual color update
 }
-

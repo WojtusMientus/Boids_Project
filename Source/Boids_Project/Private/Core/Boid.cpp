@@ -1,5 +1,6 @@
-#include "Internal Logic/Boid.h"
-#include "Subsystems/BoidManagerSubsystem.h"
+
+#include "Core/Boid.h"
+#include "Core/BoidManagerSubsystem.h"
 
 
 Boid::Boid()

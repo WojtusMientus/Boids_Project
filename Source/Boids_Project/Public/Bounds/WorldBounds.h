@@ -6,7 +6,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Internal Logic/Bounds/Bounds.h"
+#include "Bounds/Bounds.h"
 
 
 class BOIDS_PROJECT_API FWorldBounds: public FBounds

@@ -1,4 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+
+// Data container for Bounds parameters
+//
+// Future: Load at simulation start, suport external tool integration for customization & saving
 
 #pragma once
 
@@ -6,9 +9,7 @@
 #include "Engine/DataAsset.h"
 #include "BoundsData.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class BOIDS_PROJECT_API UBoundsData : public UPrimaryDataAsset
 {

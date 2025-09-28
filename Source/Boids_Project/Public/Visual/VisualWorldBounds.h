@@ -1,4 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+
+// Visual representation of demo world bounds.
+// Updates its mesh in response to BoidManager events.
+// 
+// Future: Support in-editor editing via external Boid Tool.
 
 #pragma once
 
@@ -7,7 +11,6 @@
 #include "VisualWorldBounds.generated.h"
 
 class UBoidManagerSubsystem;
-class Bounds;
 
 
 UCLASS()
@@ -15,14 +18,15 @@ class BOIDS_PROJECT_API AVisualWorldBounds : public AActor
 {
 	GENERATED_BODY()
 	
-public:	
+public:
+
+	// ----- Constructor -----
 	AVisualWorldBounds();
 
+	// ----- AActor Overrides -----
 	virtual void BeginPlay() override;
-
-	UFUNCTION(BlueprintCallable)
-	void HandleBoundsUpdate(const FVector& Center, const FVector& Extent);
-
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
 protected:
 	
 	UPROPERTY(EditDefaultsOnly)
@@ -33,8 +37,12 @@ protected:
 
 private:
 
-	void UpdateMeshBounds(const FVector& NewBoundsExtent);
+	// ----- Private Helpers -----
+	UFUNCTION(BlueprintCallable)
+	void HandleBoundsUpdate(const FVector& Center, const FVector& Extent);
 	
+	void UpdateMeshBounds(const FVector& NewBoundsExtent);
+
+	
+	float BoundsMeshScaleFactor = 0.01f;
 };
-
-

@@ -1,10 +1,14 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+
+// Visual representation of a Boid for demo purposes.
+//
+// Future: Support multiple boid species via BoidEnum for richer interactions.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Interfaces/SelectableBoid.h"
+#include "Boids_Project/Globals.h"
 #include "VisualBoid.generated.h"
 
 class UBoidManagerSubsystem;
@@ -18,16 +22,20 @@ class BOIDS_PROJECT_API AVisualBoid : public AActor, public ISelectableBoid
 {
 	GENERATED_BODY()
 	
-public:	
+public:
+
+	// ----- Constructor -----
 	AVisualBoid();
 
+	// ----- Public API -----
 	void UpdateBoid(const FVector& NewPosition, const FVector& NewVelocity);
-	void AssignID(int32 ID);
+	void SetBoidID(int32 ID);
 
-	virtual FBoidSelection OnBoidSelection() override;
+	virtual FBoidSelection GetBoidSelection() const override;
 	
 protected:
 
+	// ----- Components -----
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USceneComponent> SceneRoot;
 	
@@ -39,9 +47,9 @@ protected:
 
 private:
 
+	// ----- Private Helpers -----
 	void AlignRotationToVelocity(const FVector& Velocity);
-
+	
 	int32 BoidID;
-
 	EBoidType BoidType;
 };

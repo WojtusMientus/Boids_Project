@@ -1,6 +1,5 @@
-#include "Internal Logic/Bounds/WorldCollisionBounds.h"
 
-#include "DataWrappers/ChaosVDJointDataWrappers.h"
+#include "Bounds/WorldCollisionBounds.h"
 
 
 FWorldCollisionBounds::FWorldCollisionBounds(): FBounds()

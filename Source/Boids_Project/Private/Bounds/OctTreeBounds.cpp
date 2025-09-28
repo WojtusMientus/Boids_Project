@@ -1,4 +1,5 @@
-#include "Internal Logic/Bounds/OctTreeBounds.h"
+
+#include "Bounds/OctTreeBounds.h"
 
 
 FOctTreeBounds::FOctTreeBounds(): FBounds()

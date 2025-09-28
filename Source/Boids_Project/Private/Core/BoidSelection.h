@@ -1,9 +1,9 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
+﻿
 #pragma once
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
+#include "Boids_Project/Globals.h"
 #include "BoidSelection.generated.h"
 
 USTRUCT(BlueprintType)
@@ -11,10 +11,8 @@ struct FBoidSelection
 {
 	GENERATED_BODY()
 
-	FBoidSelection()
-	{
-	}
-	
+	// ----- Constructors -----
+	FBoidSelection() = default;
 	FBoidSelection(const int32 Index, const EBoidType BoidType): ID(Index), Type(BoidType)
 	{
 	}

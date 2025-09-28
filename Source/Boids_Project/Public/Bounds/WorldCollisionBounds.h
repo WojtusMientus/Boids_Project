@@ -3,12 +3,12 @@
 // Each voxel stores precomputed collision forces near the bounds.
 // This design can be extended later to support richer collision data.
 //
-//  Future extension: Store per-voxel data of static geometry collision
+//  Future: Store per-voxel data of static geometry collision
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Internal Logic/Bounds/Bounds.h"
+#include "Bounds/Bounds.h"
 
 
 class BOIDS_PROJECT_API FWorldCollisionBounds: public FBounds

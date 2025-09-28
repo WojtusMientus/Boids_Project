@@ -1,13 +1,14 @@
 
 // First iteration of octree nodes; checks if a point is inside.
 // Min-inclusive, max-exclusive bounds to avoid multiple leaf assignments.
-// This class will be deprecated and will be deleted in future development
+//
+// Future: Class will be deprecated and will be deleted in future development
 // Collision checks will be moved to VoxelGrid instead of OctTree
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Internal Logic/Bounds/Bounds.h"
+#include "Bounds/Bounds.h"
 
 
 class BOIDS_PROJECT_API FOctTreeBounds: public FBounds

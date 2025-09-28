@@ -1,8 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 
 #include "Visual/VisualWorldBounds.h"
-#include "Subsystems/BoidManagerSubsystem.h"
+#include "Core/BoidManagerSubsystem.h"
 
 AVisualWorldBounds::AVisualWorldBounds()
 {
@@ -21,11 +19,22 @@ void AVisualWorldBounds::BeginPlay()
 
 	if (UWorld* World = GetWorld())
 	{
-		UBoidManagerSubsystem* BoidManagerSubsystem = World->GetSubsystem<UBoidManagerSubsystem>();
-
-		if (BoidManagerSubsystem)
+		if (UBoidManagerSubsystem* BoidManagerSubsystem = World->GetSubsystem<UBoidManagerSubsystem>())
 		{
 			BoidManagerSubsystem->OnBoundsUpdate.AddDynamic(this, &AVisualWorldBounds::HandleBoundsUpdate);
+		}
+	}
+}
+
+void AVisualWorldBounds::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	if (UWorld* World = GetWorld())
+	{
+		if (UBoidManagerSubsystem* BoidManagerSubsystem = World->GetSubsystem<UBoidManagerSubsystem>())
+		{
+			BoidManagerSubsystem->OnBoundsUpdate.RemoveDynamic(this, &AVisualWorldBounds::HandleBoundsUpdate);
 		}
 	}
 }
@@ -38,13 +47,10 @@ void AVisualWorldBounds::HandleBoundsUpdate(const FVector& Center, const FVector
 
 void AVisualWorldBounds::UpdateMeshBounds(const FVector& NewBoundsExtent)
 {
-	const FVector NewBoundsSize = NewBoundsExtent / 100;
+	const FVector NewBoundsSize = NewBoundsExtent * BoundsMeshScaleFactor;
 
 	if (IsValid(MeshComponent))
 	{
 		MeshComponent->SetRelativeScale3D(NewBoundsSize);
 	}
 }
-
-
-
