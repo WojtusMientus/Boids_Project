@@ -19,8 +19,8 @@ FWorldCollisionBounds::FWorldCollisionBounds(const FVector& UpperForwardRightCor
 FWorldCollisionBounds::FWorldCollisionBounds(const float BoundsSize)
 {
 	const float HalfBoundsSize = BoundsSize / 2;
-	BoundsUpperRightForwardCorner = FVector(HalfBoundsSize, HalfBoundsSize, HalfBoundsSize);
-	BoundsBottomLeftBackCorner = FVector(-HalfBoundsSize, -HalfBoundsSize, -HalfBoundsSize);
+	BoundsMax = FVector(HalfBoundsSize, HalfBoundsSize, HalfBoundsSize);
+	BoundsMin = FVector(-HalfBoundsSize, -HalfBoundsSize, -HalfBoundsSize);
 
 	VoxelCollisionGrid.SetNumZeroed(DIMENSION_X * DIMENSION_Y * DIMENSION_Z);
 	InitializeCellSizes();
@@ -31,8 +31,8 @@ void FWorldCollisionBounds::UpdateBounds(const FVector& Center, const FVector& B
 {
 	const FVector HalfExtent = BoxExtent / 2;
 
-	BoundsBottomLeftBackCorner = Center - HalfExtent;
-	BoundsUpperRightForwardCorner = Center + HalfExtent;
+	BoundsMin = Center - HalfExtent;
+	BoundsMax = Center + HalfExtent;
 	InitializeCellSizes();
 }
 
@@ -48,9 +48,9 @@ FVector FWorldCollisionBounds::GetCollisionForceAt(const FVector& Location) cons
 
 FVector FWorldCollisionBounds::GetCellCenter(int32 IndexX, int32 IndexY, int32 IndexZ) const
 {
-	float LocationX = BoundsBottomLeftBackCorner.X + CellSizeX * IndexX + CellSizeX / 2;
-	float LocationY = BoundsBottomLeftBackCorner.Y + CellSizeY * IndexY + CellSizeY / 2;
-	float LocationZ = BoundsBottomLeftBackCorner.Z + CellSizeZ * IndexZ + CellSizeZ / 2;
+	float LocationX = BoundsMin.X + CellSizeX * IndexX + CellSizeX / 2;
+	float LocationY = BoundsMin.Y + CellSizeY * IndexY + CellSizeY / 2;
+	float LocationZ = BoundsMin.Z + CellSizeZ * IndexZ + CellSizeZ / 2;
 
 	return FVector(LocationX, LocationY, LocationZ);
 }
@@ -138,9 +138,9 @@ void FWorldCollisionBounds::InitializeForcesAlongZ(int StartIndex, int EndIndex,
 
 void FWorldCollisionBounds::InitializeCellSizes()
 {
-	CellSizeX = (BoundsUpperRightForwardCorner.X - BoundsBottomLeftBackCorner.X) / DIMENSION_X;
-	CellSizeY = (BoundsUpperRightForwardCorner.Y - BoundsBottomLeftBackCorner.Y) / DIMENSION_Y;
-	CellSizeZ = (BoundsUpperRightForwardCorner.Z - BoundsBottomLeftBackCorner.Z) / DIMENSION_Z;
+	CellSizeX = (BoundsMax.X - BoundsMin.X) / DIMENSION_X;
+	CellSizeY = (BoundsMax.Y - BoundsMin.Y) / DIMENSION_Y;
+	CellSizeZ = (BoundsMax.Z - BoundsMin.Z) / DIMENSION_Z;
 }
 
 void FWorldCollisionBounds::AddForceAt(const FVector& Force, int32 Index)

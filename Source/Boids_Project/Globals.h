@@ -6,9 +6,8 @@
 
 /**
  * Defines the type of Boid - same types flock together, while ignoring different ones.
- * @note Flocking behaviour by species is not yet implemented.
- * @todo Test github.
  */
+// TODO: Type-based flocking is not yet implemented.
 UENUM(BlueprintType)
 enum class EBoidType : uint8
 {

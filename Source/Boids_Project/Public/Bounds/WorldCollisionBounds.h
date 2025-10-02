@@ -66,16 +66,16 @@ private:
 
 	FORCEINLINE int32 CellIndexX(const FVector& Location) const
 	{
-		return FMath::Clamp(FMath::FloorToInt32((Location.X - BoundsBottomLeftBackCorner.X) / CellSizeX), 0, DIMENSION_X - 1);
+		return FMath::Clamp(FMath::FloorToInt32((Location.X - BoundsMin.X) / CellSizeX), 0, DIMENSION_X - 1);
 	}
 
 	FORCEINLINE int32 CellIndexY(const FVector& Location) const
 	{
-		return FMath::Clamp(FMath::FloorToInt32((Location.Y - BoundsBottomLeftBackCorner.Y) / CellSizeY), 0, DIMENSION_Y - 1);
+		return FMath::Clamp(FMath::FloorToInt32((Location.Y - BoundsMin.Y) / CellSizeY), 0, DIMENSION_Y - 1);
 	}
 
 	FORCEINLINE int32 CellIndexZ(const FVector& Location) const
 	{
-		return FMath::Clamp(FMath::FloorToInt32((Location.Z - BoundsBottomLeftBackCorner.Z) / CellSizeZ), 0, DIMENSION_Z - 1);
+		return FMath::Clamp(FMath::FloorToInt32((Location.Z - BoundsMin.Z) / CellSizeZ), 0, DIMENSION_Z - 1);
 	}
 };

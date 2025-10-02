@@ -1,8 +1,3 @@
-
-// Visual representation of demo world bounds.
-// Updates its mesh in response to BoidManager events.
-// 
-// Future: Support in-editor editing via external Boid Tool.
 // Copyright WojtusMientus
 
 #pragma once
@@ -13,7 +8,9 @@
 
 class UBoidManagerSubsystem;
 
-
+/**
+ * Visual representation of Bounds containing mesh.
+ */
 UCLASS()
 class BOIDS_PROJECT_API AVisualWorldBounds : public AActor
 {
@@ -21,29 +18,42 @@ class BOIDS_PROJECT_API AVisualWorldBounds : public AActor
 	
 public:
 
-	// ----- Constructor -----
+	/** Default constructor. Creates actor's components. */
 	AVisualWorldBounds();
 
-	// ----- AActor Overrides -----
+	//~ Begin AActor Interface
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	//~ End AActor Interface
 	
 protected:
-	
+
+	/** Root scene component. */
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USceneComponent> SceneRoot;
-	
+
+	/** Static mesh representing Bounds. Collision disabled. */
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UStaticMeshComponent> MeshComponent;
 
 private:
-
-	// ----- Private Helpers -----
+	/**
+	 * Updates Bounds world position and size
+	 * @param NewCenter World location of the Bounds.
+	 * @param NewExtent Extent of the Bounds mesh.
+	 */
 	UFUNCTION(BlueprintCallable)
-	void HandleBoundsUpdate(const FVector& Center, const FVector& Extent);
-	
+	void HandleBoundsUpdate(const FVector& NewCenter, const FVector& NewExtent);
+
+	/**
+	 * Updates bounds size
+	 * @param NewBoundsExtent Extent of the Bounds mesh.
+	 */
 	void UpdateMeshBounds(const FVector& NewBoundsExtent);
 
+	/** Weak reference to the BoidManagerSubsystem for event binding and unbinding. */
+	TWeakObjectPtr<UBoidManagerSubsystem> BoidManagerSubsystem;
 	
+	/** Conversion factor from Unreal units to meters, since mesh scale is defined in meters. */
 	float BoundsMeshScaleFactor = 0.01f;
 };

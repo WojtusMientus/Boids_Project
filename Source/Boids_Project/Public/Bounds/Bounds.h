@@ -1,30 +1,39 @@
 // Copyright WojtusMientus
 
-// Base class representing a 3D axis-aligned bounding box.
-
 #pragma once
 
 #include "CoreMinimal.h"
 
-
+/**
+ * Base Bounds class representing a 3D axis-aligned bounding box. (AABB)
+ */
 class BOIDS_PROJECT_API FBounds
 {
 	
 public:
 
-	// ----- Constructors ----
+	/** Default constructor.  */
 	FBounds();
-	FBounds(const FVector& UpperForwardRightCorner, const FVector& BottomBackLeftCorner);
+	/** Constructs a bounds from the given min and max corners.  */
+	FBounds(const FVector& MaxCorner, const FVector& MinCorner);
 	virtual ~FBounds() = default;
+	
+	/** Returns the maximum corner of the box. */
+	FORCEINLINE FVector GetMax() const { return BoundsMax; }
 
-	// ----- Public API -----
-	FORCEINLINE FVector GetMaxCorner() const { return BoundsUpperRightForwardCorner; } 
-	FORCEINLINE FVector GetMinCorner() const { return BoundsBottomLeftBackCorner; }
-	FORCEINLINE FVector GetBoundsSize() const { return BoundsUpperRightForwardCorner - BoundsBottomLeftBackCorner; }
-	FORCEINLINE FVector GetBoundsCenter() const { return (BoundsUpperRightForwardCorner + BoundsBottomLeftBackCorner) / 2; }
+	/** Returns the minimum corner of the box. */
+	FORCEINLINE FVector GetMin() const { return BoundsMin; }
+
+	/** Returns the size of the box (Max - Min). */
+	FORCEINLINE FVector GetSize() const { return BoundsMax - BoundsMin; }
+
+	/** Returns the center point of the box. */
+	FORCEINLINE FVector GetCenter() const { return (BoundsMax + BoundsMin) * 0.5f; }
 
 protected:
-	
-	FVector BoundsBottomLeftBackCorner;
-	FVector BoundsUpperRightForwardCorner;
+
+	/** The minimum corner of the box (left-bottom-back).*/
+	FVector BoundsMin;
+	/** The maximum corner of the box (right-top-forward). */
+	FVector BoundsMax;
 };

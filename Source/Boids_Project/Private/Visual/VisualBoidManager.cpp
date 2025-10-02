@@ -25,7 +25,7 @@ void AVisualBoidManager::BeginPlay()
 			BoidManagerSubsystem->OnBoidsColorUpdate.AddDynamic(this, &AVisualBoidManager::HandleBoidsColorUpdate);
 		}
 	}
-	
+
 	InitializeBoids();
 }
 
@@ -83,7 +83,7 @@ void AVisualBoidManager::HandleBoidsUpdate()
 	}
 }
 
-void AVisualBoidManager::HandleBoidsNumberUpdate(EBoidType BoidType, int32 NewBoidNumber)
+void AVisualBoidManager::HandleBoidsNumberUpdate(EBoidType BoidType, int32 NewBoidCount)
 {
 	// TODO: Implement spawning and despawning visual boids
 }

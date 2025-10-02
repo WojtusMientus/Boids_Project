@@ -13,9 +13,9 @@ FOctTreeBounds::FOctTreeBounds(const FVector& UpperForwardRightCorner, const FVe
 
 bool FOctTreeBounds::IsInBounds(const FVector& Position)
 {
-	return IsInAxisRange(BoundsBottomLeftBackCorner.X, BoundsUpperRightForwardCorner.X, Position.X) &&
-			IsInAxisRange(BoundsBottomLeftBackCorner.Y, BoundsUpperRightForwardCorner.Y, Position.Y) &&
-			IsInAxisRange(BoundsBottomLeftBackCorner.Z, BoundsUpperRightForwardCorner.Z, Position.Z);
+	return IsInAxisRange(BoundsMin.X, BoundsMax.X, Position.X) &&
+			IsInAxisRange(BoundsMin.Y, BoundsMax.Y, Position.Y) &&
+			IsInAxisRange(BoundsMin.Z, BoundsMax.Z, Position.Z);
 }
 
 // The bounds are intentionally min-inclusive and max-exclusive to ensure that points on the boundary are only assigned to one octree leaf.

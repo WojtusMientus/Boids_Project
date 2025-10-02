@@ -13,16 +13,16 @@ FWorldBounds::FWorldBounds(const FVector& UpperForwardRightCorner, const FVector
 FWorldBounds::FWorldBounds(const float BoundsSize)
 {
 	const float HalfBoundsSize = BoundsSize / 2;
-	BoundsUpperRightForwardCorner = FVector(HalfBoundsSize, HalfBoundsSize, HalfBoundsSize);
-	BoundsBottomLeftBackCorner = FVector(-HalfBoundsSize, -HalfBoundsSize, -HalfBoundsSize);
+	BoundsMax = FVector(HalfBoundsSize, HalfBoundsSize, HalfBoundsSize);
+	BoundsMin = FVector(-HalfBoundsSize, -HalfBoundsSize, -HalfBoundsSize);
 }
 
 void FWorldBounds::UpdateBounds(const FVector& Center, const FVector& BoxExtent)
 {
 	const FVector HalfExtent = BoxExtent / 2;
 
-	BoundsBottomLeftBackCorner = Center - HalfExtent;
-	BoundsUpperRightForwardCorner = Center + HalfExtent;
+	BoundsMin = Center - HalfExtent;
+	BoundsMax = Center + HalfExtent;
 }
 
 void FWorldBounds::WrapPosition(FVector& Position)

@@ -10,6 +10,7 @@ AVisualWorldBounds::AVisualWorldBounds()
 	SetRootComponent(SceneRoot);
 
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Bounds Mesh"));
+	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	MeshComponent->SetupAttachment(GetRootComponent());
 }
 
@@ -19,7 +20,9 @@ void AVisualWorldBounds::BeginPlay()
 
 	if (UWorld* World = GetWorld())
 	{
-		if (UBoidManagerSubsystem* BoidManagerSubsystem = World->GetSubsystem<UBoidManagerSubsystem>())
+		BoidManagerSubsystem = World->GetSubsystem<UBoidManagerSubsystem>();
+		
+		if (BoidManagerSubsystem.IsValid())
 		{
 			BoidManagerSubsystem->OnBoundsUpdate.AddDynamic(this, &AVisualWorldBounds::HandleBoundsUpdate);
 		}
@@ -30,27 +33,25 @@ void AVisualWorldBounds::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	if (UWorld* World = GetWorld())
+	if (BoidManagerSubsystem.IsValid())
 	{
-		if (UBoidManagerSubsystem* BoidManagerSubsystem = World->GetSubsystem<UBoidManagerSubsystem>())
-		{
-			BoidManagerSubsystem->OnBoundsUpdate.RemoveDynamic(this, &AVisualWorldBounds::HandleBoundsUpdate);
-		}
+		BoidManagerSubsystem->OnBoundsUpdate.RemoveDynamic(this, &AVisualWorldBounds::HandleBoundsUpdate);
 	}
 }
 
-void AVisualWorldBounds::HandleBoundsUpdate(const FVector& Center, const FVector& Extent)
+void AVisualWorldBounds::HandleBoundsUpdate(const FVector& NewCenter, const FVector& NewExtent)
 {
-	SetActorLocation(Center);
-	UpdateMeshBounds(Extent);
+	SetActorLocation(NewCenter);
+	UpdateMeshBounds(NewExtent);
 }
 
 void AVisualWorldBounds::UpdateMeshBounds(const FVector& NewBoundsExtent)
 {
-	const FVector NewBoundsSize = NewBoundsExtent * BoundsMeshScaleFactor;
-
-	if (IsValid(MeshComponent))
+	if (!IsValid(MeshComponent))
 	{
-		MeshComponent->SetRelativeScale3D(NewBoundsSize);
+		return;
 	}
+	
+	const FVector NewBoundsSize = NewBoundsExtent * BoundsMeshScaleFactor;
+	MeshComponent->SetRelativeScale3D(NewBoundsSize);
 }

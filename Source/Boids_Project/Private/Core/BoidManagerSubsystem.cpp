@@ -17,7 +17,7 @@ void UBoidManagerSubsystem::Deinitialize()
 
 void UBoidManagerSubsystem::PostAllActorsBeginPlay()
 {
-	OnBoundsUpdate.Broadcast(WorldCollisionBounds->GetBoundsCenter(), WorldCollisionBounds->GetBoundsSize());
+	OnBoundsUpdate.Broadcast(WorldCollisionBounds->GetCenter(), WorldCollisionBounds->GetSize());
 }
 
 void UBoidManagerSubsystem::Tick(float DeltaTime)

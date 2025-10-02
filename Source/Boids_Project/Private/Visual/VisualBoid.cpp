@@ -12,6 +12,7 @@ AVisualBoid::AVisualBoid()
 	SetRootComponent(SceneRoot);
 
 	BoidMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Boid Mesh"));
+	BoidMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	BoidMeshComponent->SetupAttachment(GetRootComponent());
 
 	ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("Arrow Component"));
