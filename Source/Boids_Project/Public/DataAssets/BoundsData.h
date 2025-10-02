@@ -1,3 +1,4 @@
+// Copyright WojtusMientus
 
 // Data container for Bounds parameters
 //

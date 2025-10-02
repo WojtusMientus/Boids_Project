@@ -1,3 +1,4 @@
+// Copyright WojtusMientus
 
 // Main manager for Boid simulation
 // Updates Boid positions and velocities each tick 
@@ -28,7 +29,7 @@ UCLASS()
 class BOIDS_PROJECT_API UBoidManagerSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
-
+		
 public:
 
 	// ----- Events for visual updates -----

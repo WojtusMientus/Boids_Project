@@ -1,3 +1,4 @@
+// Copyright WojtusMientus
 
 // Boid-specific selection interface for runtime visualization
 //

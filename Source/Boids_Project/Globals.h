@@ -1,7 +1,14 @@
-﻿#pragma once
+﻿// Copyright WojtusMientus
+
+#pragma once
  
 #include "CoreMinimal.h"
 
+/**
+ * Defines the type of Boid - same types flock together, while ignoring different ones.
+ * @note Flocking behaviour by species is not yet implemented.
+ * @todo Test github.
+ */
 UENUM(BlueprintType)
 enum class EBoidType : uint8
 {

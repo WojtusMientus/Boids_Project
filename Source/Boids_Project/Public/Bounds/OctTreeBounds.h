@@ -1,3 +1,4 @@
+// Copyright WojtusMientus
 
 // First iteration of octree nodes; checks if a point is inside.
 // Min-inclusive, max-exclusive bounds to avoid multiple leaf assignments.

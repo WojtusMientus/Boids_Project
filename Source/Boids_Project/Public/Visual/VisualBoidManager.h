@@ -1,3 +1,4 @@
+// Copyright WojtusMientus
 
 // Manager for Visual Boids in demo world.
 // Listens to BoidManager events to update visual representation at runtime.

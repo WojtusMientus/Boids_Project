@@ -1,3 +1,4 @@
+// Copyright WojtusMientus
 
 // Represents a voxelized collision boundary around the demo world.
 // Each voxel stores precomputed collision forces near the bounds.

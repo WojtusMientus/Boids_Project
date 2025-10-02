@@ -3,6 +3,7 @@
 // Updates its mesh in response to BoidManager events.
 // 
 // Future: Support in-editor editing via external Boid Tool.
+// Copyright WojtusMientus
 
 #pragma once
 

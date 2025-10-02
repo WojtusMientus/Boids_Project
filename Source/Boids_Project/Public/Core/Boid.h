@@ -1,3 +1,4 @@
+// Copyright WojtusMientus
 
 // Simple Boid class representing position and velocity
 // Provides basic Update() functionality for demo purposes

@@ -1,3 +1,4 @@
+// Copyright WojtusMientus
 
 // Base class representing a 3D axis-aligned bounding box.
 

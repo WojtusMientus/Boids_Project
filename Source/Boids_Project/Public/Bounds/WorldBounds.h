@@ -1,3 +1,4 @@
+// Copyright WojtusMientus
 
 // Represents world bounds around the demo world
 // Is currently being replaced with WorldCollisionBounds class

@@ -1,3 +1,4 @@
+// Copyright WojtusMientus
 
 // Visual representation of a Boid for demo purposes.
 //
