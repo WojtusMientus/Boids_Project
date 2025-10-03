@@ -38,7 +38,7 @@ protected:
 
 private:
 	/**
-	 * Updates Bounds world position and size
+	 * Updates Bounds world position and size.
 	 * @param NewCenter World location of the Bounds.
 	 * @param NewExtent Extent of the Bounds mesh.
 	 */
@@ -46,7 +46,7 @@ private:
 	void HandleBoundsUpdate(const FVector& NewCenter, const FVector& NewExtent);
 
 	/**
-	 * Updates bounds size
+	 * Updates bounds size.
 	 * @param NewBoundsExtent Extent of the Bounds mesh.
 	 */
 	void UpdateMeshBounds(const FVector& NewBoundsExtent);

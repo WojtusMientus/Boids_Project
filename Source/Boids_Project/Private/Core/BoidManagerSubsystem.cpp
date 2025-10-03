@@ -23,7 +23,7 @@ void UBoidManagerSubsystem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	UpdateBoids(DeltaTime);
-	OnBoidsUpdate.Broadcast();
+	OnBoidsUpdateFinish.Broadcast();
 }
 
 TStatId UBoidManagerSubsystem::GetStatId() const
@@ -130,7 +130,7 @@ FVector UBoidManagerSubsystem::ComputeSeparation(const FBoid* CurrentBoid)
 		float DistanceToOtherBoid = FVector::Dist(CurrentBoid->Position, CurrentNeighbours[i]->Position);
 		FVector DesiredDirection = CurrentBoid->Position - CurrentNeighbours[i]->Position;
 		DesiredDirection.Normalize();
-		DesiredDirection *= SEPARATION_DESIRED_DIRECTION_MULTIPLIER - DistanceToOtherBoid / PERCEPTION_DISTANCE;
+		DesiredDirection *= SEPARATION_FALLOFF - DistanceToOtherBoid / PERCEPTION_DISTANCE;
 			
 		FinalSeparationVector += DesiredDirection;	
 	}

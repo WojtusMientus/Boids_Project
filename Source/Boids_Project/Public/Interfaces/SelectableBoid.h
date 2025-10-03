@@ -1,9 +1,5 @@
 // Copyright WojtusMientus
 
-// Boid-specific selection interface for runtime visualization
-//
-// Future: Could be generalized to ISeectable interface
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -16,13 +12,17 @@ class USelectableBoid : public UInterface
 	GENERATED_BODY()
 };
 
+/**
+ * Interface for accessing Boid selection information.
+ */
 class BOIDS_PROJECT_API ISelectableBoid
 {
 	GENERATED_BODY()
 
 public:
 	
+	/** Retrieves selection information about this Boid. */
 	UFUNCTION(BlueprintCallable)
-	virtual FBoidSelection GetBoidSelection() const = 0;
+	virtual FBoidSelectionInfo GetBoidSelection() const = 0;
 	
 };

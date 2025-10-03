@@ -11,7 +11,7 @@ class UBoidManagerSubsystem;
 class AVisualBoid;
 
 /**
- * Manager for the in-scene visual representation of Boids
+ * Manager for the in-scene visual representation of Boids.
  * Listens to BoidManager events to update visual representation at runtime.
  */
 // TODO: Move logic to a subsystem in future development.
@@ -32,7 +32,7 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	//~ End AActor Interface
 
-	/** Subclass of AVisualBoid to spawn at runtime */
+	/** Subclass of AVisualBoid to spawn at runtime. */
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AVisualBoid> VisualBoidClass;
 
@@ -41,7 +41,7 @@ private:
 	/** Populates the VisualBoid array with the correct number of Boids. Called only during object creation. */
 	void InitializeBoids();
 
-	/** Updates the world location and rotation of all visual Boids . */
+	/** Updates the world location and rotation of all visual Boids. */
 	UFUNCTION()
 	void HandleBoidsUpdate();
 

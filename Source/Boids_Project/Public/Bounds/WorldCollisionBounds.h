@@ -23,9 +23,9 @@ public:
 	~FWorldCollisionBounds() = default;
 
 	/**
-	 * Updates bounds world position and size
+	 * Updates bounds world position and size.
 	 * @param NewCenter World location of the Bounds.
-	 * @param NewBoxExtent Extent of the Bounds
+	 * @param NewBoxExtent Extent of the Bounds.
 	 */
 	void UpdateBounds(const FVector& NewCenter, const FVector& NewBoxExtent);
 
@@ -99,7 +99,7 @@ private:
 
 	/**
 	 * Computes the voxel X-axis index for a given world location.
-	 * @param Location World location to convert
+	 * @param Location World location to convert.
 	 */
 	FORCEINLINE int32 CellIndexX(const FVector& Location) const
 	{
@@ -108,7 +108,7 @@ private:
 
 	/**
 	 * Computes the voxel Y-axis index for a given world location.
-	 * @param Location World location to convert
+	 * @param Location World location to convert.
 	 */
 	FORCEINLINE int32 CellIndexY(const FVector& Location) const
 	{
@@ -117,7 +117,7 @@ private:
 
 	/**
 	 * Computes the voxel Z-axis index for a given world location.
-	 * @param Location World location to convert
+	 * @param Location World location to convert.
 	 */
 	FORCEINLINE int32 CellIndexZ(const FVector& Location) const
 	{

@@ -20,7 +20,7 @@ void AVisualBoidManager::BeginPlay()
 	
 		if (BoidManagerSubsystem.IsValid())
 		{			
-			BoidManagerSubsystem->OnBoidsUpdate.AddDynamic(this, &AVisualBoidManager::HandleBoidsUpdate);
+			BoidManagerSubsystem->OnBoidsUpdateFinish.AddDynamic(this, &AVisualBoidManager::HandleBoidsUpdate);
 			BoidManagerSubsystem->OnBoidsNumberUpdate.AddDynamic(this, &AVisualBoidManager::HandleBoidsNumberUpdate);
 			BoidManagerSubsystem->OnBoidsColorUpdate.AddDynamic(this, &AVisualBoidManager::HandleBoidsColorUpdate);
 		}
@@ -35,7 +35,7 @@ void AVisualBoidManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	if (BoidManagerSubsystem.IsValid())
 	{			
-		BoidManagerSubsystem->OnBoidsUpdate.RemoveDynamic(this, &AVisualBoidManager::HandleBoidsUpdate);
+		BoidManagerSubsystem->OnBoidsUpdateFinish.RemoveDynamic(this, &AVisualBoidManager::HandleBoidsUpdate);
 		BoidManagerSubsystem->OnBoidsNumberUpdate.RemoveDynamic(this, &AVisualBoidManager::HandleBoidsNumberUpdate);
 		BoidManagerSubsystem->OnBoidsColorUpdate.RemoveDynamic(this, &AVisualBoidManager::HandleBoidsColorUpdate);
 	}

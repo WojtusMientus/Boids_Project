@@ -1,26 +1,28 @@
 // Copyright WojtusMientus
 
-// Data container for Bounds parameters
-//
-// Future: Load at simulation start, suport external tool integration for customization & saving
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "BoundsData.generated.h"
 
-
+/**
+ * Data asset defining parameters for simulation bounds.
+ * Configures bounds center and its extent.
+ */
+// TODO: Load saved data at simulation start
 UCLASS()
 class BOIDS_PROJECT_API UBoundsData : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 	
 public:
-	
+
+	/** World location of the bounds center. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FVector BoundsCenter;
-
+	
+	/** Extent of the bounds. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FVector BoundsExtent;
 	

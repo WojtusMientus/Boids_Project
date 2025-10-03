@@ -41,7 +41,7 @@ public:
 	void SetBoidID(int32 ID);
 
 	//~ Begin ISelectableBoid Interface
-	virtual FBoidSelection GetBoidSelection() const override;
+	virtual FBoidSelectionInfo GetBoidSelection() const override;
 	//~ End ISelectableBoid Interface
 
 protected:
@@ -68,6 +68,8 @@ private:
 	/** Unique Boid's ID used for selection and additional info. Set only during creation. */
 	int32 BoidID = -1;
 
-	/** Species type of the Boid. @note Currently unused - Setup for future development. */
+	/** Species type of the Boid. */
 	EBoidType BoidType;
+	// NOTE: Currently unused - Setup for future development.
+	
 };
