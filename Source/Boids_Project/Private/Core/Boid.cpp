@@ -13,7 +13,7 @@ FBoid::FBoid(const FVector& Position, const FVector& Velocity): Position(Positio
 
 void FBoid::Update(float DeltaTime, float MaxSpeed)
 {
-	Velocity.Normalize();
+	Velocity = Velocity.GetSafeNormal();
 	Velocity *= DeltaTime * MaxSpeed;
 	Position += Velocity;
 }

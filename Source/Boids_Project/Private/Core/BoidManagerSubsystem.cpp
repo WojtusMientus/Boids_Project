@@ -129,7 +129,7 @@ FVector UBoidManagerSubsystem::ComputeSeparation(const FBoid* CurrentBoid)
 	{
 		float DistanceToOtherBoid = FVector::Dist(CurrentBoid->Position, CurrentNeighbours[i]->Position);
 		FVector DesiredDirection = CurrentBoid->Position - CurrentNeighbours[i]->Position;
-		DesiredDirection.Normalize();
+		DesiredDirection = DesiredDirection.GetSafeNormal();
 		DesiredDirection *= SEPARATION_FALLOFF - DistanceToOtherBoid / PERCEPTION_DISTANCE;
 			
 		FinalSeparationVector += DesiredDirection;	
@@ -154,9 +154,7 @@ FVector UBoidManagerSubsystem::ComputeAlignment()
 	
 	for (int i = 0; i < CurrentNeighbours.Num(); i++)
 	{
-		FVector NormalizedBoidVelocity = CurrentNeighbours[i]->Velocity;
-		NormalizedBoidVelocity.Normalize();
-			
+		FVector NormalizedBoidVelocity = CurrentNeighbours[i]->Velocity.GetSafeNormal();
 		FinalAlignmentVector += NormalizedBoidVelocity;			
 	}
 
@@ -186,7 +184,7 @@ FVector UBoidManagerSubsystem::ComputeCohesion(const FBoid* CurrentBoid)
 	{
 		FinalCohesionVector /= NeighboursCount;
 		FinalCohesionVector -= CurrentBoid->Position;
-		FinalCohesionVector.Normalize();
+		FinalCohesionVector = FinalCohesionVector.GetSafeNormal();
 		FinalCohesionVector *= COHESION_FORCE;
 	}
 
