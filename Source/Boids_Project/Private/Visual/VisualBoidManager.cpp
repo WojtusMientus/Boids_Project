@@ -49,8 +49,10 @@ void AVisualBoidManager::InitializeBoids()
 	{
 		return;
 	}
+
+	const int32 NumberOfBoids = BoidManagerSubsystem->GetBoidsCount(); 
 	
-	for (int i = 0; i < UBoidManagerSubsystem::BOIDS_COUNT; i++)
+	for (int i = 0; i < NumberOfBoids; i++)
 	{
 		TObjectPtr<AVisualBoid> VisualBoid = World->SpawnActor<AVisualBoid>(VisualBoidClass, FVector(), FRotator());
 
@@ -74,8 +76,10 @@ void AVisualBoidManager::HandleBoidsUpdate()
 	{
 		return;
 	}
+
+	const int32 NumberOfBoids = BoidManagerSubsystem->GetBoidsCount(); 
 	
-	for (int i = 0; i < UBoidManagerSubsystem::BOIDS_COUNT; i++)
+	for (int i = 0; i < NumberOfBoids; i++)
 	{
 		FVector NewLocation = BoidManagerSubsystem->GetBoidPositionAt(i);
 		FVector NewVelocity = BoidManagerSubsystem->GetBoidVelocityAt(i);

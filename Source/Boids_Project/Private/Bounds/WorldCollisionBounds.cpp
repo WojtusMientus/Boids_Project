@@ -4,16 +4,12 @@
 
 FWorldCollisionBounds::FWorldCollisionBounds(): FBounds()
 {
-	VoxelCollisionGrid.SetNumZeroed(DIMENSION_X * DIMENSION_Y * DIMENSION_Z);
-	InitializeCellSizes();
-	InitializeForcesNearBounds();
+	InitializeCollisionGrid();
 }
 
-FWorldCollisionBounds::FWorldCollisionBounds(const FVector& UpperForwardRightCorner, const FVector& BottomBackLeftCorner): FBounds(UpperForwardRightCorner, BottomBackLeftCorner)
+FWorldCollisionBounds::FWorldCollisionBounds(const FVector& MaxCorner, const FVector& MinCorner): FBounds(MaxCorner, MinCorner)
 {
-	VoxelCollisionGrid.SetNumZeroed(DIMENSION_X * DIMENSION_Y * DIMENSION_Z);
-	InitializeCellSizes();
-	InitializeForcesNearBounds();
+	InitializeCollisionGrid();
 }
 
 FWorldCollisionBounds::FWorldCollisionBounds(const float BoundsSize)
@@ -22,18 +18,16 @@ FWorldCollisionBounds::FWorldCollisionBounds(const float BoundsSize)
 	BoundsMax = FVector(HalfBoundsSize, HalfBoundsSize, HalfBoundsSize);
 	BoundsMin = FVector(-HalfBoundsSize, -HalfBoundsSize, -HalfBoundsSize);
 
-	VoxelCollisionGrid.SetNumZeroed(DIMENSION_X * DIMENSION_Y * DIMENSION_Z);
-	InitializeCellSizes();
-	InitializeForcesNearBounds();
+	InitializeCollisionGrid();
 }
 
-void FWorldCollisionBounds::UpdateBounds(const FVector& Center, const FVector& BoxExtent)
+void FWorldCollisionBounds::UpdateBounds(const FVector& NewCenter, const FVector& NewBoxExtent)
 {
-	const FVector HalfExtent = BoxExtent / 2;
+	const FVector HalfExtent = NewBoxExtent / 2;
 
-	BoundsMin = Center - HalfExtent;
-	BoundsMax = Center + HalfExtent;
-	InitializeCellSizes();
+	BoundsMin = NewCenter - HalfExtent;
+	BoundsMax = NewCenter + HalfExtent;
+	CalculateCellSizes();
 }
 
 FVector FWorldCollisionBounds::GetCollisionForceAt(const FVector& Location) const
@@ -48,11 +42,18 @@ FVector FWorldCollisionBounds::GetCollisionForceAt(const FVector& Location) cons
 
 FVector FWorldCollisionBounds::GetCellCenter(int32 IndexX, int32 IndexY, int32 IndexZ) const
 {
-	float LocationX = BoundsMin.X + CellSizeX * IndexX + CellSizeX / 2;
-	float LocationY = BoundsMin.Y + CellSizeY * IndexY + CellSizeY / 2;
-	float LocationZ = BoundsMin.Z + CellSizeZ * IndexZ + CellSizeZ / 2;
+	float LocationX = BoundsMin.X + VoxelSizeX * IndexX + VoxelSizeX / 2;
+	float LocationY = BoundsMin.Y + VoxelSizeY * IndexY + VoxelSizeY / 2;
+	float LocationZ = BoundsMin.Z + VoxelSizeZ * IndexZ + VoxelSizeZ / 2;
 
 	return FVector(LocationX, LocationY, LocationZ);
+}
+
+void FWorldCollisionBounds::InitializeCollisionGrid()
+{
+	VoxelCollisionGrid.SetNumZeroed(DIMENSION_X * DIMENSION_Y * DIMENSION_Z);
+	CalculateCellSizes();
+	InitializeForcesNearBounds();
 }
 
 void FWorldCollisionBounds::InitializeForcesNearBounds()
@@ -136,11 +137,11 @@ void FWorldCollisionBounds::InitializeForcesAlongZ(int StartIndex, int EndIndex,
 	}
 }
 
-void FWorldCollisionBounds::InitializeCellSizes()
+void FWorldCollisionBounds::CalculateCellSizes()
 {
-	CellSizeX = (BoundsMax.X - BoundsMin.X) / DIMENSION_X;
-	CellSizeY = (BoundsMax.Y - BoundsMin.Y) / DIMENSION_Y;
-	CellSizeZ = (BoundsMax.Z - BoundsMin.Z) / DIMENSION_Z;
+	VoxelSizeX = (BoundsMax.X - BoundsMin.X) / DIMENSION_X;
+	VoxelSizeY = (BoundsMax.Y - BoundsMin.Y) / DIMENSION_Y;
+	VoxelSizeZ = (BoundsMax.Z - BoundsMin.Z) / DIMENSION_Z;
 }
 
 void FWorldCollisionBounds::AddForceAt(const FVector& Force, int32 Index)

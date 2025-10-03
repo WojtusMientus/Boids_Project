@@ -64,6 +64,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FORCEINLINE FVector GetBoidLocation(int32 Index) { return GetBoidPositionAt(Index); }
 
+	FORCEINLINE int32 GetBoidsCount() { return BOIDS_COUNT; }
 	
 	static constexpr float BOID_MAX_SPEED = 250;
 	static constexpr int32 BOIDS_COUNT = 100;
@@ -84,15 +85,16 @@ private:
 
 	// ----- Private Simulation Methods -----
 	void InitializeBoids();
+	FVector CalculateBoidInitialPosition();
 	void UpdateBoids(float DeltaTime);
 	
-	void GetNeighbourBoids(int32 BoidIndexToCheckNeighbours, TArray<Boid*>& ValidBoids);
-	void CheckBoidsSubarrayForValidBoids(int32 StartIndex, int32 EndIndex, int32 BoidIndexToCheckNeighbours, TArray<Boid*>& ValidBoids);
+	void GetNeighbourBoids(int32 BoidIndexToCheckNeighbours, TArray<FBoid*>& ValidBoids);
+	void CheckBoidsSubarrayForValidBoids(int32 StartIndex, int32 EndIndex, int32 BoidIndexToCheckNeighbours, TArray<FBoid*>& ValidBoids);
 
 	// ----- Calculating Forces Per Boid -----
-	FVector ComputeSeparation(const Boid* CurrentBoid);
+	FVector ComputeSeparation(const FBoid* CurrentBoid);
 	FVector ComputeAlignment();
-	FVector ComputeCohesion(const Boid* CurrentBoid);
+	FVector ComputeCohesion(const FBoid* CurrentBoid);
 	void ApplyCollisionForce(int32 BoidIndex);
 	
 	bool IsWithinPerceptionRange(int32 FirstIndex, int32 SecondIndex);
@@ -102,8 +104,8 @@ private:
 	TArray<FVector> GetNeighbourBoidsLocations(int32 BoidIndexToCheckNeighbours);
 	
 	
-	TArray<TUniquePtr<Boid>> Boids;
-	TArray<Boid*> CurrentNeighbours;
+	TArray<TUniquePtr<FBoid>> Boids;
+	TArray<FBoid*> CurrentNeighbours;
 	
 	TArray<FVector> NewCalculatedVelocityPerBoid;
 	

@@ -12,7 +12,7 @@ class BOIDS_PROJECT_API FBounds
 	
 public:
 
-	/** Default constructor.  */
+	/** Default constructor. */
 	FBounds();
 	/** Constructs a bounds from the given min and max corners.  */
 	FBounds(const FVector& MaxCorner, const FVector& MinCorner);

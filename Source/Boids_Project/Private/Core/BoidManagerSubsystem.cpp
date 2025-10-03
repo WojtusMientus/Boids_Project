@@ -1,6 +1,5 @@
 
 #include "Core/BoidManagerSubsystem.h"
-#include "Bounds/WorldBounds.h"
 
 void UBoidManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -56,17 +55,27 @@ void UBoidManagerSubsystem::InitializeBoids()
 {
 	for (int i = 0; i < BOIDS_COUNT; i++)
 	{
-		Boids.Add(MakeUnique<Boid>(BOIDS_BOUNDS));
+		const FVector InitialPosition = CalculateBoidInitialPosition();
+		const FVector InitialVelocity = FMath::VRand() * BOID_MAX_SPEED;
+		Boids.Add(MakeUnique<FBoid>(InitialPosition, InitialVelocity));
 		NewCalculatedVelocityPerBoid.Add(Boids[i]->Velocity);
 	}
 	CurrentNeighbours.Reserve(BOIDS_COUNT);
+}
+
+FVector UBoidManagerSubsystem::CalculateBoidInitialPosition()
+{
+
+	return FVector(FMath::RandRange(-BOIDS_BOUNDS / 2, BOIDS_BOUNDS / 2),
+				FMath::RandRange(-BOIDS_BOUNDS / 2, BOIDS_BOUNDS / 2),
+				FMath::RandRange(-BOIDS_BOUNDS / 2, BOIDS_BOUNDS / 2));
 }
 
 void UBoidManagerSubsystem::UpdateBoids(float DeltaTime)
 {
 	for (int i = 0; i < Boids.Num(); i++)
 	{
-		Boid* CurrentBoid = Boids[i].Get();
+		FBoid* CurrentBoid = Boids[i].Get();
 		if (!CurrentBoid)
 		{
 			continue;
@@ -90,14 +99,14 @@ void UBoidManagerSubsystem::UpdateBoids(float DeltaTime)
 	}
 }
 
-void UBoidManagerSubsystem::GetNeighbourBoids(int32 BoidIndexToCheckNeighbours, TArray<Boid*>& ValidBoids)
+void UBoidManagerSubsystem::GetNeighbourBoids(int32 BoidIndexToCheckNeighbours, TArray<FBoid*>& ValidBoids)
 {
 	ValidBoids.Reset();
 	CheckBoidsSubarrayForValidBoids(0, BoidIndexToCheckNeighbours, BoidIndexToCheckNeighbours, ValidBoids);
 	CheckBoidsSubarrayForValidBoids(BoidIndexToCheckNeighbours + 1, BOIDS_COUNT, BoidIndexToCheckNeighbours, ValidBoids);
 }
 
-void UBoidManagerSubsystem::CheckBoidsSubarrayForValidBoids(int32 StartIndex, int32 EndIndex, int32 BoidIndexToCheckNeighbours, TArray<Boid*>& ValidBoids)
+void UBoidManagerSubsystem::CheckBoidsSubarrayForValidBoids(int32 StartIndex, int32 EndIndex, int32 BoidIndexToCheckNeighbours, TArray<FBoid*>& ValidBoids)
 {
 	for (int i = StartIndex; i < EndIndex; i++)
 	{
@@ -111,7 +120,7 @@ void UBoidManagerSubsystem::CheckBoidsSubarrayForValidBoids(int32 StartIndex, in
 // NOTE: These functions could be combined into a single loop for all forces
 //       (Separation, Alignment, Cohesion) to reduce iterations over neighbors.
 //		 For now, since this is still in early development and clarity, I keep them separate
-FVector UBoidManagerSubsystem::ComputeSeparation(const Boid* CurrentBoid)
+FVector UBoidManagerSubsystem::ComputeSeparation(const FBoid* CurrentBoid)
 {
 	FVector FinalSeparationVector = FVector::ZeroVector;
 	int32 NeighboursCount = CurrentNeighbours.Num();
@@ -163,7 +172,7 @@ FVector UBoidManagerSubsystem::ComputeAlignment()
 // NOTE: These functions could be combined into a single loop for all forces
 //       (Separation, Alignment, Cohesion) to reduce iterations over neighbors.
 //		 For now, since this is still in early development and clarity, I keep them separate
-FVector UBoidManagerSubsystem::ComputeCohesion(const Boid* CurrentBoid)
+FVector UBoidManagerSubsystem::ComputeCohesion(const FBoid* CurrentBoid)
 {
 	FVector FinalCohesionVector = FVector::ZeroVector;
 	int32 NeighboursCount = CurrentNeighbours.Num();
@@ -197,7 +206,7 @@ void UBoidManagerSubsystem::ApplyCollisionForce(int32 BoidIndex)
 
 TArray<FVector> UBoidManagerSubsystem::GetNeighbourBoidsLocations(int32 BoidIndexToCheckNeighbours)
 {
-	TArray<Boid*> NeighbourBoids;
+	TArray<FBoid*> NeighbourBoids;
 	GetNeighbourBoids(BoidIndexToCheckNeighbours, NeighbourBoids);
 	
 	TArray<FVector> FinalLocations;

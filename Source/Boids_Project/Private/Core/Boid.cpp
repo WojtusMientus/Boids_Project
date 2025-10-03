@@ -3,19 +3,15 @@
 #include "Core/BoidManagerSubsystem.h"
 
 
-Boid::Boid()
+FBoid::FBoid()
 {
 }
 
-Boid::Boid(float MaxBounds)
-:	Position(FMath::RandRange(-MaxBounds / 2, MaxBounds / 2),
-				FMath::RandRange(-MaxBounds / 2, MaxBounds / 2),
-				FMath::RandRange(-MaxBounds / 2, MaxBounds / 2)),
-	  Velocity(FMath::VRand() * UBoidManagerSubsystem::BOID_MAX_SPEED)
+FBoid::FBoid(const FVector& Position, const FVector& Velocity): Position(Position), Velocity(Velocity)
 {
 }
 
-void Boid::Update(float DeltaTime, float MaxSpeed)
+void FBoid::Update(float DeltaTime, float MaxSpeed)
 {
 	Velocity.Normalize();
 	Velocity *= DeltaTime * MaxSpeed;
