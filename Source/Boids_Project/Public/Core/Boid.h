@@ -26,13 +26,15 @@ public:
 	/**
 	 * Updates the Boid's position based on its velocity.
 	 * @param DeltaTime Time elapsed since the last frame.
-	 * @param MaxSpeed The maximum speed the Boid can move at.
 	 */
-	void Update(float DeltaTime, float MaxSpeed);
+	void Update(float DeltaTime);
 
 	/** The Boid's current location in 3D space. */
 	FVector Position;
 
-	/** The Boid's current movement velocity. */
+	/** The Boid's current movement speed. */
 	FVector Velocity;
+
+	/** The Boid's current acceleration. */
+	FVector Acceleration;
 };

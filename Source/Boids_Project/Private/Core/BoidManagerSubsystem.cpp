@@ -56,7 +56,7 @@ void UBoidManagerSubsystem::InitializeBoids()
 	for (int i = 0; i < BOIDS_COUNT; i++)
 	{
 		const FVector InitialPosition = CalculateBoidInitialPosition();
-		const FVector InitialVelocity = FMath::VRand() * BOID_MAX_SPEED;
+		const FVector InitialVelocity = FMath::VRand() * BOID_DESIRED_VELOCITY;
 		Boids.Add(MakeUnique<FBoid>(InitialPosition, InitialVelocity));
 		NewCalculatedVelocityPerBoid.Add(Boids[i]->Velocity);
 	}
@@ -81,21 +81,29 @@ void UBoidManagerSubsystem::UpdateBoids(float DeltaTime)
 			continue;
 		}
 		
+		CurrentBoid->Acceleration = FVector::ZeroVector;
 		GetNeighbourBoids(i, CurrentNeighbours);
 
-		FVector Alignment = ComputeAlignment();
-		FVector Cohesion = ComputeCohesion(CurrentBoid);
-		FVector Separation = ComputeSeparation(CurrentBoid);
+		const FVector Alignment = ComputeAlignment();
+		const FVector Cohesion = ComputeCohesion(CurrentBoid);
+		const FVector Separation = ComputeSeparation(CurrentBoid);
 
-		NewCalculatedVelocityPerBoid[i] += Separation + Alignment + Cohesion;
-		ApplyCollisionForce(i);
+		CurrentBoid->Acceleration += Separation + Alignment + Cohesion;
+		ApplyCollisionForce(CurrentBoid);
+		ApplySpeedAdjustmentForce(CurrentBoid);
 	}
 	
 	for (int i = 0; i < Boids.Num(); i++)
 	{
-		Boids[i]->Velocity = NewCalculatedVelocityPerBoid[i];
-		Boids[i]->Update(DeltaTime, BOID_MAX_SPEED);
-		NewCalculatedVelocityPerBoid[i] = Boids[i]->Velocity;
+		FBoid* CurrentBoid = Boids[i].Get();
+		if (!CurrentBoid)
+		{
+			continue;
+		}
+		
+		CurrentBoid->Velocity += CurrentBoid->Acceleration * DeltaTime;
+		CurrentBoid->Velocity = CurrentBoid->Velocity.GetClampedToMaxSize(BOID_DESIRED_VELOCITY * 2);
+		CurrentBoid->Update(DeltaTime);
 	}
 }
 
@@ -197,9 +205,16 @@ bool UBoidManagerSubsystem::IsWithinPerceptionRange(int32 FirstIndex, int32 Seco
 	return DistanceBetweenBoids <= PERCEPTION_DISTANCE_SQUARED;
 }
 
-void UBoidManagerSubsystem::ApplyCollisionForce(int32 BoidIndex)
+void UBoidManagerSubsystem::ApplyCollisionForce(FBoid* CurrentBoid)
 {
-	NewCalculatedVelocityPerBoid[BoidIndex] += WorldCollisionBounds->GetCollisionForceAt(Boids[BoidIndex]->Position);
+	CurrentBoid->Acceleration += WorldCollisionBounds->GetCollisionForceAt(CurrentBoid->Position);
+}
+
+void UBoidManagerSubsystem::ApplySpeedAdjustmentForce(FBoid* CurrentBoid)
+{
+	const FVector DesiredVelocity = CurrentBoid->Velocity.GetSafeNormal() * BOID_DESIRED_VELOCITY;
+	const FVector CorrectionVector = DesiredVelocity - CurrentBoid->Velocity;
+	CurrentBoid->Acceleration += CorrectionVector * SPEED_CORRECTION_FORCE;
 }
 
 TArray<FVector> UBoidManagerSubsystem::GetNeighbourBoidsLocations(int32 BoidIndexToCheckNeighbours)

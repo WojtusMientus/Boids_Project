@@ -87,31 +87,44 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FORCEINLINE FVector GetBoidLocation(int32 Index) { return GetBoidPositionAt(Index); }
 
+	/**
+	 * Returns velocity of the Boid at given index.
+	 * @param Index Index to sample on.
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FORCEINLINE FVector GetBoidVelocity(int32 Index) { return GetBoidVelocityAt(Index); }
+	
 	/** Returns simulated Boid count. */
 	FORCEINLINE int32 GetBoidsCount() { return BOIDS_COUNT; }
-
-	/** Maximum movement speed. */
-	static constexpr float BOID_MAX_SPEED = 250;
-
-	/** Number of Boids spawned at simulation start. */
-	static constexpr int32 BOIDS_COUNT = 100;
 	
 private:
 
+	/** Maximum movement speed. */
+	static constexpr float BOID_MAX_VELOCITY = 500.0f;
+
+	/** Desired movement speed that Boid is trying to achieve. */
+	static constexpr float BOID_DESIRED_VELOCITY = 150.0f;
+
+	/** Speed correction force multiplier.  */
+	static constexpr float SPEED_CORRECTION_FORCE = 0.01f;
+	
+	/** Number of Boids spawned at simulation start. */
+	static constexpr int32 BOIDS_COUNT = 100;
+	
 	/** Final multiplier applied to separation steering force. */
-	static constexpr float SEPARATION_FORCE = .85f;
+	static constexpr float SEPARATION_FORCE = 125.0f;
 	
 	/** Final multiplier applied to alignment steering force. */
-	static constexpr float ALIGNMENT_FORCE = .5f;
+	static constexpr float ALIGNMENT_FORCE = 100.0f;
 	
 	/** Final multiplier applied to cohesion steering force. */
-	static constexpr float COHESION_FORCE = .4f;  
+	static constexpr float COHESION_FORCE = 125.0f;  
 	
 	/** Separation distance falloff. Stronger when Boids are closer. */
 	static constexpr float SEPARATION_FALLOFF = 1.5f;
 
 	/** Maximum perception radius. */
-	static constexpr int32 PERCEPTION_DISTANCE = 125;
+	static constexpr int32 PERCEPTION_DISTANCE = 175;
 
 	/** Cached perception distance squared for distance calculations. */
 	static constexpr int32 PERCEPTION_DISTANCE_SQUARED = PERCEPTION_DISTANCE * PERCEPTION_DISTANCE;
@@ -162,10 +175,16 @@ private:
 
 	/**
 	 * Applies collision force to a given Boid.
-	 * @param BoidIndex Index of the Boid to apply the force to.
+	 * @param CurrentBoid Boid to apply the force to.
 	 */
-	void ApplyCollisionForce(int32 BoidIndex);
+	void ApplyCollisionForce(FBoid* CurrentBoid);
 
+	/**
+	 * Applies corrective force towards its desired velocity.
+	 * @param CurrentBoid Boid to apply the force to.
+	 */
+	void ApplySpeedAdjustmentForce(FBoid* CurrentBoid);
+	
 	/**
 	 * Checks if 2 given Boids are within perception range.
 	 * @param FirstIndex First Boid index.

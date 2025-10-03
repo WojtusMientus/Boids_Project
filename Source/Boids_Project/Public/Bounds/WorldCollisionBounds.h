@@ -61,7 +61,7 @@ private:
 	static constexpr int32 COLLISION_ROWS = 4;
 
 	/** Final multiplier applied before retrieving collision force. */
-	static constexpr float COLLISION_MULTIPLIER = .15f;
+	static constexpr float COLLISION_MULTIPLIER = 200.0f;
 
 	/** Calculated voxel sizes along each axis. Recalculated every bounds change. */
 	float VoxelSizeX = 0.0f;
