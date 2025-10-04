@@ -11,11 +11,11 @@ My goal wasn't just to get something that looks cool but to build a robust and p
 Boids are basically simulated "bird-like objects." The cool part is that their complex, lifelike flocking behavior comes from just three simple rules that each boid follows on its own. There's no central brain telling them what to do.
 
 1.  **Separation** – Steer to avoid crowding local flockmates.
-![Separation With Wrapping](Content\Assets\Github\Gifs\SeparationWithWrapping.gif)
+![Separation With Wrapping](Content/Assets/Github/Gifs/SeparationWithWrapping.gif)
 2.  **Alignment** – Steer towards the average heading of local flockmates.
-![Alignment With Wrapping](Content\Assets\Github\Gifs\AlignmentWithWrapping.gif)
+![Alignment With Wrapping](Content/Assets/Github/Gifs/AlignmentWithWrapping.gif)
 3.  **Cohesion** – Steer to move toward the average position of local flockmates.
-![Cohesion With Wrapping](Content\Assets\Github\Gifs\CohesionWithWrapping.gif)
+![Cohesion With Wrapping](Content/Assets/Github/Gifs/CohesionWithWrapping.gif)
 
 When you mix these rules together, you get the mesmerizing, emergent patterns you see in real flocks of birds or schools of fish!
 
@@ -24,12 +24,12 @@ When you mix these rules together, you get the mesmerizing, emergent patterns yo
 In the initial stages of development, the simulation had no collision boundaries. To keep the boids contained, I implemented a "wrapping" behavior where a boid exiting one side of the bounds would instantly teleport to the opposite side.
 
 Here's a look at the pure flocking behavior with this wrapping mechanic:
-![All Forces With Wrapping](Content\Assets\Github\Gifs\AllForcesWithWrapping.gif)
+![All Forces With Wrapping](Content/Assets/Github/Gifs/AllForcesWithWrapping.gif)
 
 This was later replaced by a "soft wall" collision system, which uses pre-computed force vectors to steer boids away from the boundaries, resulting in a more natural look.
 
 Here is the current behavior with all forces and boundary collision active:
-![All Forces With Collision Bounding Box](Content\Assets\Github\Gifs\AllForcesWithCollision.gif)
+![All Forces With Collision Bounding Box](Content/Assets/Github/Gifs/AllForcesWithCollision.gif)
 
 ---
 
@@ -73,7 +73,7 @@ This layer will drive the simulation's parameters and allow for in-editor tweaki
 
 Here is an early design of how it will look later on (*don't take the color scheme seriously, it's a prototype*):
 
-![Tool Prototype](Content\Assets\Github\Images\BoidsToolPrototype.png)
+![Tool Prototype](Content/Assets/Github/Images/BoidsToolPrototype.png)
 
 ---
 
