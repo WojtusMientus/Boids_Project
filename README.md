@@ -95,4 +95,9 @@ This project is being developed iteratively, with a clear plan for future enhanc
 3.  **Environment Collision Grid:** Implement the voxelized collision system for static geometry based on the generic class.
 4.  **Data Integration:** Hook up the Editor Tool to load and save `UBoidsData` assets, allowing for persistent changes.
 5.  **Tool Interactivity:** Implement the tool's core logic to communicate with the `BoidManagerSubsystem` at runtime.
-6.  **Template Object Pool:** Create a generic object pool for efficiently managing `AVisualBoid` actors and Threads
+6.  **Template Object Pool:** Create a generic object pool for efficiently managing `AVisualBoid` actors and Threads.
+7.  **Compute Shader (Boid Logic):** As a major optimization goal, migrate the core boid update loop to a compute shader to leverage GPU parallelism.
+8.  **Compute Shader (Voxel Grid):** If time permits, move the Voxel Grid neighbor search to a compute shader for even greater performance.
+9.  **Compute Shader (Collision Generation):** As a final stretch goal, move the pre-computation of the environment collision data into a compute shader.
+
+Thank you for taking the time to explore this project! I've had a fantastic time developing it and look forward to pushing its capabilities even further.
