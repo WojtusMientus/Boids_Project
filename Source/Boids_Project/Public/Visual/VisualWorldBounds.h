@@ -27,8 +27,7 @@ public:
 	//~ End AActor Interface
 	
 protected:
-
-	/** Root scene component. */
+	
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USceneComponent> SceneRoot;
 

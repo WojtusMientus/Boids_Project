@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Boids_Project/Globals.h"
+#include "GameplayTagContainer.h"
 #include "BoidSelectionInfo.generated.h"
 
 /**
@@ -21,7 +21,7 @@ struct FBoidSelectionInfo
 	 * @param ID Unique ID of the selected Boid.
 	 * @param BoidType Species type of the Boid.
 	 */
-	FBoidSelectionInfo(const int32 ID, const EBoidType BoidType): ID(ID), Type(BoidType)
+	FBoidSelectionInfo(const int32 ID, const FGameplayTag BoidType): ID(ID), Type(BoidType)
 	{
 	}
 
@@ -31,6 +31,6 @@ struct FBoidSelectionInfo
 
 	/** Species type of the Boid. */
 	UPROPERTY(BlueprintReadOnly)
-	EBoidType Type;
+	FGameplayTag Type;
 	
 };

@@ -2,7 +2,6 @@
 #include "Visual/VisualBoidManager.h"
 #include "Core/BoidManagerSubsystem.h"
 #include "Visual/VisualBoid.h"
-#include "Boids_Project/Globals.h"
 
 
 AVisualBoidManager::AVisualBoidManager()
@@ -43,7 +42,7 @@ void AVisualBoidManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void AVisualBoidManager::InitializeBoids()
 {
-	TObjectPtr<UWorld> World = GetWorld();
+	UWorld* World = GetWorld();
 
 	if (!IsValid(World) || !BoidManagerSubsystem.IsValid())
 	{
@@ -54,7 +53,7 @@ void AVisualBoidManager::InitializeBoids()
 	
 	for (int i = 0; i < NumberOfBoids; i++)
 	{
-		TObjectPtr<AVisualBoid> VisualBoid = World->SpawnActor<AVisualBoid>(VisualBoidClass, FVector(), FRotator());
+		AVisualBoid* VisualBoid = World->SpawnActor<AVisualBoid>(VisualBoidClass, FVector(), FRotator());
 
 		if (!IsValid(VisualBoid))
 		{
@@ -87,12 +86,12 @@ void AVisualBoidManager::HandleBoidsUpdate()
 	}
 }
 
-void AVisualBoidManager::HandleBoidsNumberUpdate(EBoidType BoidType, int32 NewBoidCount)
+void AVisualBoidManager::HandleBoidsNumberUpdate(FGameplayTag BoidType, int32 NewBoidCount)
 {
 	// TODO: Implement spawning and despawning visual boids
 }
 
-void AVisualBoidManager::HandleBoidsColorUpdate(EBoidType BoidType, FColor NewBoidColor)
+void AVisualBoidManager::HandleBoidsColorUpdate(FGameplayTag BoidType, FColor NewBoidColor)
 {
 	// TODO: Implement visual color update
 }

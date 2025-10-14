@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Boids_Project/Globals.h"
 #include "VisualBoidManager.generated.h"
 
 class UBoidManagerSubsystem;
@@ -51,7 +50,7 @@ private:
 	 * @param NewBoidCount Number of Boids for that species.
 	 */
 	UFUNCTION()
-	void HandleBoidsNumberUpdate(EBoidType BoidType, int32 NewBoidCount);
+	void HandleBoidsNumberUpdate(FGameplayTag BoidType, int32 NewBoidCount);
 	// TODO: Currently unused - Setup for future development.
 
 	/**
@@ -60,7 +59,7 @@ private:
 	 * @param NewBoidColor Color for that species.
 	 */
 	UFUNCTION()
-	void HandleBoidsColorUpdate(EBoidType BoidType, FColor NewBoidColor);
+	void HandleBoidsColorUpdate(FGameplayTag BoidType, FColor NewBoidColor);
 	// TODO: Currently unused - Setup for future development.
 	
 	/** Array of all spawned visual Boid actors. */

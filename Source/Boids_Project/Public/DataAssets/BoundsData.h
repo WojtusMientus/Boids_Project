@@ -20,10 +20,10 @@ public:
 
 	/** World location of the bounds center. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FVector BoundsCenter;
+	FVector Center;
 	
 	/** Extent of the bounds. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FVector BoundsExtent;
+	FVector Extent;
 	
 };

@@ -12,17 +12,14 @@ class BOIDS_PROJECT_API FBounds
 	
 public:
 
-	/** Default constructor. */
-	FBounds();
 	/** Constructs a bounds from the given min and max corners.  */
-	FBounds(const FVector& MaxCorner, const FVector& MinCorner);
-	virtual ~FBounds() = default;
+	FBounds(const FVector& MaxCorner = FVector(), const FVector& MinCorner = FVector());
 	
 	/** Returns the maximum corner of the box. */
-	FORCEINLINE FVector GetMax() const { return BoundsMax; }
+	FORCEINLINE const FVector& GetMax() const { return BoundsMax; }
 
 	/** Returns the minimum corner of the box. */
-	FORCEINLINE FVector GetMin() const { return BoundsMin; }
+	FORCEINLINE const FVector& GetMin() const { return BoundsMin; }
 
 	/** Returns the size of the box (Max - Min). */
 	FORCEINLINE FVector GetSize() const { return BoundsMax - BoundsMin; }

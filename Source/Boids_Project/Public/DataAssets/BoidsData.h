@@ -3,14 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Boids_Project/Globals.h"
+#include "GameplayTagContainer.h"
 #include "Engine/DataAsset.h"
 #include "BoidsData.generated.h"
 
-/** Categories for editor organization. */
-#define BOID_CATEGORY_SETUP "Boid|Setup"
-#define BOID_CATEGORY_FORCES "Boid|Forces"
-#define BOID_CATEGORY_PERCEPTION "Boid|Perception"
 
 /**
  * Data asset defining parameters for a single Boid species.
@@ -18,47 +14,47 @@
  */
 // TODO: Load saved data at simulation start
 UCLASS()
-class BOIDS_PROJECT_API UBoidsData : public UPrimaryDataAsset
+class BOIDS_PROJECT_API UBoidsData : public UDataAsset
 {
 	GENERATED_BODY()
 
 public:
 
 	/** Species type of the Boid. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = BOID_CATEGORY_SETUP)
-	EBoidType BoidType;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Setup")
+	FGameplayTag Type;
 	
 	/** Number of Boids of this species to spawn. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = BOID_CATEGORY_SETUP)
-	int32 BoidNumber = 100;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Setup")
+	int32 Number = 100;
 
 	/** Visual Boid's color. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = BOID_CATEGORY_SETUP)
-	FColor BoidColor;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Setup")
+	FColor Color;
 	
 	/** Separation force multiplier. */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = BOID_CATEGORY_FORCES)
-	float SeparationForce = 1;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Forces")
+	float SeparationForce = 100.0f;
 	
 	/** Alignment force multiplier. */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = BOID_CATEGORY_FORCES)
-	float AlignmentForce = 1;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Forces")
+	float AlignmentForce = 100.0f;
 	
 	/** Cohesion force multiplier. */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = BOID_CATEGORY_FORCES)
-	float CohesionForce = 1;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Forces")
+	float CohesionForce = 100.0f;
 
-	/** Maximum movement speed. */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = BOID_CATEGORY_PERCEPTION)
-	float BoidSpeed;
+	/** Desired movement speed. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Perception")
+	float DesiredSpeed;
 	 
 	/** Maximum perception radius. */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = BOID_CATEGORY_PERCEPTION)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Perception")
 	int32 PerceptionDistance = 100;
 
 	/** Maximum perception angle. */
 	// TODO: Implement angular perception
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, meta = (ClampMin = 30, ClampMax = 360), Category = BOID_CATEGORY_PERCEPTION)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = 30, ClampMax = 360), Category = "Perception")
 	int32 PerceptionAngle = 360;
 	
 };

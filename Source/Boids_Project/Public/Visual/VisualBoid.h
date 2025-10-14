@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
 #include "Interfaces/SelectableBoid.h"
-#include "Boids_Project/Globals.h"
 #include "VisualBoid.generated.h"
 
 class UBoidManagerSubsystem;
@@ -45,8 +45,7 @@ public:
 	//~ End ISelectableBoid Interface
 
 protected:
-
-	/** Root scene component. */
+	
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USceneComponent> SceneRoot;
 
@@ -69,7 +68,7 @@ private:
 	int32 BoidID = -1;
 
 	/** Species type of the Boid. */
-	EBoidType BoidType;
+	FGameplayTag BoidType;
 	// NOTE: Currently unused - Setup for future development.
 	
 };

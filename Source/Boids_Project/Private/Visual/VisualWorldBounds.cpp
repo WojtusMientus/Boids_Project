@@ -47,7 +47,7 @@ void AVisualWorldBounds::HandleBoundsUpdate(const FVector& NewCenter, const FVec
 
 void AVisualWorldBounds::UpdateMeshBounds(const FVector& NewBoundsExtent)
 {
-	if (!IsValid(MeshComponent))
+	if (!ensure(IsValid(MeshComponent)))
 	{
 		return;
 	}

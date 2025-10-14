@@ -7,6 +7,11 @@ void UBoidManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	
 	InitializeBoids();
 	WorldCollisionBounds = MakeUnique<FWorldCollisionBounds>(BOIDS_BOUNDS);
+	
+	if (UWorld* World = GetWorld())
+	{
+		World->OnWorldBeginPlay.AddUObject(this, &UBoidManagerSubsystem::PostAllActorsBeginPlay);
+	}
 }
 
 void UBoidManagerSubsystem::Deinitialize()
@@ -14,7 +19,7 @@ void UBoidManagerSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
-void UBoidManagerSubsystem::PostAllActorsBeginPlay()
+void UBoidManagerSubsystem::PostAllActorsBeginPlay() const
 {
 	OnBoundsUpdate.Broadcast(WorldCollisionBounds->GetCenter(), WorldCollisionBounds->GetSize());
 }
@@ -102,7 +107,7 @@ void UBoidManagerSubsystem::UpdateBoids(float DeltaTime)
 		}
 		
 		CurrentBoid->Velocity += CurrentBoid->Acceleration * DeltaTime;
-		CurrentBoid->Velocity = CurrentBoid->Velocity.GetClampedToMaxSize(BOID_DESIRED_VELOCITY * 2);
+		CurrentBoid->Velocity = CurrentBoid->Velocity.GetClampedToMaxSize(2 * BOID_DESIRED_VELOCITY);
 		CurrentBoid->Update(DeltaTime);
 	}
 }

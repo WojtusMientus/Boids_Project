@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Subsystems/WorldSubsystem.h"
-#include "Boids_Project/Globals.h"
 #include "Core/Boid.h"
 #include "Bounds/WorldCollisionBounds.h"
 #include "BoidManagerSubsystem.generated.h"
@@ -13,8 +13,8 @@
 /** Delegates for visual updates */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBoidsUpdateFinishSignature);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBoundsUpdateSignature, const FVector&, NewCenter, const FVector&, Extent);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBoidsNumberUpdateSignature, EBoidType, BoidType, int32, NewBoidNumber);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBoidsColorUpdateSignature, EBoidType, BoidType, FColor, NewBoidColor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBoidsNumberUpdateSignature, FGameplayTag, BoidType, int32, NewBoidNumber);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBoidsColorUpdateSignature, FGameplayTag, BoidType, FColor, NewBoidColor);
 
 
 /**
@@ -71,9 +71,8 @@ public:
 	 */
 	FVector GetBoidVelocityAt(int32 Index);
 
-	/** Called only from level blueprint after all actors in level are initialized. Broadcasts OnBoundsUpdate delegate for initial setup. */
-	UFUNCTION(BlueprintCallable)
-	void PostAllActorsBeginPlay();
+	/** Called only after all actors in level are initialized. Broadcasts OnBoundsUpdate delegate for initial setup. */
+	void PostAllActorsBeginPlay() const;
 
 	/** Returns perception radius used by Boids to find neighbors. */
 	UFUNCTION(BlueprintCallable, BlueprintPure)
@@ -98,33 +97,30 @@ public:
 	FORCEINLINE int32 GetBoidsCount() { return BOIDS_COUNT; }
 	
 private:
-
-	/** Maximum movement speed. */
-	static constexpr float BOID_MAX_VELOCITY = 500.0f;
-
+	
 	/** Desired movement speed that Boid is trying to achieve. */
-	static constexpr float BOID_DESIRED_VELOCITY = 150.0f;
+	static constexpr float BOID_DESIRED_VELOCITY = 200.0f;
 
 	/** Speed correction force multiplier.  */
-	static constexpr float SPEED_CORRECTION_FORCE = 0.01f;
+	static constexpr float SPEED_CORRECTION_FORCE = 0.85f;
 	
 	/** Number of Boids spawned at simulation start. */
 	static constexpr int32 BOIDS_COUNT = 100;
 	
 	/** Final multiplier applied to separation steering force. */
-	static constexpr float SEPARATION_FORCE = 125.0f;
+	static constexpr float SEPARATION_FORCE = 600.0f;
 	
 	/** Final multiplier applied to alignment steering force. */
-	static constexpr float ALIGNMENT_FORCE = 100.0f;
+	static constexpr float ALIGNMENT_FORCE = 200.0f;
 	
 	/** Final multiplier applied to cohesion steering force. */
-	static constexpr float COHESION_FORCE = 125.0f;  
+	static constexpr float COHESION_FORCE = 600.0f;  
 	
 	/** Separation distance falloff. Stronger when Boids are closer. */
-	static constexpr float SEPARATION_FALLOFF = 1.5f;
+	static constexpr float SEPARATION_FALLOFF = 1.75f;
 
 	/** Maximum perception radius. */
-	static constexpr int32 PERCEPTION_DISTANCE = 175;
+	static constexpr int32 PERCEPTION_DISTANCE = 150;
 
 	/** Cached perception distance squared for distance calculations. */
 	static constexpr int32 PERCEPTION_DISTANCE_SQUARED = PERCEPTION_DISTANCE * PERCEPTION_DISTANCE;
@@ -209,5 +205,5 @@ private:
 	TArray<FVector> NewCalculatedVelocityPerBoid;
 	
 	/** World collision bounds for collision calculations. */
-	TUniquePtr<FWorldCollisionBounds> WorldCollisionBounds;	
+	TUniquePtr<FWorldCollisionBounds> WorldCollisionBounds;
 };

@@ -13,14 +13,11 @@ class BOIDS_PROJECT_API FWorldCollisionBounds: public FBounds
 {
 	
 public:
-
-	/** Default constructor. Initializes voxel grid. */
-	FWorldCollisionBounds();
+	
 	/** Constructs a bounds from the given min and max corners. Initializes voxel grid. */
 	FWorldCollisionBounds(const FVector& MaxCorner, const FVector& MinCorner);
 	/** Constructs a bounding box of the given size, centered ath the origin (0,0,0). Initializes voxel grid. */
-	FWorldCollisionBounds(const float BoundsSize);
-	~FWorldCollisionBounds() = default;
+	FWorldCollisionBounds(float BoundsSize);
 
 	/**
 	 * Updates bounds world position and size.
@@ -61,7 +58,7 @@ private:
 	static constexpr int32 COLLISION_ROWS = 4;
 
 	/** Final multiplier applied before retrieving collision force. */
-	static constexpr float COLLISION_MULTIPLIER = 200.0f;
+	static constexpr float COLLISION_MULTIPLIER = 250.0f;
 
 	/** Calculated voxel sizes along each axis. Recalculated every bounds change. */
 	float VoxelSizeX = 0.0f;

@@ -2,11 +2,6 @@
 #include "Bounds/WorldCollisionBounds.h"
 
 
-FWorldCollisionBounds::FWorldCollisionBounds(): FBounds()
-{
-	InitializeCollisionGrid();
-}
-
 FWorldCollisionBounds::FWorldCollisionBounds(const FVector& MaxCorner, const FVector& MinCorner): FBounds(MaxCorner, MinCorner)
 {
 	InitializeCollisionGrid();
