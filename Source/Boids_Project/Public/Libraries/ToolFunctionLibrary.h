@@ -7,6 +7,8 @@
 #include "ToolFunctionLibrary.generated.h"
 
 
+class UCustomColorPicker;
+
 UCLASS()
 class BOIDS_PROJECT_API UToolFunctionLibrary : public UEditorUtilityLibrary
 {
@@ -15,5 +17,7 @@ class BOIDS_PROJECT_API UToolFunctionLibrary : public UEditorUtilityLibrary
 	/** Retrieves number of child gameplay tags in the hierarchy. */
 	UFUNCTION(BlueprintCallable)
 	static int32 GetNumChildGameplayTags(const FGameplayTag& Parent);
-	
 };
+
+
+

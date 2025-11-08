@@ -2,6 +2,7 @@
 
 #include "Libraries/ToolFunctionLibrary.h"
 #include "GameplayTagsManager.h"
+#include "UI/Slate/SCustomColorPicker.h"
 
 int32 UToolFunctionLibrary::GetNumChildGameplayTags(const FGameplayTag& Parent)
 {
@@ -9,4 +10,3 @@ int32 UToolFunctionLibrary::GetNumChildGameplayTags(const FGameplayTag& Parent)
 	const FGameplayTagContainer& ChildContainer = GameplayTagsManager.RequestGameplayTagChildren(Parent);
 	return ChildContainer.Num();
 }
-
