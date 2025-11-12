@@ -11,5 +11,6 @@ public class Boids_ProjectEditorTarget : TargetRules
 		DefaultBuildSettings = BuildSettingsVersion.V5;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_6;
 		ExtraModuleNames.Add("Boids_Project");
+		ExtraModuleNames.Add("Boids_Project_Editor");
 	}
 }

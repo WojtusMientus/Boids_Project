@@ -4,20 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "EditorUtilityLibrary.h"
-#include "ToolFunctionLibrary.generated.h"
+#include "MainEditorUtilityLibrary.generated.h"
 
-
-class UCustomColorPicker;
-
+/**
+ * 
+ */
 UCLASS()
-class BOIDS_PROJECT_API UToolFunctionLibrary : public UEditorUtilityLibrary
+class BOIDS_PROJECT_EDITOR_API UMainEditorUtilityLibrary : public UEditorUtilityLibrary
 {
 	GENERATED_BODY()
 
 	/** Retrieves number of child gameplay tags in the hierarchy. */
 	UFUNCTION(BlueprintCallable)
-	static int32 GetNumChildGameplayTags(const FGameplayTag& Parent);
+	static int32 GetNumberOfChildGameplayTags(const FGameplayTag& Parent);
+	
 };
-
-
-

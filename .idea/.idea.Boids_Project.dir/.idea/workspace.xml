@@ -7,59 +7,86 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a999f4cc-f30d-4217-8b76-6a0779c87ee2" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Source/Boids_Project/Private/Libraries/TestFunctionLibrary.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/Boids_Project/Private/UI/Slate/SCustomColorPicker.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/Boids_Project/Private/UI/Slate/SCustomColorSlider.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/Boids_Project/Private/UI/UserWidgets/CustomColorPicker.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/Boids_Project/Public/Libraries/TestFunctionLibrary.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/Boids_Project/Public/UI/Slate/SCustomColorPicker.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/Boids_Project/Public/UI/Slate/SCustomColorSlider.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/Boids_Project/Public/UI/UserWidgets/CustomColorPicker.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Boids_Project.dir/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Boids_Project.dir/.idea/dictionaries/project.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Boids_Project.dir/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Boids_Project.dir/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Boids_Project/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Boids_Project/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Boids_Project/.idea/indexLayout.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Boids_Project.uproject.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/Boids_Project.uproject.DotSettings.user" afterDir="false" />
+    <list default="true" id="ab7041a4-be39-4ea5-ac03-b08ac1d5d980" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Public/Boids_Project_EditorModule.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Public/Boids_Project_EditorModule.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Boids_Project.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Boids_Project.dir/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Boids_Project.uproject" beforeDir="false" afterPath="$PROJECT_DIR$/Boids_Project.uproject" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/EUW_BoidInProgress.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Editor/EUW_BoidInProgress.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/Modules/EUW_ButtonWithText.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Editor/Modules/EUW_ButtonWithText.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/EUW_BoidInProgressTesting.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/EUW_Boid_Test.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Editor/EUW_Boid_Test.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/EUW_BoidsMain.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/Modules/EUW_SectionWithText.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Editor/Modules/EUW_SectionWithText.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/NewBlueprint.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/NewEditorUtilityWidgetBlueprint.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Maps/MainLevel.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Maps/MainLevel.umap" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Boids_Project.Build.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project/Boids_Project.Build.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Private/Libraries/ToolFunctionLibrary.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project/Private/Libraries/ToolFunctionLibrary.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Public/Libraries/ToolFunctionLibrary.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project/Public/Libraries/ToolFunctionLibrary.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Private/Libraries/TestFunctionLibrary.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Private/Libraries/ToolFunctionLibrary.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Private/UI/Editor/BoidEditorUtilityWidgetBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Private/EditorUtilityWidgets/BoidEditorUtilityWidgetBase.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Private/UI/Slate/SCustomColorPicker.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Private/Slate/SCustomColorPicker.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Private/UI/Slate/SCustomColorSlider.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Private/Slate/SCustomColorSlider.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Private/UI/UserWidgets/CustomColorPicker.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Public/Libraries/TestFunctionLibrary.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Public/Libraries/ToolFunctionLibrary.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Public/UI/Editor/BoidEditorUtilityWidgetBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Public/EditorUtilityWidgets/BoidEditorUtilityWidgetBase.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Public/UI/Slate/SCustomColorPicker.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Public/Slate/SCustomColorPicker.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Public/UI/Slate/SCustomColorSlider.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Public/Slate/SCustomColorSlider.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Public/UI/UserWidgets/CustomColorPicker.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_ProjectEditor.Target.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_ProjectEditor.Target.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="DpaMonitoringSettings">
+    <option name="firstShow" value="false" />
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 4
-}]]></component>
-  <component name="ProjectId" id="35CvNLN5slGZxw9RRJ97eIoXZoB" />
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/AppFramework/Private/Widgets/Colors/SColorSlider.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/Core/Public/Math/Color.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/Core/Public/Templates/SharedPointer.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/Slate/Private/Widgets/Input/SSlider.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/Slate/Public/Framework/SlateDelegates.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/Slate/Public/Widgets/Input/SSlider.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/Slate/Public/Widgets/Input/SSpinBox.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/SlateCore/Public/Fonts/SlateFontInfo.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/SlateCore/Public/Layout/Margin.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/SlateCore/Public/Styling/ISlateStyle.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/SlateCore/Public/Styling/SlateTypes.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/Boids_Project_Editor/Private/Libraries/MainEditorUtilityLibrary.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/Boids_Project_Editor/Public/Libraries/MainEditorUtilityLibrary.h" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="35LGcYKCtlzFCTBg1Rlj5grRxTH" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Uproject.Boids_Project.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;WorkInProgress&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="Boids_Project" type="Uproject" factoryName="rider.uproject">
       <configuration_1 setup="1">
@@ -137,12 +164,15 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="a999f4cc-f30d-4217-8b76-6a0779c87ee2" name="Changes" comment="" />
-      <created>1762626828111</created>
+      <changelist id="ab7041a4-be39-4ea5-ac03-b08ac1d5d980" name="Changes" comment="" />
+      <created>1762882019769</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1762626828111</updated>
-      <workItem from="1762626830795" duration="990000" />
+      <updated>1762882019769</updated>
+      <workItem from="1762882022529" duration="4774000" />
+      <workItem from="1762899868230" duration="2991000" />
+      <workItem from="1762954273962" duration="5023000" />
+      <workItem from="1762968331037" duration="5886000" />
     </task>
     <servers />
   </component>

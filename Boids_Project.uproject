@@ -12,6 +12,14 @@
 				"Engine",
 				"Blutility"
 			]
+		},
+		{
+			"Name": "Boids_Project_Editor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Blutility"
+			]
 		}
 	],
 	"Plugins": [
