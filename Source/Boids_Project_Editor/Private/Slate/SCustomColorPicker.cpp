@@ -1,5 +1,6 @@
 ﻿
 #include "Slate/SCustomColorPicker.h"
+
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Colors/SColorSpectrum.h"
 #include "Slate/SCustomColorSlider.h"
@@ -15,6 +16,7 @@ void SCustomColorPicker::Construct(const FArguments& InArgs)
 	OnColorValueChanged = InArgs._OnColorValueChanged;
 	OnColorCommitted = InArgs._OnColorCommitted;
 	OnColorCancelled = InArgs._OnColorCancelled;
+	OnWindowClosed = InArgs._OnWindowClosed;
 	
 	CurrentColorRGB = StartingColor;
 	CurrentColorHSV = StartingColor.LinearRGBToHSV();
@@ -297,6 +299,8 @@ void SCustomColorPicker::OpenCustomColorPicker(const FCustomColorPickerArgs& InA
 {
 	const FVector2D ConstructionLocation = CalculateColorPickerConstructionLocation();
 	TSharedRef<SWindow> Window = CreateCustomColorPickerWindow(ConstructionLocation);
+	Window->SetOnWindowClosed(FOnWindowClosed::CreateStatic(
+	&SCustomColorPicker::HandleWindowClosed));
 	
 	if (!GlobalCustomColorPicker.IsValid())
 	{
@@ -314,18 +318,6 @@ void SCustomColorPicker::OpenCustomColorPicker(const FCustomColorPickerArgs& InA
 	Window->MoveWindowTo(ConstructionLocation);
 	
 	CustomColorPickerWindow = Window;
-}
-
-void SCustomColorPicker::SetNewParentWindow(const TSharedRef<SWindow>& InParentWindow)
-{
-	ParentWindow = InParentWindow;
-}
-
-void SCustomColorPicker::SetNewStartingColor(const FLinearColor InColor)
-{
-	StartingColor = InColor;
-	CurrentColorRGB = InColor;
-	CurrentColorHSV = InColor.LinearRGBToHSV();
 }
 
 FVector2D SCustomColorPicker::CalculateColorPickerConstructionLocation()
@@ -348,7 +340,8 @@ TSharedRef<SCustomColorPicker> SCustomColorPicker::CreateCustomColorPicker(const
 		.ParentWindow(InWindow)
 		.OnColorValueChanged(InArgs.OnColorValueChanged)
 		.OnColorCommitted(InArgs.OnColorCommitted)
-		.OnColorCancelled(InArgs.OnColorCancelled);
+		.OnColorCancelled(InArgs.OnColorCancelled)
+		.OnWindowClosed(InArgs.OnWindowClosed);
 }
 
 TSharedRef<SWindow> SCustomColorPicker::CreateCustomColorPickerWindow(const FVector2D InSpawnLocation)
@@ -361,6 +354,14 @@ TSharedRef<SWindow> SCustomColorPicker::CreateCustomColorPickerWindow(const FVec
 		.SupportsMaximize(false);
 }
 
+void SCustomColorPicker::HandleWindowClosed(const TSharedRef<SWindow>& InWindow)
+{
+	if (GlobalCustomColorPicker.IsValid())
+	{
+		GlobalCustomColorPicker->OnWindowClosed.ExecuteIfBound();
+	}
+}
+
 void SCustomColorPicker::SetupNewStartingValues(const FCustomColorPickerArgs& InArgs, const TSharedRef<SWindow>& InWindow)
 {
 	GlobalCustomColorPicker->SetNewStartingColor(InArgs.StartingColor);
@@ -368,6 +369,19 @@ void SCustomColorPicker::SetupNewStartingValues(const FCustomColorPickerArgs& In
 	GlobalCustomColorPicker->OnColorValueChanged = InArgs.OnColorValueChanged;
 	GlobalCustomColorPicker->OnColorCommitted = InArgs.OnColorCommitted;
 	GlobalCustomColorPicker->OnColorCancelled = InArgs.OnColorCancelled;
+	GlobalCustomColorPicker->OnWindowClosed = InArgs.OnWindowClosed;
+}
+
+void SCustomColorPicker::SetNewParentWindow(const TSharedRef<SWindow>& InParentWindow)
+{
+	ParentWindow = InParentWindow;
+}
+
+void SCustomColorPicker::SetNewStartingColor(const FLinearColor InColor)
+{
+	StartingColor = InColor;
+	CurrentColorRGB = InColor;
+	CurrentColorHSV = InColor.LinearRGBToHSV();
 }
 
 void SCustomColorPicker::TryDestroyOldWindow()

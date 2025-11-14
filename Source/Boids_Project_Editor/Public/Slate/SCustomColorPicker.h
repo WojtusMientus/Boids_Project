@@ -25,6 +25,9 @@ struct FCustomColorPickerArgs
 	
 	/** Delegate invoked on "Cancel" button click. */
 	FOnLinearColorValueChanged OnColorCancelled;
+	
+	/** Delegate invoked on "Window Close" button click. */
+	FSimpleDelegate OnWindowClosed;
 };
 
 /**
@@ -41,7 +44,8 @@ public:
 		_ParentWindow(nullptr),
 		_OnColorValueChanged(),
 		_OnColorCommitted(),
-		_OnColorCancelled()
+		_OnColorCancelled(),
+		_OnWindowClosed()
 		{}
 
 		/** Initial value of the color picker. */
@@ -58,6 +62,9 @@ public:
 		
 		/** Delegate invoked on "Cancel" button click. */
 		SLATE_EVENT(FOnLinearColorValueChanged, OnColorCancelled)
+
+		/** Delegate invoked on "Window Close" button click. */
+		SLATE_EVENT(FSimpleDelegate, OnWindowClosed)
 		
 	SLATE_END_ARGS()
 
@@ -94,12 +101,12 @@ private:
 	/** Helper that invokes OnColorValueChanged delegate. */
 	void HandleColorValueChanged();
 	
-	/** Ok Button Handler, which closes window and invokes OnColorCommitted. */
+	/** Ok button handler, which closes window and invokes OnColorCommitted. */
 	FReply HandleOkButtonClicked();
 	
-	/** Cancel Button Handler, which closes window and invokes OnColorCancelled. */
+	/** Cancel button handler, which closes window and invokes OnColorCancelled. */
 	FReply HandleCancelButtonClicked();
-	
+		
 	
 	/** Reference to the parent window for closing it after pressing either "Ok" or "Cancel" buttons. */
 	TWeakPtr<SWindow> ParentWindow;
@@ -112,6 +119,9 @@ private:
 	
 	/**  Invoked when pressing the "Canceled" button. */
 	FOnLinearColorValueChanged OnColorCancelled;
+	
+	/**  Invoked when pressing the "Close Window" button. */
+	FSimpleDelegate OnWindowClosed;
 	
 	/** Initial and current color values. */
 	FLinearColor StartingColor = FLinearColor::White;
@@ -140,10 +150,7 @@ public:
 	static void OpenCustomColorPicker(const FCustomColorPickerArgs& InArgs);
 
 private:
-	
-	void SetNewParentWindow(const TSharedRef<SWindow>& InParentWindow);
-	void SetNewStartingColor(const FLinearColor InColor);
-	
+		
 	/** Retrieves calculated spawn location taking into consideration its size and padding. */
 	static FVector2D CalculateColorPickerConstructionLocation();
 
@@ -152,8 +159,14 @@ private:
 	                                                              const TSharedRef<SWindow>& InWindow);
 	static TSharedRef<SWindow> CreateCustomColorPickerWindow(const FVector2D InSpawnLocation);
 	
+	/** Window close button handler, which closes window and invokes OnWindowClosed. */
+	static void HandleWindowClosed(const TSharedRef<SWindow>& InWindow);
+	
 	/** Initializes new starting values. */
 	static void SetupNewStartingValues(const FCustomColorPickerArgs& InArgs, const TSharedRef<SWindow>& InWindow);
+	
+	void SetNewParentWindow(const TSharedRef<SWindow>& InParentWindow);
+	void SetNewStartingColor(const FLinearColor InColor);
 	
 	/** Destroys leftover color picker if there is one. */
 	static void TryDestroyOldWindow();

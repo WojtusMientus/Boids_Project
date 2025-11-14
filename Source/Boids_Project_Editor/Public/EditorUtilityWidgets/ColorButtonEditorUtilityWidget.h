@@ -4,25 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "EditorUtilityWidget.h"
-#include "BoidEditorUtilityWidgetBase.generated.h"
+#include "ColorButtonEditorUtilityWidget.generated.h"
 
 class SCustomColorPicker;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnColorChangedEvent, FLinearColor, NewColor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnColorCommittedEvent, FLinearColor, NewColor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnColorCancelledEvent, FLinearColor, NewColor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnColorPickerWindowClosedEvent);
 
 /**
- * Base class for Boids Tool. 
- * Its main purpose is to bridge logic between Slate and Blueprints.
+ * Base class for blueprint color button widget.
+ * Able to create color picker and bridge logic between Slate and Blueprints. 
  */
 UCLASS(Blueprintable)
-class UBoidEditorUtilityWidgetBase : public UEditorUtilityWidget
+class BOIDS_PROJECT_EDITOR_API UColorButtonEditorUtilityWidget : public UEditorUtilityWidget
 {
 	GENERATED_BODY()
-
-protected:
 	
+protected:
+		
 	UPROPERTY(BlueprintAssignable)
 	FOnColorChangedEvent OnColorChanged;
 	
@@ -31,13 +32,16 @@ protected:
 	
 	UPROPERTY(BlueprintAssignable)
 	FOnColorCancelledEvent OnColorCancelled;
-
+	
+	UPROPERTY(BlueprintAssignable)
+	FOnColorPickerWindowClosedEvent OnColorPickerWindowClosed;
+	
 	/**
 	 * Initializes global custom color picker with new starting color.
 	 * @param StartingColor Initial color of spawned color picker.
 	 */
 	UFUNCTION(BlueprintCallable)
-	void SpawnColorPicker(const FLinearColor StartingColor);
+	void SpawnColorPicker(const FLinearColor StartingColor = FLinearColor::White);
 	
 private:
 	
@@ -45,5 +49,6 @@ private:
 	void HandleColorChanged(FLinearColor NewColor);
 	void HandleColorCommitted(FLinearColor NewColor);
 	void HandleColorCancelled(FLinearColor NewColor);
+	void HandleColorPickerWindowClosed();
 	
 };

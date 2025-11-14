@@ -8,33 +8,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ab7041a4-be39-4ea5-ac03-b08ac1d5d980" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Public/Boids_Project_EditorModule.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Public/Boids_Project_EditorModule.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Boids_Project.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Boids_Project.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Boids_Project.uproject" beforeDir="false" afterPath="$PROJECT_DIR$/Boids_Project.uproject" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Boids_Project.uproject.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/Boids_Project.uproject.DotSettings.user" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/EUW_BoidInProgress.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Editor/EUW_BoidInProgress.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/EUW_BoidInProgressTesting.uasset" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/EUW_Boid_Test.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Editor/EUW_Boid_Test.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/EUW_BoidsMain.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/Modules/EUW_ButtonWithText.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Editor/Modules/EUW_ButtonWithText.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/Modules/EUW_SectionWithText.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Editor/Modules/EUW_SectionWithText.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/NewBlueprint.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/NewEditorUtilityWidgetBlueprint.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Maps/MainLevel.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Maps/MainLevel.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Boids_Project.Build.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project/Boids_Project.Build.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Private/Libraries/TestFunctionLibrary.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Private/Libraries/ToolFunctionLibrary.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Private/UI/Editor/BoidEditorUtilityWidgetBase.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Private/EditorUtilityWidgets/BoidEditorUtilityWidgetBase.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Private/UI/Slate/SCustomColorPicker.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Private/Slate/SCustomColorPicker.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Private/UI/Slate/SCustomColorSlider.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Private/Slate/SCustomColorSlider.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Private/UI/UserWidgets/CustomColorPicker.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Public/Libraries/TestFunctionLibrary.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Public/Libraries/ToolFunctionLibrary.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Public/UI/Editor/BoidEditorUtilityWidgetBase.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Public/EditorUtilityWidgets/BoidEditorUtilityWidgetBase.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Public/UI/Slate/SCustomColorPicker.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Public/Slate/SCustomColorPicker.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Public/UI/Slate/SCustomColorSlider.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Public/Slate/SCustomColorSlider.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Public/UI/UserWidgets/CustomColorPicker.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Boids_ProjectEditor.Target.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_ProjectEditor.Target.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/Modules/Transactable/EUW_TransactableBoxValue.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Editor/Modules/Transactable/EUW_TransactableBoxValue.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Editor/Modules/Transactable/EUW_TransactableVectorWithObjects.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Editor/Modules/Transactable/EUW_TransactableVectorWithObjects.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_Project/Public/DataAssets/BoidsData.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project/Public/DataAssets/BoidsData.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_Project_Editor/Private/EditorUtilityWidgets/BoidEditorUtilityWidgetBase.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_Project_Editor/Private/Slate/SCustomColorPicker.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Private/Slate/SCustomColorPicker.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_Project_Editor/Public/EditorUtilityWidgets/BoidEditorUtilityWidgetBase.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Boids_Project_Editor/Public/Slate/SCustomColorPicker.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Boids_Project_Editor/Public/Slate/SCustomColorPicker.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,20 +34,34 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="cidr-memory-view://6" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Editor/Blutility/Classes/EditorUtilityWidgetComponents.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/AppFramework/Private/Widgets/Colors/SColorSlider.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/Core/Public/Delegates/Delegate.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/Core/Public/Delegates/DelegateCombinations.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/Core/Public/Delegates/DelegateInstancesImpl.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/Core/Public/Delegates/DelegateSignatureImpl.inl" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/Core/Public/Math/Color.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/Core/Public/Templates/SharedPointer.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/Slate/Private/Widgets/Input/SSlider.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/Slate/Public/Framework/SlateDelegates.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/Slate/Public/Widgets/Input/SSlider.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/Slate/Public/Widgets/Input/SSpinBox.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/SlateCore/Private/Widgets/SWindow.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/SlateCore/Public/Fonts/SlateFontInfo.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/SlateCore/Public/Layout/Margin.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/SlateCore/Public/Styling/ISlateStyle.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/SlateCore/Public/Styling/SlateTypes.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/SlateCore/Public/Widgets/DeclarativeSyntaxSupport.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/SlateCore/Public/Widgets/SWindow.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/UMG/Private/Components/SpinBox.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../EpicGames/UE_5.6/Engine/Source/Runtime/UMG/Public/Components/SpinBox.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/Boids_Project_Editor/Private/EditorUtilityWidgets/ColorButtonEditorUtilityWidget.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/Boids_Project_Editor/Private/Libraries/MainEditorUtilityLibrary.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/Boids_Project_Editor/Public/EditorUtilityWidgets/ColorButtonEditorUtilityWidget.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/Boids_Project_Editor/Public/Libraries/MainEditorUtilityLibrary.h" root0="FORCE_HIGHLIGHTING" />
   </component>
+  <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 4
@@ -84,6 +84,7 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settingsdialog.IDE.editor.colors.C/C++&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -173,12 +174,19 @@
       <workItem from="1762899868230" duration="2991000" />
       <workItem from="1762954273962" duration="5023000" />
       <workItem from="1762968331037" duration="5886000" />
+      <workItem from="1762987588921" duration="1539000" />
+      <workItem from="1763024878686" duration="3918000" />
+      <workItem from="1763051684706" duration="6824000" />
+      <workItem from="1763063928611" duration="881000" />
+      <workItem from="1763064874610" duration="5890000" />
+      <workItem from="1763075843113" duration="839000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
   <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
@@ -200,5 +208,9 @@
         </breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

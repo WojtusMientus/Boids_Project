@@ -30,7 +30,7 @@ public:
 
 	/** Visual Boid's color. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Setup")
-	FColor Color;
+	FLinearColor Color;
 	
 	/** Separation force multiplier. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Forces")
