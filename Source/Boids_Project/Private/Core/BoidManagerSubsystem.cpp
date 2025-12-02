@@ -1,27 +1,26 @@
 
 #include "Core/BoidManagerSubsystem.h"
 
+
 void UBoidManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 	
-	InitializeBoids();
-	WorldCollisionBounds = MakeUnique<FWorldCollisionBounds>(BOIDS_BOUNDS);
-	
 	if (UWorld* World = GetWorld())
 	{
-		World->OnWorldBeginPlay.AddUObject(this, &UBoidManagerSubsystem::PostAllActorsBeginPlay);
+		if (World->IsGameWorld())
+		{
+			InitializeBoids();
+			WorldCollisionBounds = MakeUnique<FWorldCollisionBounds>(BOIDS_BOUNDS);
+		}
 	}
 }
 
-void UBoidManagerSubsystem::Deinitialize()
+void UBoidManagerSubsystem::UpdateBoidCellIndices(const int32 ID, const int32 VoxelGridIndex,
+	const int32 VoxelGridCellIndex)
 {
-	Super::Deinitialize();
-}
-
-void UBoidManagerSubsystem::PostAllActorsBeginPlay() const
-{
-	OnBoundsUpdate.Broadcast(WorldCollisionBounds->GetCenter(), WorldCollisionBounds->GetSize());
+	Boids[ID]->VoxelGridIndex = VoxelGridIndex;
+	Boids[ID]->VoxelGridCellIndex = VoxelGridCellIndex;
 }
 
 void UBoidManagerSubsystem::Tick(float DeltaTime)
@@ -58,14 +57,24 @@ FVector UBoidManagerSubsystem::GetBoidVelocityAt(int32 Index)
 
 void UBoidManagerSubsystem::InitializeBoids()
 {
+	int32 ValidBoidIDs = 0;
+	Boids.Reserve(BOIDS_COUNT);
+	CurrentNeighbours.Reserve(BOIDS_COUNT);
+	
 	for (int i = 0; i < BOIDS_COUNT; i++)
 	{
 		const FVector InitialPosition = CalculateBoidInitialPosition();
 		const FVector InitialVelocity = FMath::VRand() * BOID_DESIRED_VELOCITY;
-		Boids.Add(MakeUnique<FBoid>(InitialPosition, InitialVelocity));
-		NewCalculatedVelocityPerBoid.Add(Boids[i]->Velocity);
+		
+		TUniquePtr<FBoid> CreatedBoid = MakeUnique<FBoid>(InitialPosition, InitialVelocity, ValidBoidIDs);
+		
+		if (CreatedBoid.IsValid())
+		{
+			Boids.Add(MoveTemp(CreatedBoid));
+			NewCalculatedVelocityPerBoid.Add(InitialVelocity);
+			ValidBoidIDs++;
+		}
 	}
-	CurrentNeighbours.Reserve(BOIDS_COUNT);
 }
 
 FVector UBoidManagerSubsystem::CalculateBoidInitialPosition()
@@ -81,10 +90,6 @@ void UBoidManagerSubsystem::UpdateBoids(float DeltaTime)
 	for (int i = 0; i < Boids.Num(); i++)
 	{
 		FBoid* CurrentBoid = Boids[i].Get();
-		if (!CurrentBoid)
-		{
-			continue;
-		}
 		
 		CurrentBoid->Acceleration = FVector::ZeroVector;
 		GetNeighbourBoids(i, CurrentNeighbours);

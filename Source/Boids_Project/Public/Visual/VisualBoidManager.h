@@ -58,8 +58,7 @@ private:
 	 * @param BoidType The type of Boid whose color was changed.
 	 * @param NewBoidColor Color for that species.
 	 */
-	UFUNCTION()
-	void HandleBoidsColorUpdate(FGameplayTag BoidType, FColor NewBoidColor);
+	void HandleBoidsColorUpdate(FGameplayTag BoidType, FLinearColor NewBoidColor);
 	// TODO: Currently unused - Setup for future development.
 	
 	/** Array of all spawned visual Boid actors. */
@@ -68,5 +67,11 @@ private:
 
 	/** Weak reference to the BoidManagerSubsystem for event binding and unbinding. */
 	TWeakObjectPtr<UBoidManagerSubsystem> BoidManagerSubsystem;
+	
+#if WITH_EDITOR
+	/**  */
+	FDelegateHandle  BoidsColorChangeDelegateHandle;
+#endif
+	
 };
 

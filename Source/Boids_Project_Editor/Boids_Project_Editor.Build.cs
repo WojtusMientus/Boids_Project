@@ -9,7 +9,7 @@ public class Boids_Project_Editor : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "Boids_Project", 
-			"InputCore", "EnhancedInput", "GameplayTags", "Blutility", "UMG" });
+			"InputCore", "EnhancedInput", "GameplayTags", "Blutility", "UMG", "EditorScriptingUtilities", "EditorSubsystem" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "UnrealEd", "AppFramework", "EditorStyle" });
 		

@@ -2,6 +2,13 @@
 #include "EditorUtilityWidgets/ColorButtonEditorUtilityWidget.h"
 #include "Slate/SCustomColorPicker.h"
 
+
+void UColorButtonEditorUtilityWidget::ReleaseSlateResources(bool bReleaseChildren)
+{
+	Super::ReleaseSlateResources(bReleaseChildren);
+	SCustomColorPicker::TryDestroyOldWindow();
+}
+
 void UColorButtonEditorUtilityWidget::SpawnColorPicker(const FLinearColor StartingColor)
 {
 	FCustomColorPickerArgs SpawnArguments;

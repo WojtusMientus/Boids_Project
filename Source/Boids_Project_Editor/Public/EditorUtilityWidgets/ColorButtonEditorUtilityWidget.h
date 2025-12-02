@@ -6,12 +6,12 @@
 #include "EditorUtilityWidget.h"
 #include "ColorButtonEditorUtilityWidget.generated.h"
 
-class SCustomColorPicker;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnColorChangedEvent, FLinearColor, NewColor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnColorCommittedEvent, FLinearColor, NewColor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnColorCancelledEvent, FLinearColor, NewColor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnColorPickerWindowClosedEvent);
+
 
 /**
  * Base class for blueprint color button widget.
@@ -36,12 +36,17 @@ protected:
 	UPROPERTY(BlueprintAssignable)
 	FOnColorPickerWindowClosedEvent OnColorPickerWindowClosed;
 	
+	//~ Begin UEditorUtilityWidget Interface 
+	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
+	//~ End UEditorUtilityWidget Interface 
+	
 	/**
 	 * Initializes global custom color picker with new starting color.
 	 * @param StartingColor Initial color of spawned color picker.
 	 */
 	UFUNCTION(BlueprintCallable)
 	void SpawnColorPicker(const FLinearColor StartingColor = FLinearColor::White);
+
 	
 private:
 	

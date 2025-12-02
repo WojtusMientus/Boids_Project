@@ -3,7 +3,8 @@
 #include "Core/BoidManagerSubsystem.h"
 
 
-FBoid::FBoid(const FVector& InitPosition, const FVector& InitVelocity): Position(InitPosition), Velocity(InitVelocity)
+FBoid::FBoid(const FVector& InitPosition, const FVector& InitVelocity, const int32 InitID)
+			: Position(InitPosition), Velocity(InitVelocity)
 {
 }
 

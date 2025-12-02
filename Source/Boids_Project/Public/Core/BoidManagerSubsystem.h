@@ -10,17 +10,14 @@
 #include "BoidManagerSubsystem.generated.h"
 
 
-/** Delegates for visual updates */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBoidsUpdateFinishSignature);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBoundsUpdateSignature, const FVector&, NewCenter, const FVector&, Extent);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBoidsNumberUpdateSignature, FGameplayTag, BoidType, int32, NewBoidNumber);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBoidsColorUpdateSignature, FGameplayTag, BoidType, FColor, NewBoidColor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBoidsUpdateFinishEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBoidsNumberUpdateEvent, FGameplayTag, BoidType, int32, NewBoidNumber);
 
 
 /**
  * Main manager for Boid simulation.
  * Updates Boid positions and velocities each tick.
- * Handles neighbour queries and applies steering forces (Separation, Alignment, Cohesion).
+ * Handles neighbor queries and applies steering forces (Separation, Alignment, Cohesion).
  * Broadcasts events for visualization updates.
  */
 
@@ -38,23 +35,15 @@ public:
 
 	/** Delegate after Boid movement calculations complete. */
 	UPROPERTY()
-	FOnBoidsUpdateFinishSignature OnBoidsUpdateFinish;
-	
-	/** Delegate broadcast when bounds center or extent changes. */
-	UPROPERTY()
-	FOnBoundsUpdateSignature OnBoundsUpdate;
+	FOnBoidsUpdateFinishEvent OnBoidsUpdateFinish;
 	
 	/** Delegate broadcast when the number of given Boid species changes. */
 	UPROPERTY()
-	FOnBoidsNumberUpdateSignature OnBoidsNumberUpdate;
+	FOnBoidsNumberUpdateEvent OnBoidsNumberUpdate;
 	
-	/** Delegate broadcast when the color of a given Boid species changes. */
-	UPROPERTY()
-	FOnBoidsColorUpdateSignature OnBoidsColorUpdate;
 
 	//~ Begin UTickableWorldSubsystem Interface
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	virtual void Deinitialize() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual TStatId GetStatId() const override;
 	//~ End UTickableWorldSubsystem Interface
@@ -71,8 +60,6 @@ public:
 	 */
 	FVector GetBoidVelocityAt(int32 Index);
 
-	/** Called only after all actors in level are initialized. Broadcasts OnBoundsUpdate delegate for initial setup. */
-	void PostAllActorsBeginPlay() const;
 
 	/** Returns perception radius used by Boids to find neighbors. */
 	UFUNCTION(BlueprintCallable, BlueprintPure)
@@ -95,6 +82,10 @@ public:
 	
 	/** Returns simulated Boid count. */
 	FORCEINLINE int32 GetBoidsCount() { return BOIDS_COUNT; }
+
+	/** Updates internal Boid's IDs used in BoidCollisionVoxelGrid. */
+	void UpdateBoidCellIndices(const int32 ID, const int32 VoxelGridIndex, const int32 VoxelGridCellIndex);
+
 	
 private:
 	

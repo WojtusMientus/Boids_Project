@@ -9,12 +9,10 @@
  */
 class BOIDS_PROJECT_API FBounds
 {
-	
 public:
-
 	/** Constructs a bounds from the given min and max corners.  */
 	FBounds(const FVector& MaxCorner = FVector(), const FVector& MinCorner = FVector());
-	
+
 	/** Returns the maximum corner of the box. */
 	FORCEINLINE const FVector& GetMax() const { return BoundsMax; }
 
@@ -28,7 +26,6 @@ public:
 	FORCEINLINE FVector GetCenter() const { return (BoundsMax + BoundsMin) * 0.5f; }
 
 protected:
-
 	/** The minimum corner of the box (left-bottom-back).*/
 	FVector BoundsMin;
 	/** The maximum corner of the box (right-top-forward). */

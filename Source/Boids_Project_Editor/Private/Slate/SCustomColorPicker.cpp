@@ -320,6 +320,17 @@ void SCustomColorPicker::OpenCustomColorPicker(const FCustomColorPickerArgs& InA
 	CustomColorPickerWindow = Window;
 }
 
+void SCustomColorPicker::TryDestroyOldWindow()
+{
+	if (CustomColorPickerWindow.IsValid())
+	{
+		if (TSharedPtr<SWindow> ExistingWindow = CustomColorPickerWindow.Pin())
+		{
+			ExistingWindow->RequestDestroyWindow();
+		}
+	}
+}
+
 FVector2D SCustomColorPicker::CalculateColorPickerConstructionLocation()
 {
 	const FVector2D CurrentCursorPosition = FSlateApplication::Get().GetCursorPos();
@@ -384,13 +395,4 @@ void SCustomColorPicker::SetNewStartingColor(const FLinearColor InColor)
 	CurrentColorHSV = InColor.LinearRGBToHSV();
 }
 
-void SCustomColorPicker::TryDestroyOldWindow()
-{
-	if (CustomColorPickerWindow.IsValid())
-	{
-		if (TSharedPtr<SWindow> ExistingWindow = CustomColorPickerWindow.Pin())
-		{
-			ExistingWindow->RequestDestroyWindow();
-		}
-	}
-}
+

@@ -6,6 +6,7 @@
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Input/SSlider.h"
 
+
 /**
  * Custom color slider used in custom color picker.
  * Shows gradient with a handle and its numeric value in the spinbox next to it. 

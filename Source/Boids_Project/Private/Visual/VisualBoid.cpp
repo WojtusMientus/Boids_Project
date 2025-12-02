@@ -1,7 +1,6 @@
 
 #include "Visual/VisualBoid.h"
 #include "Components/ArrowComponent.h"
-#include "Core/BoidSelectionInfo.h"
 
 
 AVisualBoid::AVisualBoid()
@@ -23,16 +22,6 @@ void AVisualBoid::UpdateBoid(const FVector& NewPosition, const FVector& NewVeloc
 {
 	SetActorLocation(NewPosition);
 	AlignRotationToVelocity(NewVelocity);
-}
-
-void AVisualBoid::SetBoidID(int32 ID)
-{
-	BoidID = ID;
-}
-
-FBoidSelectionInfo AVisualBoid::GetBoidSelection() const
-{
-	return FBoidSelectionInfo(BoidID, BoidType);
 }
 
 void AVisualBoid::AlignRotationToVelocity(const FVector& Velocity)

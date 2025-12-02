@@ -1,5 +1,7 @@
 
 #include "Visual/VisualBoidManager.h"
+
+#include "Core/BoidDelegates.h"
 #include "Core/BoidManagerSubsystem.h"
 #include "Visual/VisualBoid.h"
 
@@ -13,6 +15,10 @@ void AVisualBoidManager::BeginPlay()
 {
 	Super::BeginPlay();
 
+#if WITH_EDITOR
+	BoidsColorChangeDelegateHandle = BoidsDelegates::OnColorUpdate().AddUObject(this,  &AVisualBoidManager::HandleBoidsColorUpdate);
+#endif
+	
 	if (UWorld* World = GetWorld())
 	{
 		BoidManagerSubsystem = World->GetSubsystem<UBoidManagerSubsystem>();
@@ -21,23 +27,19 @@ void AVisualBoidManager::BeginPlay()
 		{			
 			BoidManagerSubsystem->OnBoidsUpdateFinish.AddDynamic(this, &AVisualBoidManager::HandleBoidsUpdate);
 			BoidManagerSubsystem->OnBoidsNumberUpdate.AddDynamic(this, &AVisualBoidManager::HandleBoidsNumberUpdate);
-			BoidManagerSubsystem->OnBoidsColorUpdate.AddDynamic(this, &AVisualBoidManager::HandleBoidsColorUpdate);
 		}
 	}
-
+	
 	InitializeBoids();
 }
 
 void AVisualBoidManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-
-	if (BoidManagerSubsystem.IsValid())
-	{			
-		BoidManagerSubsystem->OnBoidsUpdateFinish.RemoveDynamic(this, &AVisualBoidManager::HandleBoidsUpdate);
-		BoidManagerSubsystem->OnBoidsNumberUpdate.RemoveDynamic(this, &AVisualBoidManager::HandleBoidsNumberUpdate);
-		BoidManagerSubsystem->OnBoidsColorUpdate.RemoveDynamic(this, &AVisualBoidManager::HandleBoidsColorUpdate);
-	}
+	
+#if WITH_EDITOR
+	BoidsDelegates::OnColorUpdate().Remove(BoidsColorChangeDelegateHandle);
+#endif
 }
 
 void AVisualBoidManager::InitializeBoids()
@@ -63,7 +65,6 @@ void AVisualBoidManager::InitializeBoids()
 		FVector StartingLocation = BoidManagerSubsystem->GetBoidPositionAt(i);
 		FVector StartingVelocity = BoidManagerSubsystem->GetBoidVelocityAt(i);
 		VisualBoid->UpdateBoid(StartingLocation, StartingVelocity);
-		VisualBoid->SetBoidID(i);
 		
 		VisualBoids.Add(VisualBoid);
 	}
@@ -91,7 +92,7 @@ void AVisualBoidManager::HandleBoidsNumberUpdate(FGameplayTag BoidType, int32 Ne
 	// TODO: Implement spawning and despawning visual boids
 }
 
-void AVisualBoidManager::HandleBoidsColorUpdate(FGameplayTag BoidType, FColor NewBoidColor)
+void AVisualBoidManager::HandleBoidsColorUpdate(FGameplayTag BoidType, FLinearColor NewBoidColor)
 {
 	// TODO: Implement visual color update
 }

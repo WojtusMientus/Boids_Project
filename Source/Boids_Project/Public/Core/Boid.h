@@ -14,10 +14,11 @@ public:
 
 	/**
 	 * Constructs a Boid with an initial position and velocity.
-	 * @param InitPosition The starting world-space position.
-	 * @param InitVelocity The starting velocity vector.
+	 * @param InitPosition Starting world-space position.
+	 * @param InitVelocity Starting velocity vector.
+	 * @param InitID Starting ID.
 	 */
-	FBoid(const FVector& InitPosition, const FVector& InitVelocity);	
+	FBoid(const FVector& InitPosition, const FVector& InitVelocity, const int32 InitID);	
 
 	/**
 	 * Updates the Boid's position based on its velocity.
@@ -28,4 +29,7 @@ public:
 	FVector Position;
 	FVector Velocity;
 	FVector Acceleration;
+	
+	int32 VoxelGridIndex = INDEX_NONE;
+	int32 VoxelGridCellIndex = INDEX_NONE;
 };

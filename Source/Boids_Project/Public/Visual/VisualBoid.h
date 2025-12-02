@@ -3,9 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
-#include "Interfaces/SelectableBoid.h"
 #include "VisualBoid.generated.h"
 
 class UBoidManagerSubsystem;
@@ -18,7 +16,7 @@ class UArrowComponent;
  * This actor is passive - the AVisualBoidManager class is responsible for updating its location and rotation every frame.
  */
 UCLASS()
-class BOIDS_PROJECT_API AVisualBoid : public AActor, public ISelectableBoid
+class BOIDS_PROJECT_API AVisualBoid : public AActor
 {
 	GENERATED_BODY()
 	
@@ -33,16 +31,6 @@ public:
 	 * @param NewVelocity Velocity vector used to align the Boid's rotation.
 	 */
 	void UpdateBoid(const FVector& NewPosition, const FVector& NewVelocity);
-
-	/**
-	 * Assigns a unique Boid ID.
-	 * @param ID Unique ID for this Boid.
-	 */
-	void SetBoidID(int32 ID);
-
-	//~ Begin ISelectableBoid Interface
-	virtual FBoidSelectionInfo GetBoidSelection() const override;
-	//~ End ISelectableBoid Interface
 
 protected:
 	
@@ -63,12 +51,5 @@ private:
 	 * @param Velocity Direction the Boid should be facing.
 	 */
 	void AlignRotationToVelocity(const FVector& Velocity);
-
-	/** Unique Boid's ID used for selection and additional info. Set only during creation. */
-	int32 BoidID = -1;
-
-	/** Species type of the Boid. */
-	FGameplayTag BoidType;
-	// NOTE: Currently unused - Setup for future development.
 	
 };

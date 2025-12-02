@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 
+
 enum class ECustomColorSliderChannel
 {
 	None,
@@ -29,6 +30,7 @@ struct FCustomColorPickerArgs
 	/** Delegate invoked on "Window Close" button click. */
 	FSimpleDelegate OnWindowClosed;
 };
+
 
 /**
  * Custom color picker used in BoidEditorUtilityWidget.
@@ -148,7 +150,10 @@ public:
 	
 	/** Main function for calling color picker to spawn at cursor location. */
 	static void OpenCustomColorPicker(const FCustomColorPickerArgs& InArgs);
-
+	
+	/** Destroys leftover color picker if there is one. */
+	static void TryDestroyOldWindow();
+	
 private:
 		
 	/** Retrieves calculated spawn location taking into consideration its size and padding. */
@@ -168,6 +173,4 @@ private:
 	void SetNewParentWindow(const TSharedRef<SWindow>& InParentWindow);
 	void SetNewStartingColor(const FLinearColor InColor);
 	
-	/** Destroys leftover color picker if there is one. */
-	static void TryDestroyOldWindow();
 };
