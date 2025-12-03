@@ -47,11 +47,11 @@ void UBoidDataEditorSubsystem::HandleBoundsChanged(const FVector& NewCenter, con
 
 void UBoidDataEditorSubsystem::HandleBoundsVisibilityChanged(bool bIsVisible)
 {
-	OnBoundsVisibilityChangedEvent.Broadcast(bIsVisible);
+	// OnBoundsVisibilityChangedEvent.Broadcast(bIsVisible);
 }
 
 void UBoidDataEditorSubsystem::HandleCollisionDataVisibilityChanged(bool bIsVisible)
 {
-	OnCollisionDataVisibilityChangedEvent.Broadcast(bIsVisible);
+	// OnCollisionDataVisibilityChangedEvent.Broadcast(bIsVisible);
 }
 

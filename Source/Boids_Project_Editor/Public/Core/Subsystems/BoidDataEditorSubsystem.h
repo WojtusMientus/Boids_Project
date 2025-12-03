@@ -7,17 +7,17 @@
 #include "Utilities/Macros/DebugMacros.h"
 #include "Core/Managers/EditorBoidDataManager.h"
 #include "Core/Managers/CollisionDataGenerator.h"
+#include "Visualizers/VisualizerVisibility.h"
 #include "BoidDataEditorSubsystem.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCollisionDataRegenerationEvent, const TArray<bool>&, CollisionData, 
-	const FBoundsPlainData&, BoundsData);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCollisionDataRegenerationEvent, const TArray<bool>& /* CollisionData */,
+                                     const FBoundsPlainData& /* BoundsData */);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSimulationBoundsChangedEvent, const FVector&, NewCenter, 
-	const FVector&, NewExtent);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSimulationBoundsChangedEvent, const FVector& /* NewCenter */, 
+	const FVector& /* NewExtent */);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCollisionDataVisibilityChangedEvent, bool, bNewVisibility);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBoundsVisibilityChangedEvent, bool, bNewVisibility);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnAnyVisibilityChangedEvent, const FVisualizerVisibility& /* NewVisibility */ );
 
 
 #define ENSURE_BOIDS_DATA_MANAGER()\
@@ -43,8 +43,7 @@ public:
 	
 	FOnSimulationBoundsChangedEvent OnSimulationBoundsChangedEvent;
 	
-	FOnCollisionDataVisibilityChangedEvent OnCollisionDataVisibilityChangedEvent;
-	FOnBoundsVisibilityChangedEvent OnBoundsVisibilityChangedEvent;
+	FOnAnyVisibilityChangedEvent OnAnyVisibilityChanged;
 	
 	//~ Begin USubsystem Interface
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
