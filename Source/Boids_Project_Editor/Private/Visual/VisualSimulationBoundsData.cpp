@@ -1,13 +1,13 @@
 ﻿
-#include "Visualizers/SimulationBoundsDataVisualizer.h"
+#include "Visual/VisualSimulationBoundsData.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Core/Subsystems/BoidDataEditorSubsystem.h"
-#include "Visualizers/VisualizerVisibility.h"
+#include "Visual/VisualizerVisibility.h"
 #include "Utilities/Libraries/BoundsMathLibrary.h"
 #include "DataAssets/BoundsData.h"
 
 
-ASimulationBoundsDataVisualizer::ASimulationBoundsDataVisualizer()
+AVisualSimulationBoundsData::AVisualSimulationBoundsData()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	
@@ -26,51 +26,51 @@ ASimulationBoundsDataVisualizer::ASimulationBoundsDataVisualizer()
 	CollisionDataInstancedStaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 }
 
-void ASimulationBoundsDataVisualizer::PostActorCreated()
+void AVisualSimulationBoundsData::PostActorCreated()
 {
 	Super::PostActorCreated();
 	TrySubscribeToSubsystemEvent();
 }
 
-void ASimulationBoundsDataVisualizer::PostLoad()
+void AVisualSimulationBoundsData::PostLoad()
 {
 	Super::PostLoad();
 	TrySubscribeToSubsystemEvent();
 }
 
-void ASimulationBoundsDataVisualizer::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void AVisualSimulationBoundsData::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	TryToUnsubscribeFromSubsystemEvent();
 }
 
-void ASimulationBoundsDataVisualizer::Destroyed()
+void AVisualSimulationBoundsData::Destroyed()
 {
 	TryToUnsubscribeFromSubsystemEvent();	
 	Super::Destroyed();
 }
 
-void ASimulationBoundsDataVisualizer::TrySubscribeToSubsystemEvent()
+void AVisualSimulationBoundsData::TrySubscribeToSubsystemEvent()
 {
 	if (!HasAnyFlags(RF_ClassDefaultObject | RF_Transient | RF_ArchetypeObject) && GEditor && !bDidSubscribeToSubsystem)
 	{
 		if (UBoidDataEditorSubsystem* BoidDataEditorSubsystem = GEditor->GetEditorSubsystem<UBoidDataEditorSubsystem>())
 		{
 			BoundsChangedDelegateHandle = BoidDataEditorSubsystem->OnSimulationBoundsChangedEvent.AddUObject(this, 
-				&ASimulationBoundsDataVisualizer::HandleBoundsChanged);
+				&AVisualSimulationBoundsData::HandleBoundsChanged);
 			
 			CollisionRegenerationDelegateHandle = BoidDataEditorSubsystem->OnCollisionDataRegenerationEvent.AddUObject
-				(this, &ASimulationBoundsDataVisualizer::HandleRegenerationCollisionData);
+				(this, &AVisualSimulationBoundsData::HandleRegenerationCollisionData);
 			
 			AnyVisibilityChangedDelegateHandle = BoidDataEditorSubsystem->OnAnyVisibilityChanged.AddUObject(this, 
-				&ASimulationBoundsDataVisualizer::HandleAnyVisibilityChanged);
+				&AVisualSimulationBoundsData::HandleAnyVisibilityChanged);
 			
 			bDidSubscribeToSubsystem = true;
 		}
 	}
 }
 
-void ASimulationBoundsDataVisualizer::TryToUnsubscribeFromSubsystemEvent()
+void AVisualSimulationBoundsData::TryToUnsubscribeFromSubsystemEvent()
 {
 	if (!HasAnyFlags(RF_Transient) && GEditor && bDidSubscribeToSubsystem)
 	{
@@ -85,7 +85,7 @@ void ASimulationBoundsDataVisualizer::TryToUnsubscribeFromSubsystemEvent()
 	}
 }
 
-void ASimulationBoundsDataVisualizer::HandleBoundsChanged(const FVector& NewCenter, const FVector& NewExtent)
+void AVisualSimulationBoundsData::HandleBoundsChanged(const FVector& NewCenter, const FVector& NewExtent)
 {
 	ENSURE_BOUNDS_MESH_COMPONENT()
 	SimulationBoundsMeshComponent->SetWorldLocation(NewCenter);
@@ -94,7 +94,7 @@ void ASimulationBoundsDataVisualizer::HandleBoundsChanged(const FVector& NewCent
 	SimulationBoundsMeshComponent->SetRelativeScale3D(NewBoundsSize);
 }
 
-void ASimulationBoundsDataVisualizer::HandleRegenerationCollisionData(const TArray<bool>& CollisionData,
+void AVisualSimulationBoundsData::HandleRegenerationCollisionData(const TArray<bool>& CollisionData,
 	const FBoundsPlainData& BoundsData)
 {
 	ENSURE_WALL_DATA_INSTANCE_MESH_COMPONENT()
@@ -132,7 +132,7 @@ void ASimulationBoundsDataVisualizer::HandleRegenerationCollisionData(const TArr
 	}
 }
 
-void ASimulationBoundsDataVisualizer::HandleAnyVisibilityChanged(const FVisualizerVisibility& VisualizerVisibility)
+void AVisualSimulationBoundsData::HandleAnyVisibilityChanged(const FVisualizerVisibility& VisualizerVisibility)
 {
 	ENSURE_BOUNDS_MESH_COMPONENT()
 	ENSURE_WALL_DATA_INSTANCE_MESH_COMPONENT()

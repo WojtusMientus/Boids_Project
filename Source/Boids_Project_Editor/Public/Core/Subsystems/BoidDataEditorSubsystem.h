@@ -7,7 +7,7 @@
 #include "Utilities/Macros/DebugMacros.h"
 #include "Core/Managers/EditorBoidDataManager.h"
 #include "Core/Managers/CollisionDataGenerator.h"
-#include "Visualizers/VisualizerVisibility.h"
+#include "Visual/VisualizerVisibility.h"
 #include "BoidDataEditorSubsystem.generated.h"
 
 

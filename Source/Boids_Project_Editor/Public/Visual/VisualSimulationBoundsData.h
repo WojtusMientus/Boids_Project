@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Utilities/Macros/DebugMacros.h"
-#include "SimulationBoundsDataVisualizer.generated.h"
+#include "VisualSimulationBoundsData.generated.h"
 
 
 struct FVisualizerVisibility;
@@ -30,14 +30,14 @@ class UHierarchicalInstancedStaticMeshComponent;
  * Shows voxelized wall data, its repelling forces with instanced static mesh and bounds mesh. 
  */
 UCLASS()
-class BOIDS_PROJECT_EDITOR_API ASimulationBoundsDataVisualizer : public AActor
+class BOIDS_PROJECT_EDITOR_API AVisualSimulationBoundsData : public AActor
 {
 	GENERATED_BODY()
 
 public:
 	
 	/** Default constructor. Creates actor's components. */
-	ASimulationBoundsDataVisualizer();
+	AVisualSimulationBoundsData();
 	
 	//~ Being AActor Interface
 
