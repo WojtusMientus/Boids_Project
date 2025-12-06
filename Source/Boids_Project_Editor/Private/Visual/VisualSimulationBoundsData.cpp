@@ -1,6 +1,7 @@
 ﻿
 #include "Visual/VisualSimulationBoundsData.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
+#include "Core/CollisionData.h"
 #include "Core/Subsystems/BoidDataEditorSubsystem.h"
 #include "Visual/VisualizerVisibility.h"
 #include "Utilities/Libraries/BoundsMathLibrary.h"
@@ -20,10 +21,10 @@ AVisualSimulationBoundsData::AVisualSimulationBoundsData()
 	WallDataInstancedStaticMeshComponent->SetupAttachment(RootComponent);
 	WallDataInstancedStaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 	
-	CollisionDataInstancedStaticMeshComponent = CreateDefaultSubobject<UHierarchicalInstancedStaticMeshComponent>
+	CollisionForcesDataInstancedStaticMeshComponent = CreateDefaultSubobject<UHierarchicalInstancedStaticMeshComponent>
 (TEXT("CollisionDataInstancedStaticMeshComponent"));	
-	CollisionDataInstancedStaticMeshComponent->SetupAttachment(RootComponent);
-	CollisionDataInstancedStaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	CollisionForcesDataInstancedStaticMeshComponent->SetupAttachment(RootComponent);
+	CollisionForcesDataInstancedStaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 }
 
 void AVisualSimulationBoundsData::PostActorCreated()
@@ -94,41 +95,42 @@ void AVisualSimulationBoundsData::HandleBoundsChanged(const FVector& NewCenter, 
 	SimulationBoundsMeshComponent->SetRelativeScale3D(NewBoundsSize);
 }
 
+<<<<<<< Updated upstream:Source/Boids_Project_Editor/Private/Visual/VisualSimulationBoundsData.cpp
 void AVisualSimulationBoundsData::HandleRegenerationCollisionData(const TArray<bool>& CollisionData,
 	const FBoundsPlainData& BoundsData)
+=======
+void ASimulationBoundsDataVisualizer::HandleRegenerationCollisionData(const FCollisionData& CollisionData)
+>>>>>>> Stashed changes:Source/Boids_Project_Editor/Private/Visualizers/SimulationBoundsDataVisualizer.cpp
 {
 	ENSURE_WALL_DATA_INSTANCE_MESH_COMPONENT()
 	ENSURE_COLLISION_DATA_INSTANCE_MESH_COMPONENT()
+	ENSURE_ALWAYS_MESSAGE_RETURN(CollisionData.EveryVoxelCenterData.Num() == CollisionData.CollisionForcesData.Num(),
+		"Collision forces data is invalid!")
 	
 	WallDataInstancedStaticMeshComponent->ClearInstances();
-	
-	const FIntVector GridResolution = BoundsData.GridResolution;
-	const FVector StartingPosition = FBoundsMath::GetStartingCellCenter(BoundsData.Center, BoundsData.Extent, 
-	BoundsData.GridResolution);
+	CollisionForcesDataInstancedStaticMeshComponent->ClearInstances();
+	FBoundsPlainData BoundsData = CollisionData.CollisionBoundsData.BoundsPlainData;
 	
 	const FVector VoxelSize = FBoundsMath::GetVoxelCellSize(BoundsData.Center, BoundsData.Extent, 
 		BoundsData.GridResolution);
 	const FVector MeshScale = VoxelSize * MeshScaleFactor;
-
-	
-	for (int IndexX = 0; IndexX < GridResolution.X; IndexX++)
+		
+	for (const FVector& CellCenter: CollisionData.WallCollisionCentersData)
 	{
-		for (int IndexY = 0; IndexY < GridResolution.Y; IndexY++)
+		const FTransform InstancedMeshTransform(FRotator::ZeroRotator, CellCenter, MeshScale);
+		WallDataInstancedStaticMeshComponent->AddInstance(InstancedMeshTransform, true);
+	}
+	
+	for (int i = 0; i < CollisionData.CollisionForcesData.Num(); i++)
+	{
+		if (CollisionData.CollisionForcesData[i].Length() == 0)
 		{
-			for (int IndexZ = 0; IndexZ < GridResolution.Z; IndexZ++)
-			{
-				if (!CollisionData[FBoundsMath::XYZToArrayIndex(IndexX, IndexY, IndexZ, GridResolution)])
-				{
-					continue;
-				}
-				
-				const FVector Position = FBoundsMath::GetVoxelCenterAt(StartingPosition, VoxelSize, 
-					IndexX, IndexY, IndexZ);
-				
-				const FTransform InstancedMeshTransform(FRotator::ZeroRotator, Position, MeshScale);
-				WallDataInstancedStaticMeshComponent->AddInstance(InstancedMeshTransform, true);
-			}
+			continue;
 		}
+		
+		const FVector CellCenter = CollisionData.EveryVoxelCenterData[i];
+		const FTransform InstancedMeshTransform(FRotator::ZeroRotator, CellCenter, MeshScale);
+		CollisionForcesDataInstancedStaticMeshComponent->AddInstance(InstancedMeshTransform, true);
 	}
 }
 
@@ -140,5 +142,5 @@ void AVisualSimulationBoundsData::HandleAnyVisibilityChanged(const FVisualizerVi
 	
 	SimulationBoundsMeshComponent->SetVisibility(VisualizerVisibility.bIsBoundsVisible);
 	WallDataInstancedStaticMeshComponent->SetVisibility(VisualizerVisibility.bIsWallDataVisible);
-	CollisionDataInstancedStaticMeshComponent->SetVisibility(VisualizerVisibility.bIsCollisionDataVisible);
+	CollisionForcesDataInstancedStaticMeshComponent->SetVisibility(VisualizerVisibility.bIsCollisionDataVisible);
 }
