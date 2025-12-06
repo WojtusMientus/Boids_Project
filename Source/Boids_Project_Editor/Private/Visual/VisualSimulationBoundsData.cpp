@@ -95,12 +95,8 @@ void AVisualSimulationBoundsData::HandleBoundsChanged(const FVector& NewCenter, 
 	SimulationBoundsMeshComponent->SetRelativeScale3D(NewBoundsSize);
 }
 
-<<<<<<< Updated upstream:Source/Boids_Project_Editor/Private/Visual/VisualSimulationBoundsData.cpp
-void AVisualSimulationBoundsData::HandleRegenerationCollisionData(const TArray<bool>& CollisionData,
-	const FBoundsPlainData& BoundsData)
-=======
-void ASimulationBoundsDataVisualizer::HandleRegenerationCollisionData(const FCollisionData& CollisionData)
->>>>>>> Stashed changes:Source/Boids_Project_Editor/Private/Visualizers/SimulationBoundsDataVisualizer.cpp
+
+void AVisualSimulationBoundsData::HandleRegenerationCollisionData(const FCollisionData& CollisionData)
 {
 	ENSURE_WALL_DATA_INSTANCE_MESH_COMPONENT()
 	ENSURE_COLLISION_DATA_INSTANCE_MESH_COMPONENT()
