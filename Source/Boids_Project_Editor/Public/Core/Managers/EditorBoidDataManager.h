@@ -39,7 +39,7 @@ public:
 		FBoidsPlainData>& OutBoidsData);
 	
 	void SaveBoundsData(const FCollisionBoundsPlainData& BoundsDataToSave, 
-		const TArray<bool>& CalculatedCollisionData);
+		const TArray<FVector>& CalculatedCollisionData);
 	void SaveBoidsData(const FBoidsPlainData& BoidsDataToSave);
 	void SaveAllBoidsData(const TMap<FGameplayTag, FBoidsPlainData>& AllBoidsDataToSave);
 	

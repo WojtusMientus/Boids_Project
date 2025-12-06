@@ -15,6 +15,11 @@ public:
 		return X * GridResolution.Z * GridResolution.Y + Y * GridResolution.Z + Z;
 	}
 	
+	static FORCEINLINE int32 XYZToArrayIndex(const FIntVector& Indices, const FIntVector& GridResolution)
+	{
+		return Indices.X * GridResolution.Z * GridResolution.Y + Indices.Y * GridResolution.Z + Indices.Z;
+	}
+	
 	static FORCEINLINE FVector GetVoxelCenterAt(const FVector& StartingCellCenter, const FVector& CellSize, 
 		const FIntVector Index)
 	{
@@ -64,11 +69,31 @@ public:
 		return FVector(StartingCellCenterX, StartingCellCenterY, StartingCellCenterZ);
 	}
 	
-	static FORCEINLINE bool IsInBounds(const FIntVector GridResolution, const FIntVector Index)
+	static FORCEINLINE bool IsInBounds(const FIntVector& VectorToCheck, const FIntVector& GridResolution)
 	{
-		return IsInBoundsAxis(GridResolution.X, Index.X) && 
-				IsInBoundsAxis(GridResolution.Y, Index.Y) && 
-				IsInBoundsAxis(GridResolution.Z, Index.Z);
+		return IsInBoundsAxis(GridResolution.X, VectorToCheck.X) && 
+				IsInBoundsAxis(GridResolution.Y, VectorToCheck.Y) && 
+				IsInBoundsAxis(GridResolution.Z, VectorToCheck.Z);
+	}
+	
+	static FORCEINLINE FIntVector ClampToBoundsResolution(const FIntVector& VectorToClamp, const FIntVector& GridResolution)
+	{
+		return FIntVector(FMath::Clamp(VectorToClamp.X, 0, GridResolution.X - 1),
+						FMath::Clamp(VectorToClamp.Y, 0, GridResolution.Y - 1),
+						FMath::Clamp(VectorToClamp.Z, 0, GridResolution.Z - 1));
+	}
+	
+	static FIntVector ClampToNearestBoundIndices(const FVector& VectorToClamp, const FVector& MinCorner,
+		const FVector& VoxelSize, const FIntVector& GridDimension)
+	{
+		return FIntVector(ClampToNearestIndex(VectorToClamp.X, MinCorner.X, VoxelSize.X, GridDimension.X),
+							ClampToNearestIndex(VectorToClamp.Y, MinCorner.Y, VoxelSize.Y, GridDimension.Y),
+							ClampToNearestIndex(VectorToClamp.Z, MinCorner.Z, VoxelSize.Z, GridDimension.Z));
+	}
+	
+	static FORCEINLINE int32 GetMaxDistanceBetweenVoxelCells(const FIntVector& FirstCellIndex, const FIntVector& SecondCellIndex)
+	{
+		return (FirstCellIndex - SecondCellIndex).GetAbsMax();
 	}
 	
 private:
@@ -92,4 +117,10 @@ private:
 	{
 		return Index >= 0 && Index < AxisMax;
 	} 
+	
+	static int32 ClampToNearestIndex(const float AxisToClamp, const float Min, const float Size, const int32 Dimension)
+	{
+		return FMath::Clamp(FMath::FloorToInt32((AxisToClamp - Min) / Size), 0, Dimension - 1);
+	}
+	
 };

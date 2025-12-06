@@ -2,6 +2,7 @@
 
 #pragma once
 
+struct FCollisionData;
 struct FCollisionBoundsPlainData;
 
 
@@ -15,22 +16,38 @@ class FCollisionDataGenerator
 	
 public:
 	
-	TArray<bool> GenerateCollisionData(const FCollisionBoundsPlainData& CollisionBoundsPlainData);
+	void GenerateCollisionData(FCollisionData& CollisionDat);
 	
 private:
 	
 	/** Helper functions. */
-	void SetupStartingValues(const FVector& Center, const FVector& Extent, const FIntVector Resolution);
+	void SetupStartingValues(const FCollisionBoundsPlainData& CollisionBoundsData);
 	FVector GetStartingCellCenter(const FVector& BoundsCenter, const FVector& Extent);
 	float GetStartingCellCenterAxis(const float MinAxis, const float CellAxisSize);
 	
 	UWorld* GetCurrentEditorWorld();
 	
-	void CalculateCollisionData(const UWorld* World, TArray<bool>& OutCollisionData);
+	void ReserveEstimatedDataSize(const int32 NumberOfCells, FCollisionData& VisualizerData);
+	float CalculateEstimatedDataSize(const int32 GridResolutionMin);
 	
-
+	void CalculateWallCollisionDataLocations(const UWorld* World, FCollisionData& VisualizerData);
+	void CalculateCollisionForces(TArray<FVector>& OutCollisionForces);
+	void AddCollisionToNeighborCells(const FIntVector& WallCell, TArray<FVector>& OutCollisionForces);
+	
+	
+	FVector CalculateCollisionForceAt(const FIntVector& CurrentVoxel, const FIntVector& StartingVoxel);
+	
+	TSet<FIntVector> WallCollisionDataIndices;
+	
 	FIntVector GridResolution = FIntVector::ZeroValue;
 	FVector VoxelCellSize = FVector::OneVector;
 	FVector StartingCellCenter = FVector::Zero();
+	FIntVector MaxCollisionBoundsDistanceVector = FIntVector::ZeroValue;
 	
+	
+	int32 VoxelGridCellCount = 0;
+	int32 EnvironmentCollisionRows = 1;
+	int32 BoundsCollisionRows = 1;
+	
+	int32 MaxCollisionBoundsDistance = 2;
 };

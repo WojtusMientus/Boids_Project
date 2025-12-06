@@ -8,6 +8,7 @@
 #include "VisualSimulationBoundsData.generated.h"
 
 
+struct FCollisionData;
 struct FVisualizerVisibility;
 class UStaticMeshComponent;
 class UHierarchicalInstancedStaticMeshComponent;
@@ -18,7 +19,7 @@ class UHierarchicalInstancedStaticMeshComponent;
 	"No valid wall datainstanced mesh component.")
 
 #define ENSURE_COLLISION_DATA_INSTANCE_MESH_COMPONENT()\
-	ENSURE_ALWAYS_MESSAGE_RETURN(IsValid(CollisionDataInstancedStaticMeshComponent),\
+	ENSURE_ALWAYS_MESSAGE_RETURN(IsValid(CollisionForcesDataInstancedStaticMeshComponent),\
 	"No valid collision data instanced mesh component.")
 
 #define ENSURE_BOUNDS_MESH_COMPONENT()\
@@ -65,7 +66,7 @@ protected:
 
 	/** Instanced static mesh representing voxelized collision data of simulation area. Collision disabled. */
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UHierarchicalInstancedStaticMeshComponent> CollisionDataInstancedStaticMeshComponent;
+	TObjectPtr<UHierarchicalInstancedStaticMeshComponent> CollisionForcesDataInstancedStaticMeshComponent;
 
 private:
 	
@@ -77,7 +78,7 @@ private:
 	void HandleBoundsChanged(const FVector& NewCenter, const FVector& NewExtent);
 	
 	UFUNCTION()
-	void HandleRegenerationCollisionData(const TArray<bool>& CollisionData, const FBoundsPlainData& BoundsData);
+	void HandleRegenerationCollisionData(const FCollisionData& CollisionData);
 	
 	UFUNCTION()
 	void HandleAnyVisibilityChanged(const FVisualizerVisibility& VisualizerVisibility);

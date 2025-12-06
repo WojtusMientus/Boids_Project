@@ -1,6 +1,6 @@
 
 #include "Core/Subsystems//BoidDataEditorSubsystem.h"
-#include "DataAssets/BoundsData.h"
+#include "Core/CollisionData.h"
 
 
 void UBoidDataEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -22,10 +22,11 @@ void UBoidDataEditorSubsystem::RegenerateCollisionDataAndSave(const FCollisionBo
 {
 	ENSURE_BOIDS_DATA_MANAGER()
 	ENSURE_COLLISION_DATA_MANAGER()
-	
-	TArray<bool> CollisionData = CollisionDataGenerator->GenerateCollisionData(CollisionBoundsData);
-	BoidDataManager->SaveBoundsData(CollisionBoundsData, CollisionData);
-	OnCollisionDataRegenerationEvent.Broadcast(CollisionData, CollisionBoundsData.BoundsPlainData);
+	FCollisionData CollisionData;
+	CollisionData.CollisionBoundsData = CollisionBoundsData;
+	CollisionDataGenerator->GenerateCollisionData(CollisionData);
+	BoidDataManager->SaveBoundsData(CollisionBoundsData, CollisionData.CollisionForcesData);
+	OnCollisionDataRegenerationEvent.Broadcast(CollisionData);
 }
 
 void UBoidDataEditorSubsystem::SaveBoidsData(const FBoidsPlainData& BoidsData)

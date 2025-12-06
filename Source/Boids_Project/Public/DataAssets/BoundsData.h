@@ -79,11 +79,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "512"))
 	FIntVector GridResolution = FIntVector(1,1,1);
 	
-	/** Count of collision voxel rows around static environment.  */
+	/** Number of collision voxel rows around static environment.  */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "20"))
 	int32 EnvironmentCollisionRows = 1;
 	
-	/** Count of collision voxel rows around the boundaries.  */
+	/** Number of collision voxel rows around the boundaries.  */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "20"))
 	int32 BoundsCollisionRows = 1;
 		
@@ -93,25 +93,30 @@ public:
 	/** Final multiplier applied to bounds collision force before retrieving data. */
 	float BoundsCollisionMultiplier = 1.0f;
 	
+	/** Helper size fo the internal CollisionForces array - overwritten only in OverwriteData function. 
+	 *	Made only so unreal doesn't need to render thousands or millions of array entries after opening the asset view.
+	 */
+	UPROPERTY(VisibleDefaultsOnly)
+	FIntVector CollisionArraySize = FIntVector(0,0,0);
+	
+private:
+	
 	/** Stored calculated collision forces. */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TArray<FVector> CollisionForces;
-	
-	/** Stored calculated wall collision data. */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly)
-	TArray<bool> WallData;
-	
+
 public:
 	
 	void OverwriteData(const FCollisionBoundsPlainData& NewCollisionBoundsData,
-		const TArray<bool>& NewCollisionWallData)
+		const TArray<FVector>& NewCollisionWallData)
 	{
 		Center = NewCollisionBoundsData.BoundsPlainData.Center;
 		Extent = NewCollisionBoundsData.BoundsPlainData.Extent;
 		GridResolution = NewCollisionBoundsData.BoundsPlainData.GridResolution;
 		EnvironmentCollisionRows = NewCollisionBoundsData.EnvironmentCollisionRows;
 		BoundsCollisionMultiplier = NewCollisionBoundsData.BoundsCollisionMultiplier;
-		WallData = NewCollisionWallData;
+		CollisionForces = NewCollisionWallData;
+		CollisionArraySize = GridResolution;
 	}
 };
 

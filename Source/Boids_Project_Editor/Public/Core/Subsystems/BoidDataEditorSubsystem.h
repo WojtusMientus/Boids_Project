@@ -11,8 +11,7 @@
 #include "BoidDataEditorSubsystem.generated.h"
 
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCollisionDataRegenerationEvent, const TArray<bool>& /* CollisionData */,
-                                     const FBoundsPlainData& /* BoundsData */);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCollisionDataRegenerationEvent, const FCollisionData& /* VisualizerData */);
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSimulationBoundsChangedEvent, const FVector& /* NewCenter */, 
 	const FVector& /* NewExtent */);

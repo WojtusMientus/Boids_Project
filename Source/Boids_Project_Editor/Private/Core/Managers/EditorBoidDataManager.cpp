@@ -19,7 +19,7 @@ void FEditorBoidDataManager::InitializeBoidSimulationData(FCollisionBoundsPlainD
 }
 
 void FEditorBoidDataManager::SaveBoundsData(const FCollisionBoundsPlainData& CollisionBoundsData, 
-	const TArray<bool>& CalculatedCollisionData)
+	const TArray<FVector>& CalculatedCollisionData)
 {	
 	ENSURE_BOUNDS_DATA_ASSET()
 	
