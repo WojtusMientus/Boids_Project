@@ -55,5 +55,4 @@ private:
 	void HandleColorCommitted(FLinearColor NewColor);
 	void HandleColorCancelled(FLinearColor NewColor);
 	void HandleColorPickerWindowClosed();
-	
 };

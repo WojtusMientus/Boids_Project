@@ -3,9 +3,9 @@
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Core/CollisionData.h"
 #include "Core/Subsystems/BoidDataEditorSubsystem.h"
+#include "Bounds/VoxelGrid/VoxelGridData/EnvironmentCollisionCellData.h"
 #include "Visual/VisualizerVisibility.h"
 #include "Utilities/Libraries/BoundsMathLibrary.h"
-#include "DataAssets/BoundsData.h"
 
 
 AVisualSimulationBoundsData::AVisualSimulationBoundsData()
@@ -25,6 +25,7 @@ AVisualSimulationBoundsData::AVisualSimulationBoundsData()
 (TEXT("CollisionDataInstancedStaticMeshComponent"));	
 	CollisionForcesDataInstancedStaticMeshComponent->SetupAttachment(RootComponent);
 	CollisionForcesDataInstancedStaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	CollisionForcesDataInstancedStaticMeshComponent->CastShadow = false;
 }
 
 void AVisualSimulationBoundsData::PostActorCreated()
@@ -63,8 +64,8 @@ void AVisualSimulationBoundsData::TrySubscribeToSubsystemEvent()
 			CollisionRegenerationDelegateHandle = BoidDataEditorSubsystem->OnCollisionDataRegenerationEvent.AddUObject
 				(this, &AVisualSimulationBoundsData::HandleRegenerationCollisionData);
 			
-			AnyVisibilityChangedDelegateHandle = BoidDataEditorSubsystem->OnAnyVisibilityChanged.AddUObject(this, 
-				&AVisualSimulationBoundsData::HandleAnyVisibilityChanged);
+			AnyVisibilityChangedDelegateHandle = BoidDataEditorSubsystem->OnAnySimulationBoundsDataVisibilityChanged
+			.AddUObject(this, &AVisualSimulationBoundsData::HandleAnyComponentVisibilityChanged);
 			
 			bDidSubscribeToSubsystem = true;
 		}
@@ -79,7 +80,7 @@ void AVisualSimulationBoundsData::TryToUnsubscribeFromSubsystemEvent()
 		{
 			BoidDataEditorSubsystem->OnSimulationBoundsChangedEvent.Remove(BoundsChangedDelegateHandle);
 			BoidDataEditorSubsystem->OnCollisionDataRegenerationEvent.Remove(CollisionRegenerationDelegateHandle);
-			BoidDataEditorSubsystem->OnAnyVisibilityChanged.Remove(AnyVisibilityChangedDelegateHandle);
+			BoidDataEditorSubsystem->OnAnySimulationBoundsDataVisibilityChanged.Remove(AnyVisibilityChangedDelegateHandle);
 			
 			bDidSubscribeToSubsystem = false;
 		}
@@ -105,7 +106,7 @@ void AVisualSimulationBoundsData::HandleRegenerationCollisionData(const FCollisi
 	
 	WallDataInstancedStaticMeshComponent->ClearInstances();
 	CollisionForcesDataInstancedStaticMeshComponent->ClearInstances();
-	FBoundsPlainData BoundsData = CollisionData.CollisionBoundsData.BoundsPlainData;
+	FBoundsPlainInfo BoundsData = CollisionData.CollisionBoundsData.BoundsPlainData;
 	
 	const FVector VoxelSize = FBoundsMath::GetVoxelCellSize(BoundsData.Center, BoundsData.Extent, 
 		BoundsData.GridResolution);
@@ -119,18 +120,23 @@ void AVisualSimulationBoundsData::HandleRegenerationCollisionData(const FCollisi
 	
 	for (int i = 0; i < CollisionData.CollisionForcesData.Num(); i++)
 	{
-		if (CollisionData.CollisionForcesData[i].Length() == 0)
+		if (CollisionData.CollisionForcesData[i].EnvironmentCollisionForce.Length() == 0
+			&& CollisionData.CollisionForcesData[i].BoundsCollisionForce.Length() == 0)
 		{
 			continue;
 		}
 		
+		const FVector FinalForce = CollisionData.CollisionForcesData[i].EnvironmentCollisionForce + 
+			CollisionData.CollisionForcesData[i].BoundsCollisionForce;
+				
 		const FVector CellCenter = CollisionData.EveryVoxelCenterData[i];
+		
 		const FTransform InstancedMeshTransform(FRotator::ZeroRotator, CellCenter, MeshScale);
 		CollisionForcesDataInstancedStaticMeshComponent->AddInstance(InstancedMeshTransform, true);
 	}
 }
 
-void AVisualSimulationBoundsData::HandleAnyVisibilityChanged(const FVisualizerVisibility& VisualizerVisibility)
+void AVisualSimulationBoundsData::HandleAnyComponentVisibilityChanged(const FVisualizerVisibility VisualizerVisibility)
 {
 	ENSURE_BOUNDS_MESH_COMPONENT()
 	ENSURE_WALL_DATA_INSTANCE_MESH_COMPONENT()

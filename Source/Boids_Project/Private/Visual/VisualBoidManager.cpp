@@ -16,7 +16,7 @@ void AVisualBoidManager::BeginPlay()
 	Super::BeginPlay();
 
 #if WITH_EDITOR
-	BoidsColorChangeDelegateHandle = BoidsDelegates::OnColorUpdate().AddUObject(this,  &AVisualBoidManager::HandleBoidsColorUpdate);
+	BoidsColorChangeDelegateHandle = BoidsDelegates::OnBoidColorUpdate().AddUObject(this,  &AVisualBoidManager::HandleBoidsColorUpdate);
 #endif
 	
 	if (UWorld* World = GetWorld())
@@ -38,7 +38,7 @@ void AVisualBoidManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 	
 #if WITH_EDITOR
-	BoidsDelegates::OnColorUpdate().Remove(BoidsColorChangeDelegateHandle);
+	BoidsDelegates::OnBoidColorUpdate().Remove(BoidsColorChangeDelegateHandle);
 #endif
 }
 

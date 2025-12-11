@@ -47,5 +47,4 @@ protected:
 	
 	/**  */
 	void AddBoidToVoxelGrid(const int32 BoidID, const int32 NewGridIndex);	
-	
 };

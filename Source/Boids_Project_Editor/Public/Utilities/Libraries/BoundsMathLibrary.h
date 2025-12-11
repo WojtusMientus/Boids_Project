@@ -122,5 +122,4 @@ private:
 	{
 		return FMath::Clamp(FMath::FloorToInt32((AxisToClamp - Min) / Size), 0, Dimension - 1);
 	}
-	
 };

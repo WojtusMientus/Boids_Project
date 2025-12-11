@@ -51,5 +51,4 @@ private:
 	 * @param Velocity Direction the Boid should be facing.
 	 */
 	void AlignRotationToVelocity(const FVector& Velocity);
-	
 };

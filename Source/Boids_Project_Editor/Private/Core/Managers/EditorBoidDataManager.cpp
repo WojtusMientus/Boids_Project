@@ -8,18 +8,20 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "DataAssets/BoidsData.h"
 #include "DataAssets/BoundsData.h"
+#include "DataAssets/SimulationPlainInfoData/BoundsPlainInfoData.h"
+#include "DataAssets/SimulationPlainInfoData/BoidsPlainInfoData.h"
 
 
-void FEditorBoidDataManager::InitializeBoidSimulationData(FCollisionBoundsPlainData& OutBoundsData,
-	TMap<FGameplayTag, FBoidsPlainData>& OutBoidsData)
+void FEditorBoidDataManager::InitializeBoidSimulationData(FCollisionBoundsPlainInfo& OutBoundsData,
+	TMap<FGameplayTag, FBoidsPlainInfo>& OutBoidsData)
 {
 	EnsureNecessarySimulationData();
 	OutBoundsData = GetCopyOfBoundsData();
 	OutBoidsData = GetCopyOfBoidsData();
 }
 
-void FEditorBoidDataManager::SaveBoundsData(const FCollisionBoundsPlainData& CollisionBoundsData, 
-	const TArray<FVector>& CalculatedCollisionData)
+void FEditorBoidDataManager::SaveBoundsData(const FCollisionBoundsPlainInfo& CollisionBoundsData, 
+	const TArray<FEnvironmentCollisionCellData>& CalculatedCollisionData)
 {	
 	ENSURE_BOUNDS_DATA_ASSET()
 	
@@ -27,7 +29,7 @@ void FEditorBoidDataManager::SaveBoundsData(const FCollisionBoundsPlainData& Col
 	SaveAsset(LoadedBoundsDataAsset);
 }
 
-void FEditorBoidDataManager::SaveBoidsData(const FBoidsPlainData& BoidsDataToSave)
+void FEditorBoidDataManager::SaveBoidsData(const FBoidsPlainInfo& BoidsDataToSave)
 {
 	UBoidsData* BoidsAssetToSave = LoadedBoidsDataAssets[BoidsDataToSave.Type];
 	ENSURE_BOIDS_DATA_ASSET(IsValid(BoidsAssetToSave))
@@ -36,9 +38,9 @@ void FEditorBoidDataManager::SaveBoidsData(const FBoidsPlainData& BoidsDataToSav
 	SaveAsset(BoidsAssetToSave);
 }
 
-void FEditorBoidDataManager::SaveAllBoidsData(const TMap<FGameplayTag, FBoidsPlainData>& AllBoidsDataToSave)
+void FEditorBoidDataManager::SaveAllBoidsData(const TMap<FGameplayTag, FBoidsPlainInfo>& AllBoidsDataToSave)
 {
-	for (const TPair<FGameplayTag, FBoidsPlainData>& Pair: AllBoidsDataToSave)
+	for (const TPair<FGameplayTag, FBoidsPlainInfo>& Pair: AllBoidsDataToSave)
 	{
 		SaveBoidsData(Pair.Value);
 	}
@@ -50,22 +52,22 @@ void FEditorBoidDataManager::EnsureNecessarySimulationData()
 	EnsureBoundsDataAssets();
 }
 
-FCollisionBoundsPlainData FEditorBoidDataManager::GetCopyOfBoundsData() const
+FCollisionBoundsPlainInfo FEditorBoidDataManager::GetCopyOfBoundsData() const
 {
-	FCollisionBoundsPlainData BoundsDataCopy;
+	FCollisionBoundsPlainInfo BoundsDataCopy;
 	ENSURE_BOUNDS_DATA_ASSET_RETURN_VALUE()
 	
 	BoundsDataCopy.OverwriteData(LoadedBoundsDataAsset);
 	return BoundsDataCopy;
 }
 
-TMap<FGameplayTag, FBoidsPlainData> FEditorBoidDataManager::GetCopyOfBoidsData() const
+TMap<FGameplayTag, FBoidsPlainInfo> FEditorBoidDataManager::GetCopyOfBoidsData() const
 {
-	TMap<FGameplayTag, FBoidsPlainData> BoidsDataCopy;
+	TMap<FGameplayTag, FBoidsPlainInfo> BoidsDataCopy;
 	
 	for (const TPair<FGameplayTag, UBoidsData*>& Pair: LoadedBoidsDataAssets)
 	{
-		FBoidsPlainData BoidSpeciesDataCopy;
+		FBoidsPlainInfo BoidSpeciesDataCopy;
 		const UBoidsData* OriginalBoidData = Pair.Value;
 		
 		ENSURE_BOIDS_DATA_ASSET_CONTINUE(IsValid(OriginalBoidData))

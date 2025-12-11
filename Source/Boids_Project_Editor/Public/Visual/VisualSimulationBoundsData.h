@@ -81,7 +81,7 @@ private:
 	void HandleRegenerationCollisionData(const FCollisionData& CollisionData);
 	
 	UFUNCTION()
-	void HandleAnyVisibilityChanged(const FVisualizerVisibility& VisualizerVisibility);
+	void HandleAnyComponentVisibilityChanged(const FVisualizerVisibility VisualizerVisibility);
 	
 	
 	FDelegateHandle BoundsChangedDelegateHandle;

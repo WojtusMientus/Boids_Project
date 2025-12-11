@@ -3,20 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "DataAssets/BoundsData.h"
-
-struct FBoundsPlainData;
-
-template<class T>
-struct FVoxelGridData
-{
-	/** Struct holding information about center, extent and the resolution of the grid. */
-	FBoundsPlainData BoundsData = FBoundsPlainData();
-	
-	/** Array representing voxel grid storing T data. */
-	TArray<T> VoxelGridData = TArray<T>();
-};
-
+#include "VoxelGridData/VoxelGridData.h"
 
 /**
  * Template class representing voxelized 3D axis-aligned bounding box in the array. (AABB)

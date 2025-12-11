@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "DataAssets/BoundsData.h"
+#include "Bounds/VoxelGrid/VoxelGridData/VoxelGridData.h"
 #include "CollisionData.generated.h"
 
 
@@ -10,11 +10,11 @@ struct FCollisionData
 {
 	GENERATED_BODY()
 	
-	FCollisionBoundsPlainData CollisionBoundsData;
+	FCollisionBoundsPlainInfo CollisionBoundsData;
 	
 	TArray<FVector> WallCollisionCentersData;
 	
 	TArray<FVector> EveryVoxelCenterData;
 	
-	TArray<FVector> CollisionForcesData;
+	TArray<FEnvironmentCollisionCellData> CollisionForcesData;
 };

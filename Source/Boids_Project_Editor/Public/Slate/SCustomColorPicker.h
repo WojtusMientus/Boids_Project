@@ -172,5 +172,4 @@ private:
 	
 	void SetNewParentWindow(const TSharedRef<SWindow>& InParentWindow);
 	void SetNewStartingColor(const FLinearColor InColor);
-	
 };

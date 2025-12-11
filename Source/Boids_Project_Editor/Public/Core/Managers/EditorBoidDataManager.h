@@ -5,9 +5,9 @@
 #include "GameplayTagContainer.h"
 #include "Utilities/Macros/DebugMacros.h"
 
-struct FBoundsPlainData;
-struct FCollisionBoundsPlainData;
-struct FBoidsPlainData;
+struct FEnvironmentCollisionCellData;
+struct FBoidsPlainInfo;
+struct FCollisionBoundsPlainInfo;
 class UBoundsData;
 class UBoidsData;
 
@@ -20,7 +20,7 @@ class UBoidsData;
 	
 #define ENSURE_BOUNDS_DATA_ASSET_RETURN_VALUE()\
 	ENSURE_ALWAYS_MESSAGE_RETURN_VALUE(IsValid(LoadedBoundsDataAsset), "Couldn't find loaded Bounds Data."\
-			, FCollisionBoundsPlainData())
+			, FCollisionBoundsPlainInfo())
 
 #define ENSURE_BOIDS_DATA_ASSET_CONTINUE(Expression)\
 	ENSURE_ALWAYS_MESSAGE_CONTINUE(Expression, "Couldn't find loaded Boids Data.")
@@ -35,20 +35,20 @@ class FEditorBoidDataManager
 	
 public:
 	
-	void InitializeBoidSimulationData(FCollisionBoundsPlainData& OutBoundsData, TMap<FGameplayTag, 
-		FBoidsPlainData>& OutBoidsData);
+	void InitializeBoidSimulationData(FCollisionBoundsPlainInfo& OutBoundsData, TMap<FGameplayTag, 
+		FBoidsPlainInfo>& OutBoidsData);
 	
-	void SaveBoundsData(const FCollisionBoundsPlainData& BoundsDataToSave, 
-		const TArray<FVector>& CalculatedCollisionData);
-	void SaveBoidsData(const FBoidsPlainData& BoidsDataToSave);
-	void SaveAllBoidsData(const TMap<FGameplayTag, FBoidsPlainData>& AllBoidsDataToSave);
+	void SaveBoundsData(const FCollisionBoundsPlainInfo& BoundsDataToSave, 
+		const TArray<FEnvironmentCollisionCellData>& CalculatedCollisionData);
+	void SaveBoidsData(const FBoidsPlainInfo& BoidsDataToSave);
+	void SaveAllBoidsData(const TMap<FGameplayTag, FBoidsPlainInfo>& AllBoidsDataToSave);
 	
 private:
 	
 	void EnsureNecessarySimulationData();
 	
-	FCollisionBoundsPlainData GetCopyOfBoundsData() const;
-	TMap<FGameplayTag, FBoidsPlainData> GetCopyOfBoidsData() const;
+	FCollisionBoundsPlainInfo GetCopyOfBoundsData() const;
+	TMap<FGameplayTag, FBoidsPlainInfo> GetCopyOfBoidsData() const;
 	
 	void EnsureBoidSpeciesDataAssets();
 	void EnsureBoundsDataAssets();

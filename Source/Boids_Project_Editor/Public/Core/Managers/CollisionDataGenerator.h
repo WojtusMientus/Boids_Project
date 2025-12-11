@@ -1,9 +1,10 @@
 // Copyright WojtusMientus
 
 #pragma once
+#include "Core/CollisionData.h"
 
 struct FCollisionData;
-struct FCollisionBoundsPlainData;
+struct FCollisionBoundsPlainInfo;
 
 
 /**
@@ -21,9 +22,7 @@ public:
 private:
 	
 	/** Helper functions. */
-	void SetupStartingValues(const FCollisionBoundsPlainData& CollisionBoundsData);
-	FVector GetStartingCellCenter(const FVector& BoundsCenter, const FVector& Extent);
-	float GetStartingCellCenterAxis(const float MinAxis, const float CellAxisSize);
+	void SetupStartingValues(const FCollisionBoundsPlainInfo& CollisionBoundsData);
 	
 	UWorld* GetCurrentEditorWorld();
 	
@@ -31,11 +30,18 @@ private:
 	float CalculateEstimatedDataSize(const int32 GridResolutionMin);
 	
 	void CalculateWallCollisionDataLocations(const UWorld* World, FCollisionData& VisualizerData);
-	void CalculateCollisionForces(TArray<FVector>& OutCollisionForces);
-	void AddCollisionToNeighborCells(const FIntVector& WallCell, TArray<FVector>& OutCollisionForces);
+	void CalculateCollisionForces(TArray<FEnvironmentCollisionCellData>& OutCollisionForces);
 	
+	void AddWallCollisionForceToNeighborCells(const FIntVector& WallCell, TArray<FEnvironmentCollisionCellData>& OutCollisionForces);
+	FVector CalculateWallCollisionForceAt(const FIntVector& CurrentVoxel, const FIntVector& StartingVoxel);
 	
-	FVector CalculateCollisionForceAt(const FIntVector& CurrentVoxel, const FIntVector& StartingVoxel);
+	void CalculateBoundsCollisionForces(TArray<FEnvironmentCollisionCellData>& OutCollisionForces);
+	void CalculateForcesAlongX(int StartIndex, int EndIndex, const FVector& ForceVector, bool bAtLowerBoundary, 
+		TArray<FEnvironmentCollisionCellData>& OutCollisionForces);
+	void CalculateForcesAlongY(int StartIndex, int EndIndex, const FVector& ForceVector, bool bAtLowerBoundary, 
+	TArray<FEnvironmentCollisionCellData>& OutCollisionForces);
+	void CalculateForcesAlongZ(int StartIndex, int EndIndex, const FVector& ForceVector, bool bAtLowerBoundary, 
+	TArray<FEnvironmentCollisionCellData>& OutCollisionForces);
 	
 	TSet<FIntVector> WallCollisionDataIndices;
 	
@@ -44,9 +50,7 @@ private:
 	FVector StartingCellCenter = FVector::Zero();
 	FIntVector MaxCollisionBoundsDistanceVector = FIntVector::ZeroValue;
 	
-	
 	int32 VoxelGridCellCount = 0;
-	int32 EnvironmentCollisionRows = 1;
 	int32 BoundsCollisionRows = 1;
 	
 	int32 MaxCollisionBoundsDistance = 2;

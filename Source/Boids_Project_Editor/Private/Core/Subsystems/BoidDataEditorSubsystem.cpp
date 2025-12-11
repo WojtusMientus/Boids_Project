@@ -11,14 +11,14 @@ void UBoidDataEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	CollisionDataGenerator = MakeUnique<FCollisionDataGenerator>();
 }
 
-void UBoidDataEditorSubsystem::InitializeNecessarySimulationData(FCollisionBoundsPlainData& BoundsData,
-	TMap<FGameplayTag, FBoidsPlainData>& BoidsData)
+void UBoidDataEditorSubsystem::InitializeNecessarySimulationData(FCollisionBoundsPlainInfo& BoundsData,
+	TMap<FGameplayTag, FBoidsPlainInfo>& BoidsData)
 {
 	ENSURE_BOIDS_DATA_MANAGER()
 	BoidDataManager->InitializeBoidSimulationData(BoundsData, BoidsData);
 }
 
-void UBoidDataEditorSubsystem::RegenerateCollisionDataAndSave(const FCollisionBoundsPlainData& CollisionBoundsData)
+void UBoidDataEditorSubsystem::RegenerateCollisionDataAndSave(const FCollisionBoundsPlainInfo& CollisionBoundsData)
 {
 	ENSURE_BOIDS_DATA_MANAGER()
 	ENSURE_COLLISION_DATA_MANAGER()
@@ -29,13 +29,13 @@ void UBoidDataEditorSubsystem::RegenerateCollisionDataAndSave(const FCollisionBo
 	OnCollisionDataRegenerationEvent.Broadcast(CollisionData);
 }
 
-void UBoidDataEditorSubsystem::SaveBoidsData(const FBoidsPlainData& BoidsData)
+void UBoidDataEditorSubsystem::SaveBoidsData(const FBoidsPlainInfo& BoidsData)
 {
 	ENSURE_BOIDS_DATA_MANAGER()
 	BoidDataManager->SaveBoidsData(BoidsData);
 }
 
-void UBoidDataEditorSubsystem::SaveAllBoidsData(const TMap<FGameplayTag, FBoidsPlainData>& AllBoidsData)
+void UBoidDataEditorSubsystem::SaveAllBoidsData(const TMap<FGameplayTag, FBoidsPlainInfo>& AllBoidsData)
 {
 	ENSURE_BOIDS_DATA_MANAGER()
 	BoidDataManager->SaveAllBoidsData(AllBoidsData);
@@ -46,13 +46,7 @@ void UBoidDataEditorSubsystem::HandleBoundsChanged(const FVector& NewCenter, con
 	OnSimulationBoundsChangedEvent.Broadcast(NewCenter, NewExtent);
 }
 
-void UBoidDataEditorSubsystem::HandleBoundsVisibilityChanged(bool bIsVisible)
+void UBoidDataEditorSubsystem::HandleSimulationBoundsDataVisibilityChanged(const FVisualizerVisibility VisualizerVisibility)
 {
-	// OnBoundsVisibilityChangedEvent.Broadcast(bIsVisible);
+	OnAnySimulationBoundsDataVisibilityChanged.Broadcast(VisualizerVisibility);
 }
-
-void UBoidDataEditorSubsystem::HandleCollisionDataVisibilityChanged(bool bIsVisible)
-{
-	// OnCollisionDataVisibilityChangedEvent.Broadcast(bIsVisible);
-}
-
