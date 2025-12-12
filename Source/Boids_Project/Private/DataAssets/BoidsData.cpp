@@ -2,7 +2,7 @@
 #include "DataAssets/BoidsData.h"
 #include "DataAssets/SimulationPlainInfoData/BoidsPlainInfoData.h"
 
-void UBoidsData::OverwriteData(const FBoidsPlainInfo& NewBoidsData)
+void UBoidsData::OverwritePlainData(const FBoidsPlainInfo& NewBoidsData)
 {
 	Number = NewBoidsData.Number;;
 	SeparationForce = NewBoidsData.SeparationForce;
@@ -13,3 +13,4 @@ void UBoidsData::OverwriteData(const FBoidsPlainInfo& NewBoidsData)
 	PerceptionAngle = NewBoidsData.PerceptionAngle;
 	Color = NewBoidsData.Color;
 }
+

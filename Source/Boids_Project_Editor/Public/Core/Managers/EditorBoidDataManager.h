@@ -52,18 +52,21 @@ private:
 	
 	void EnsureBoidSpeciesDataAssets();
 	void EnsureBoundsDataAssets();
+	void EnsureMaterialAssets();
 	
+	void EnsureBaseMaterialAsset();
+	void EnsureMaterialInstanceAsset();
+	
+	void EnsureDirectoryExist(const FString& DirectoryName) const;
 	void EnsureBoidsDataDirectoryExist() const;
 	void EnsureBoundsDataDirectoryExist() const;
-	
-	FString GetBoidsSpeciesDataDirectoryName() const;
-	FString GetBoidsBoundsDirectoryName() const;
+	void EnsureMaterialDataDirectoryExist() const;
 	
 	/** Filters already created BoidData assets for certain species. */
 	void FilterAlreadyCreatedBoidDataAssets(TArray<FGameplayTag>& OutRemainingBoidSpeciesTags);
 	
-	/** Creates filter for certain class that exist under certain directory. */
-	FARFilter GetFilterByClassAndPath(const UClass* ClassToFilter, const FString& PathToFilter) const;
+	/** Retrieves AssetData of certain class in certain directory. */
+	TArray<FAssetData> GetFilteredAssetDataByClassAndPath(UClass* ClassToFilter, const FString& PathToFilter) const;
 	
 	/** Returns all Boid.Species tags. */
 	TArray<FGameplayTag> GetBoidsSpeciesTags() const;
@@ -84,11 +87,12 @@ private:
 	TMap<FGameplayTag, UBoidsData*> LoadedBoidsDataAssets;
 	
 	UFactory* DataAssetFactory = nullptr;
-	
-	const FString BOIDS_SPECIES_TAG = TEXT("Boid.Species");
-	const FString BOIDS_SPECIES_DATA_DIRECTORY = TEXT("/DataAssets/Boids/Species");
-	const FString BOUNDS_DATA_DIRECTORY = TEXT("/DataAssets/Boids/Bounds");
+	UFactory* MaterialFactory = nullptr;
+	UFactory* MaterialConstantFactory = nullptr;
 	
 	const FString BOIDS_SPECIES_DATA_NAME_PREFIX = TEXT("DA_BoidData_");
 	const FString BOUNDS_DATA_NAME = TEXT("DA_BoundsData");
+	
+	const FString MATERIAL_DATA_NAME = TEXT("M_BoidsBase");
+	const FString MATERIAL_INSTANCE_DATA_NAME = TEXT("MI_BoidsBase");
 };

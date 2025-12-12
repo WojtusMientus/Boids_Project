@@ -6,14 +6,16 @@
 #include "GameplayTagsManager.h"
 #include "IAssetTools.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Core/BoidDataHelpers.h"
 #include "DataAssets/BoidsData.h"
 #include "DataAssets/BoundsData.h"
 #include "DataAssets/SimulationPlainInfoData/BoundsPlainInfoData.h"
 #include "DataAssets/SimulationPlainInfoData/BoidsPlainInfoData.h"
+#include "Materials/MaterialInstanceConstant.h"
 
 
 void FEditorBoidDataManager::InitializeBoidSimulationData(FCollisionBoundsPlainInfo& OutBoundsData,
-	TMap<FGameplayTag, FBoidsPlainInfo>& OutBoidsData)
+                                                          TMap<FGameplayTag, FBoidsPlainInfo>& OutBoidsData)
 {
 	EnsureNecessarySimulationData();
 	OutBoundsData = GetCopyOfBoundsData();
@@ -25,7 +27,7 @@ void FEditorBoidDataManager::SaveBoundsData(const FCollisionBoundsPlainInfo& Col
 {	
 	ENSURE_BOUNDS_DATA_ASSET()
 	
-	LoadedBoundsDataAsset->OverwriteData(CollisionBoundsData, CalculatedCollisionData);
+	LoadedBoundsDataAsset->OverwritePlainData(CollisionBoundsData, CalculatedCollisionData);
 	SaveAsset(LoadedBoundsDataAsset);
 }
 
@@ -34,7 +36,7 @@ void FEditorBoidDataManager::SaveBoidsData(const FBoidsPlainInfo& BoidsDataToSav
 	UBoidsData* BoidsAssetToSave = LoadedBoidsDataAssets[BoidsDataToSave.Type];
 	ENSURE_BOIDS_DATA_ASSET(IsValid(BoidsAssetToSave))
 	
-	BoidsAssetToSave->OverwriteData(BoidsDataToSave);
+	BoidsAssetToSave->OverwritePlainData(BoidsDataToSave);
 	SaveAsset(BoidsAssetToSave);
 }
 
@@ -48,8 +50,10 @@ void FEditorBoidDataManager::SaveAllBoidsData(const TMap<FGameplayTag, FBoidsPla
 
 void FEditorBoidDataManager::EnsureNecessarySimulationData()
 {
+	EnsureDataFactoriesExist();
 	EnsureBoidSpeciesDataAssets();	
 	EnsureBoundsDataAssets();
+	EnsureMaterialAssets();
 }
 
 FCollisionBoundsPlainInfo FEditorBoidDataManager::GetCopyOfBoundsData() const
@@ -96,11 +100,8 @@ void FEditorBoidDataManager::EnsureBoundsDataAssets()
 {
 	EnsureBoundsDataDirectoryExist();
 	
-	IAssetRegistry& AssetRegistry  = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
-	TArray<FAssetData> BoundsDataAssets;
-	
-	FARFilter Filter = GetFilterByClassAndPath(UBoundsData::StaticClass(), GetBoidsBoundsDirectoryName());
-	AssetRegistry.GetAssets(Filter, BoundsDataAssets);
+	TArray<FAssetData> BoundsDataAssets = GetFilteredAssetDataByClassAndPath(UBoundsData::StaticClass(), 
+	BoidDataHelpers::GetBoidsBoundsDirectoryName());
 	
 	if (BoundsDataAssets.Num() == 0)
 	{
@@ -112,40 +113,63 @@ void FEditorBoidDataManager::EnsureBoundsDataAssets()
 	}
 }
 
+void FEditorBoidDataManager::EnsureMaterialAssets()
+{
+	EnsureMaterialDataDirectoryExist();
+	EnsureBaseMaterialAsset();	
+	EnsureMaterialInstanceAsset();
+}
+
+void FEditorBoidDataManager::EnsureBaseMaterialAsset()
+{
+	TArray<FAssetData> MaterialAssets = GetFilteredAssetDataByClassAndPath(UMaterial::StaticClass(), 
+	BoidDataHelpers::GetBoidsMaterialsDirectoryName());
+	
+	if (MaterialAssets.Num() == 0)
+	{
+		CreateAsset(MATERIAL_DATA_NAME, BoidDataHelpers::GetBoidsMaterialsDirectoryName(), UMaterial::StaticClass(), MaterialFactory);
+	}
+}
+
+void FEditorBoidDataManager::EnsureMaterialInstanceAsset()
+{
+	TArray<FAssetData> MaterialInstanceConstantAssets = GetFilteredAssetDataByClassAndPath(
+	UMaterialInstanceConstant::StaticClass(), BoidDataHelpers::GetBoidsMaterialsDirectoryName());
+	
+	if (MaterialInstanceConstantAssets.Num() == 0)
+	{
+		CreateAsset(MATERIAL_INSTANCE_DATA_NAME, BoidDataHelpers::GetBoidsMaterialsDirectoryName(),
+			UMaterialInstanceConstant::StaticClass(), MaterialConstantFactory);
+	}
+}
+
+void FEditorBoidDataManager::EnsureDirectoryExist(const FString& DirectoryName) const
+{
+	if (!UEditorAssetLibrary::DoesDirectoryExist(DirectoryName))
+	{
+		UEditorAssetLibrary::MakeDirectory(DirectoryName);
+	}
+}
+
 void FEditorBoidDataManager::EnsureBoidsDataDirectoryExist() const
 {
-	if (!UEditorAssetLibrary::DoesDirectoryExist(GetBoidsSpeciesDataDirectoryName()))
-	{
-		UEditorAssetLibrary::MakeDirectory(GetBoidsSpeciesDataDirectoryName());
-	}
+	EnsureDirectoryExist(BoidDataHelpers::GetBoidsSpeciesDataDirectoryName());
 }
 
 void FEditorBoidDataManager::EnsureBoundsDataDirectoryExist() const
 {
-	if (!UEditorAssetLibrary::DoesDirectoryExist(GetBoidsBoundsDirectoryName()))
-	{
-		UEditorAssetLibrary::MakeDirectory(GetBoidsBoundsDirectoryName());
-	}
+	EnsureDirectoryExist(BoidDataHelpers::GetBoidsBoundsDirectoryName());
 }
 
-FString FEditorBoidDataManager::GetBoidsSpeciesDataDirectoryName() const
+void FEditorBoidDataManager::EnsureMaterialDataDirectoryExist() const
 {
-	return "/" + UEditorAssetLibrary::GetProjectRootAssetDirectory() + BOIDS_SPECIES_DATA_DIRECTORY;
-}
-
-FString FEditorBoidDataManager::GetBoidsBoundsDirectoryName() const
-{
-	return "/" + UEditorAssetLibrary::GetProjectRootAssetDirectory() + BOUNDS_DATA_DIRECTORY;
+	EnsureDirectoryExist(BoidDataHelpers::GetBoidsMaterialsDirectoryName());
 }
 
 void FEditorBoidDataManager::FilterAlreadyCreatedBoidDataAssets(TArray<FGameplayTag>& BoidSpeciesTags)
 {
-	IAssetRegistry& AssetRegistry  = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
-	TArray<FAssetData> BoidSpeciesDataAssets;
-	
-	FARFilter Filter = GetFilterByClassAndPath(UBoidsData::StaticClass(), GetBoidsSpeciesDataDirectoryName());
-	
-	AssetRegistry.GetAssets(Filter, BoidSpeciesDataAssets);
+	TArray<FAssetData> BoidSpeciesDataAssets = GetFilteredAssetDataByClassAndPath(UBoidsData::StaticClass(), 
+	BoidDataHelpers::GetBoidsSpeciesDataDirectoryName());
 	
 	for (const FAssetData& Asset: BoidSpeciesDataAssets)
 	{
@@ -162,21 +186,22 @@ void FEditorBoidDataManager::FilterAlreadyCreatedBoidDataAssets(TArray<FGameplay
 	}
 }
 
-FARFilter FEditorBoidDataManager::GetFilterByClassAndPath(const UClass* ClassToFilter, const FString& PathToFilter) const
+TArray<FAssetData> FEditorBoidDataManager::GetFilteredAssetDataByClassAndPath(UClass* ClassToFilter, 
+	const FString& PathToFilter) const
 {
-	FARFilter Filter;
-	Filter.bRecursiveClasses = false;
-	Filter.bRecursivePaths = false;
-	Filter.ClassPaths.Add(ClassToFilter->GetClassPathName());
-	Filter.PackagePaths.Add(FName(*PathToFilter));
+	IAssetRegistry& AssetRegistry  = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
+	TArray<FAssetData> FilteredAssetDatas;
 	
-	return Filter;
+	FARFilter Filter = BoidDataHelpers::GetFilterByClassAndPath(ClassToFilter, PathToFilter);
+	AssetRegistry.GetAssets(Filter, FilteredAssetDatas);
+	
+	return FilteredAssetDatas;
 }
 
 TArray<FGameplayTag> FEditorBoidDataManager::GetBoidsSpeciesTags() const
 {
 	const UGameplayTagsManager& GameplayTagsManager = UGameplayTagsManager::Get();
-	FGameplayTag FoundTag = GameplayTagsManager.RequestGameplayTag(FName(BOIDS_SPECIES_TAG));
+	FGameplayTag FoundTag = GameplayTagsManager.RequestGameplayTag(FName(BoidDataHelpers::GetBoidSpeciesTagName()));
 	FGameplayTagContainer TagContainer = GameplayTagsManager.RequestGameplayTagChildren(FoundTag); 
 	
 	return TagContainer.GetGameplayTagArray();
@@ -196,18 +221,14 @@ void FEditorBoidDataManager::CreateBoidSpeciesDataWithTag(const FGameplayTag Tag
 
 UBoidsData* FEditorBoidDataManager::CreateBoidsData(const FString& AssetName)
 {
-	EnsureDataFactoriesExist();
-	
-	UObject* CreatedAsset = CreateAsset(AssetName, GetBoidsSpeciesDataDirectoryName(), UBoidsData::StaticClass(), 
-		DataAssetFactory);
+	UObject* CreatedAsset = CreateAsset(AssetName, BoidDataHelpers::GetBoidsSpeciesDataDirectoryName(),
+		UBoidsData::StaticClass(), DataAssetFactory);
 	return Cast<UBoidsData>(CreatedAsset);
 }
 
 void FEditorBoidDataManager::CreateBoundsData()
 {
-	EnsureDataFactoriesExist();
-	
-	const FString AssetDirectory = GetBoidsBoundsDirectoryName();
+	const FString AssetDirectory = BoidDataHelpers::GetBoidsBoundsDirectoryName();
 		
 	LoadedBoundsDataAsset = Cast<UBoundsData>(CreateAsset(BOUNDS_DATA_NAME, AssetDirectory, 
 		UBoundsData::StaticClass(), DataAssetFactory));
@@ -245,20 +266,27 @@ void FEditorBoidDataManager::SaveAsset(UObject* AssetToSave)
 }
 
 void FEditorBoidDataManager::EnsureDataFactoriesExist()
-{
-	if (IsValid(DataAssetFactory))
-	{
-		return;
-	}
-	
+{	
 	IAssetTools& AssetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
 	
 	for (UFactory* Factory: AssetTools.GetNewAssetFactories())
 	{
+		if (IsValid(DataAssetFactory) && IsValid(MaterialFactory) && IsValid(MaterialConstantFactory))
+		{
+			return;
+		}
+		
 		if (IsViableFactoryClass(Factory, UDataAsset::StaticClass()))
 		{
 			DataAssetFactory = Factory;
-			break;
+		}
+		else if (IsViableFactoryClass(Factory, UMaterial::StaticClass()))
+		{
+			MaterialFactory = Factory;
+		}
+		else if (IsViableFactoryClass(Factory, UMaterialInstanceConstant::StaticClass()))
+		{
+			MaterialConstantFactory = Factory;
 		}
 	}
 }

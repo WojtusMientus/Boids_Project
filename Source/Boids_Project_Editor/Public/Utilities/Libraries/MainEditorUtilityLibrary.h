@@ -20,5 +20,4 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	static FString GetGameplayTagLeafName(FGameplayTag Tag);
-	
 };

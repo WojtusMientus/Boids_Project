@@ -57,10 +57,10 @@ public:
 	int32 PerceptionAngle = 360;
 	
 	/** Visual Boid's color. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Setup")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Color")
 	FLinearColor Color = FLinearColor::White;
 	
 	
-	 void OverwriteData(const FBoidsPlainInfo& NewBoidsData);
+	void OverwritePlainData(const FBoidsPlainInfo& NewBoidsData);
 };
 

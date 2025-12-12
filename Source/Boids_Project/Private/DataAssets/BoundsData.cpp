@@ -2,7 +2,7 @@
 #include "DataAssets/BoundsData.h"
 #include "DataAssets/SimulationPlainInfoData/BoundsPlainInfoData.h"
 
-void UBoundsData::OverwriteData(const FCollisionBoundsPlainInfo& NewCollisionBoundsData,
+void UBoundsData::OverwritePlainData(const FCollisionBoundsPlainInfo& NewCollisionBoundsData,
                                 const TArray<FEnvironmentCollisionCellData>& NewCollisionWallData)
 {
 	Center = NewCollisionBoundsData.BoundsPlainData.Center;

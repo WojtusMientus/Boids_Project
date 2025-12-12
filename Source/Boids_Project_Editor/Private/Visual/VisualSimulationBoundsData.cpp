@@ -126,9 +126,6 @@ void AVisualSimulationBoundsData::HandleRegenerationCollisionData(const FCollisi
 			continue;
 		}
 		
-		const FVector FinalForce = CollisionData.CollisionForcesData[i].EnvironmentCollisionForce + 
-			CollisionData.CollisionForcesData[i].BoundsCollisionForce;
-				
 		const FVector CellCenter = CollisionData.EveryVoxelCenterData[i];
 		
 		const FTransform InstancedMeshTransform(FRotator::ZeroRotator, CellCenter, MeshScale);

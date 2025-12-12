@@ -33,7 +33,7 @@ public:
 	
 	/** Voxelized grid resolution. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "512"))
-	FIntVector GridResolution = FIntVector(1,1,1);
+	FIntVector GridResolution = FIntVector(50,50,50);
 	
 	/** Number of collision voxel rows around static environment.  */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "128"))
@@ -62,9 +62,10 @@ private:
 	/** Stored calculated collision forces. */
 	TArray<FEnvironmentCollisionCellData> CollisionForces;
 
+
 public:
 	
-	void OverwriteData(const FCollisionBoundsPlainInfo& NewCollisionBoundsData,
+	void OverwritePlainData(const FCollisionBoundsPlainInfo& NewCollisionBoundsData,
 		const TArray<FEnvironmentCollisionCellData>& NewCollisionWallData);
 };
 
