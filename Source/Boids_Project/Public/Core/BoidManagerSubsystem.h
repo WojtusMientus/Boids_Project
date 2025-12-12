@@ -178,13 +178,7 @@ private:
 	 * @param SecondIndex Second Boid index.
 	 */
 	bool IsWithinPerceptionRange(int32 FirstIndex, int32 SecondIndex);
-
-	/**
-	 * Returns an array of neighbouring Boid world positions (for visualization purposes). 
-	 * @param BoidIndexToCheckNeighbours Index of the Boid to query neighbours from.
-	 */
-	UFUNCTION(BlueprintCallable)
-	TArray<FVector> GetNeighbourBoidsLocations(int32 BoidIndexToCheckNeighbours);
+	
 	
 	/** Array of all simulated Boids. */
 	TArray<TUniquePtr<FBoid>> Boids;

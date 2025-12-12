@@ -83,7 +83,7 @@ public:
 						FMath::Clamp(VectorToClamp.Z, 0, GridResolution.Z - 1));
 	}
 	
-	static FIntVector ClampToNearestBoundIndices(const FVector& VectorToClamp, const FVector& MinCorner,
+	static FORCEINLINE FIntVector ClampToNearestBoundIndices(const FVector& VectorToClamp, const FVector& MinCorner,
 		const FVector& VoxelSize, const FIntVector& GridDimension)
 	{
 		return FIntVector(ClampToNearestIndex(VectorToClamp.X, MinCorner.X, VoxelSize.X, GridDimension.X),
@@ -118,7 +118,7 @@ private:
 		return Index >= 0 && Index < AxisMax;
 	} 
 	
-	static int32 ClampToNearestIndex(const float AxisToClamp, const float Min, const float Size, const int32 Dimension)
+	static FORCEINLINE int32 ClampToNearestIndex(const float AxisToClamp, const float Min, const float Size, const int32 Dimension)
 	{
 		return FMath::Clamp(FMath::FloorToInt32((AxisToClamp - Min) / Size), 0, Dimension - 1);
 	}

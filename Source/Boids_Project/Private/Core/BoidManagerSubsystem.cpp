@@ -227,16 +227,3 @@ void UBoidManagerSubsystem::ApplySpeedAdjustmentForce(FBoid* CurrentBoid)
 	CurrentBoid->Acceleration += CorrectionVector * SPEED_CORRECTION_FORCE;
 }
 
-TArray<FVector> UBoidManagerSubsystem::GetNeighbourBoidsLocations(int32 BoidIndexToCheckNeighbours)
-{
-	TArray<FBoid*> NeighbourBoids;
-	GetNeighbourBoids(BoidIndexToCheckNeighbours, NeighbourBoids);
-	
-	TArray<FVector> FinalLocations;
-	for (int i = 0; i < NeighbourBoids.Num(); i++)
-	{
-		FinalLocations.Add(NeighbourBoids[i]->Position);
-	}
-	
-	return FinalLocations;
-}

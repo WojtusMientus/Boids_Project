@@ -19,9 +19,3 @@
 		{\
 			continue;\
 		}
-
-#define ENSURE_ALWAYS_MESSAGE_RETURN(Expression, Message)\
-	if (!ensureAlwaysMsgf(Expression, TEXT(Message)))\
-		{\
-			return;\
-		}
