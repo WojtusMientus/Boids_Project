@@ -1,13 +1,11 @@
-﻿#include "Bounds/VoxelGrid/BoidCollisionVoxelGrid.h"
+﻿
+#include "Bounds/VoxelGrid/BoidCollisionVoxelGrid.h"
 
-FBoidCollisionVoxelGrid::FBoidCollisionVoxelGrid(const FVoxelGridData<TArray<int32>>& VoxelGridData)
-	: FVoxelGrid<TArray<int32>>(VoxelGridData)
-{
-}
 
-void FBoidCollisionVoxelGrid::InitializeBoidCollisionGrid(const int32 StartingNumberOfBoids)
+void FBoidCollisionVoxelGrid::InitializeBoidCollisionGrid(const FVoxelGridData<TArray<int32>>& VoxelGridData, 
+	const int32 StartingNumberOfBoids)
 {
-	FVoxelGrid<TArray<int32>>::InitializeVoxelGrid();
+	InitializeVoxelGrid(VoxelGridData);
 	
 	for (TArray<int32>& VoxelCellArray: InternalVoxelGrid)
 	{

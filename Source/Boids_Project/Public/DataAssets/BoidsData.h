@@ -62,5 +62,6 @@ public:
 	
 	
 	void OverwritePlainData(const FBoidsPlainInfo& NewBoidsData);
+	FBoidsPlainInfo GetPlainDataInfo() const;
 };
 

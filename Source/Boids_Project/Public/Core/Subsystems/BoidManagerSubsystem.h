@@ -4,15 +4,23 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "BaseClass/GameInstanceSubsystemBase.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "Core/Boid.h"
 #include "Bounds/WorldCollisionBounds.h"
+#include "Bounds/VoxelGrid/WorldCollisionVoxelGrid.h"
+#include "DataAssets/SimulationPlainInfoData/BoidsPlainInfoData.h"
 #include "BoidManagerSubsystem.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBoidsUpdateFinishEvent);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBoidsNumberUpdateEvent, FGameplayTag, BoidType, int32, NewBoidNumber);
+class URuntimeDataLoaderSubsystem;
+class FBoidCollisionVoxelGrid;
+struct FEnvironmentCollisionVoxelGridData;
+class UBoidDataManagerSubsystem;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnBoidsInitializationFinishEvent, const TArray<FBoidsPlainInfo> BoidsInfo);
+DECLARE_MULTICAST_DELEGATE(FOnBoidsUpdateFinishEvent);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBoidsNumberUpdateEvent, FGameplayTag BoidType, int32 NewBoidNumber);
 
 /**
  * Main manager for Boid simulation.
@@ -27,26 +35,32 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnBoidsNumberUpdateEvent, FGamepla
 //		 - Adding a thread pool to parallelize Boid calculations.
 //		 - Implementing Collision Voxel Grid for collision detection without line tracing.
 UCLASS()
-class BOIDS_PROJECT_API UBoidManagerSubsystem : public UTickableWorldSubsystem
+class BOIDS_PROJECT_API UBoidManagerSubsystem : public UGameInstanceSubsystemBase, public FTickableGameObject
 {
 	GENERATED_BODY()
 		
 public:
-
+	
+	/** Delegate after Boid initialization complete. */
+	FOnBoidsInitializationFinishEvent OnBoidsInitializationFinish;
+	
 	/** Delegate after Boid movement calculations complete. */
-	UPROPERTY()
 	FOnBoidsUpdateFinishEvent OnBoidsUpdateFinish;
 	
 	/** Delegate broadcast when the number of given Boid species changes. */
-	UPROPERTY()
 	FOnBoidsNumberUpdateEvent OnBoidsNumberUpdate;
 	
 
-	//~ Begin UTickableWorldSubsystem Interface
+	//~ Begin UGameInstanceSubsystemBase Interface
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	//~ End UGameInstanceSubsystemBase Interface
+	
+	//~ Begin FTickableGameObject Interface
 	virtual void Tick(float DeltaTime) override;
 	virtual TStatId GetStatId() const override;
-	//~ End UTickableWorldSubsystem Interface
+	virtual bool IsTickable() const override;
+	//~ End FTickableGameObject Interface
+	
 	
 	/**
 	 * Returns Boid's world position at given index.
@@ -59,44 +73,25 @@ public:
 	 * @param Index Index of the Boid to query.
 	 */
 	FVector GetBoidVelocityAt(int32 Index);
-
-
-	/** Returns perception radius used by Boids to find neighbors. */
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FORCEINLINE float GetPerceptionRadius() { return PERCEPTION_DISTANCE; }
-	// TODO: Implement species-specific perception radius (linked to data assets).
-
-	/**
-	 * Returns world location of the Boid at given index.
-	 * @param Index Index to sample on.
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FORCEINLINE FVector GetBoidLocation(int32 Index) { return GetBoidPositionAt(Index); }
-
-	/**
-	 * Returns velocity of the Boid at given index.
-	 * @param Index Index to sample on.
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FORCEINLINE FVector GetBoidVelocity(int32 Index) { return GetBoidVelocityAt(Index); }
+	
 	
 	/** Returns simulated Boid count. */
-	FORCEINLINE int32 GetBoidsCount() { return BOIDS_COUNT; }
+	FORCEINLINE int32 GetBoidsCount() { return Boids.Num(); }
 
 	/** Updates internal Boid's IDs used in BoidCollisionVoxelGrid. */
 	void UpdateBoidCellIndices(const int32 ID, const int32 VoxelGridIndex, const int32 VoxelGridCellIndex);
 
-	
+
 private:
 	
 	/** Desired movement speed that Boid is trying to achieve. */
-	static constexpr float BOID_DESIRED_VELOCITY = 200.0f;
+	static constexpr float BOID_DESIRED_VELOCITY = 100.0f;
 
 	/** Speed correction force multiplier.  */
 	static constexpr float SPEED_CORRECTION_FORCE = 0.85f;
 	
 	/** Number of Boids spawned at simulation start. */
-	static constexpr int32 BOIDS_COUNT = 100;
+	static constexpr int32 BOIDS_COUNT = 10;
 	
 	/** Final multiplier applied to separation steering force. */
 	static constexpr float SEPARATION_FORCE = 600.0f;
@@ -119,16 +114,22 @@ private:
 	/** Extent of the simulation bounds. */
 	static constexpr int32 BOIDS_BOUNDS = 1000;
 	
-
+	
+	
+	void InitializeSimulation(const TArray<FBoidsPlainInfo> BoidsInfo, 
+		const FEnvironmentCollisionVoxelGridData VoxelGridData);
+	
 	/** Populates the Boids array with the correct number of Boids. Called only during object creation. */
-	void InitializeBoids();
+	void InitializeBoids(const TArray<FBoidsPlainInfo> BoidsInfo);
+	void InitializeBoidsTest(const TArray<FBoidsPlainInfo> BoidsInfo);
 
 	/** Initializes Boid's random startup position. */
 	FVector CalculateBoidInitialPosition();
 
 	/** Applies forces and updates Boid movement. */
 	void UpdateBoids(float DeltaTime);
-
+	void UpdateBoidsTest(float DeltaTime);
+	
 	/**
 	 * Retrieves neighbouring Boids within perception radius.
 	 * @param BoidIndexToCheckNeighbours Index of the Boid to calculate neighbours for.
@@ -165,12 +166,14 @@ private:
 	 * @param CurrentBoid Boid to apply the force to.
 	 */
 	void ApplyCollisionForce(FBoid* CurrentBoid);
+	void ApplyCollisionForceTest(FBoid* CurrentBoid);
 
 	/**
 	 * Applies corrective force towards its desired velocity.
 	 * @param CurrentBoid Boid to apply the force to.
 	 */
 	void ApplySpeedAdjustmentForce(FBoid* CurrentBoid);
+	void ApplySpeedAdjustmentForceTest(FBoid* CurrentBoid, int SpeciesIndex);
 	
 	/**
 	 * Checks if 2 given Boids are within perception range.
@@ -180,10 +183,19 @@ private:
 	bool IsWithinPerceptionRange(int32 FirstIndex, int32 SecondIndex);
 	
 	
+	TArray<TArray<TUniquePtr<FBoid>>> DifferentSpeciesBoids; 
+	TArray<TArray<FVector>> NewCalculatedVelocities;
+	TArray<FBoidsPlainInfo> SpeciesInfo;
+	
+	TUniquePtr<FWorldCollisionVoxelGrid> WorldCollisionGrid;
+	
+	TWeakObjectPtr<UBoidDataManagerSubsystem> BoidDataManager;
+	
+	
 	/** Array of all simulated Boids. */
 	TArray<TUniquePtr<FBoid>> Boids;
 	
-	/** Cached neighbours of the currently calculated Boid. */
+	/** Cached neighbors of the currently calculated Boid. */
 	TArray<FBoid*> CurrentNeighbours;
 	
 	/** Per-frame temporary array buffer for new velocities (applied after all forces are computed). */
@@ -191,4 +203,6 @@ private:
 	
 	/** World collision bounds for collision calculations. */
 	TUniquePtr<FWorldCollisionBounds> WorldCollisionBounds;
+	
+	// TUniquePtr<FBoidCollisionVoxelGrid> BoidVoxelGrid;
 };

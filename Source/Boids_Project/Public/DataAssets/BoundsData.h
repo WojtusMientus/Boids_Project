@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "Bounds/VoxelGrid/VoxelGridData/EnvironmentCollisionCellData.h"
+#include "Bounds/VoxelGrid/VoxelGridData/VoxelGridData.h"
 #include "BoundsData.generated.h"
 
 
@@ -65,7 +66,12 @@ private:
 
 public:
 	
+	TArray<FEnvironmentCollisionCellData> GetCollisionForcesArray() const;
+	
 	void OverwritePlainData(const FCollisionBoundsPlainInfo& NewCollisionBoundsData,
 		const TArray<FEnvironmentCollisionCellData>& NewCollisionWallData);
+	
+	FCollisionBoundsPlainInfo GetPlainDataInfo() const;
+	FEnvironmentCollisionVoxelGridData GetVoxelGridData() const;
 };
 

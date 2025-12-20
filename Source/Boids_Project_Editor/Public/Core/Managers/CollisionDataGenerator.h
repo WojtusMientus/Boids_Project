@@ -3,6 +3,7 @@
 #pragma once
 #include "Core/CollisionData.h"
 
+
 struct FCollisionData;
 struct FCollisionBoundsPlainInfo;
 
@@ -42,6 +43,7 @@ private:
 	TArray<FEnvironmentCollisionCellData>& OutCollisionForces);
 	void CalculateForcesAlongZ(int StartIndex, int EndIndex, const FVector& ForceVector, bool bAtLowerBoundary, 
 	TArray<FEnvironmentCollisionCellData>& OutCollisionForces);
+	
 	
 	TSet<FIntVector> WallCollisionDataIndices;
 	

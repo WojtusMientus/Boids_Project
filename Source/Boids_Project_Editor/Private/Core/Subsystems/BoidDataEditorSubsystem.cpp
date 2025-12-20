@@ -14,14 +14,15 @@ void UBoidDataEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 void UBoidDataEditorSubsystem::InitializeNecessarySimulationData(FCollisionBoundsPlainInfo& BoundsData,
 	TMap<FGameplayTag, FBoidsPlainInfo>& BoidsData)
 {
-	ENSURE_BOIDS_DATA_MANAGER()
+	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
 	BoidDataManager->InitializeBoidSimulationData(BoundsData, BoidsData);
 }
 
 void UBoidDataEditorSubsystem::RegenerateCollisionDataAndSave(const FCollisionBoundsPlainInfo& CollisionBoundsData)
 {
-	ENSURE_BOIDS_DATA_MANAGER()
-	ENSURE_COLLISION_DATA_MANAGER()
+	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
+	ENSURE_ALWAYS_RETURN(CollisionDataGenerator.IsValid())
+	
 	FCollisionData CollisionData;
 	CollisionData.CollisionBoundsData = CollisionBoundsData;
 	CollisionDataGenerator->GenerateCollisionData(CollisionData);
@@ -31,13 +32,13 @@ void UBoidDataEditorSubsystem::RegenerateCollisionDataAndSave(const FCollisionBo
 
 void UBoidDataEditorSubsystem::SaveBoidsData(const FBoidsPlainInfo& BoidsData)
 {
-	ENSURE_BOIDS_DATA_MANAGER()
+	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
 	BoidDataManager->SaveBoidsData(BoidsData);
 }
 
 void UBoidDataEditorSubsystem::SaveAllBoidsData(const TMap<FGameplayTag, FBoidsPlainInfo>& AllBoidsData)
 {
-	ENSURE_BOIDS_DATA_MANAGER()
+	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
 	BoidDataManager->SaveAllBoidsData(AllBoidsData);
 }
 

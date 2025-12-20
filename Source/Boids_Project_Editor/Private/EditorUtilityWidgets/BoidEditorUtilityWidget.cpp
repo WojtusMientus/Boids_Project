@@ -24,29 +24,29 @@ void UBoidEditorUtilityWidget::NativeDestruct()
 	
 	FEditorDelegates::BeginPIE.Remove(OnPIEBeginDelegateHandle);
 	FEditorDelegates::EndPIE.Remove(OnPIEEndDelegateHandle);
-	BoidsDelegates::OnBoidNumberUpdateFinish().Remove(OnBoidNumberUpdateFinishEvent);
+	BoidsDelegates::OnBoidNumberUpdateFinish.Remove(OnBoidNumberUpdateFinishEvent);
 }
 
 void UBoidEditorUtilityWidget::HandleBoidColorUpdate(const FGameplayTag Tag, const FLinearColor NewColor)
 {
-	BoidsDelegates::OnBoidColorUpdate().Broadcast(Tag, NewColor);
+	BoidsDelegates::OnBoidColorUpdate.Broadcast(Tag, NewColor);
 }
 
 void UBoidEditorUtilityWidget::HandleCollisionMultiplierUpdate(float NewEnvironmentCollisionMultiplier,
 	float NewBoundsCollisionMultiplier)
 {
-	BoidsDelegates::OnCollisionMultiplierUpdate().Broadcast(NewEnvironmentCollisionMultiplier,
+	BoidsDelegates::OnCollisionMultiplierUpdate.Broadcast(NewEnvironmentCollisionMultiplier,
 		NewBoundsCollisionMultiplier);
 }
 
 void UBoidEditorUtilityWidget::HandleBoidNumberUpdate(const FGameplayTag Tag, int32 CountToUpdate)
 {
-	BoidsDelegates::OnBoidNumberUpdate().Broadcast(Tag, CountToUpdate);
+	BoidsDelegates::OnBoidNumberUpdate.Broadcast(Tag, CountToUpdate);
 }
 
 void UBoidEditorUtilityWidget::HandleOnBoidParameterChange(const FBoidsPlainInfo& BoidInfo)
 {
-	BoidsDelegates::OnBoidParameterChange().Broadcast(BoidInfo);
+	BoidsDelegates::OnBoidParameterChange.Broadcast(BoidInfo);
 }
 
 void UBoidEditorUtilityWidget::HandleOnBoidNumberUpdateFinish_BP_Implementation(FGameplayTag Tag, int32 NewBoidCount)
@@ -58,7 +58,7 @@ void UBoidEditorUtilityWidget::HandleOnPIEBegin(bool bPIEStatus)
 	OnPIE_BeginEvent.Broadcast();
 	bIsInPIE = true;
 	
-	OnBoidNumberUpdateFinishEvent = BoidsDelegates::OnBoidNumberUpdateFinish().AddUObject(this, 
+	OnBoidNumberUpdateFinishEvent = BoidsDelegates::OnBoidNumberUpdateFinish.AddUObject(this, 
 		&UBoidEditorUtilityWidget::HandleOnBoidNumberUpdateFinishWrapper);
 }
 
@@ -67,7 +67,7 @@ void UBoidEditorUtilityWidget::HandleOnPIEEnd(bool bPIEStatus)
 	OnPIE_EndEvent.Broadcast();
 	bIsInPIE = false;
 	
-	BoidsDelegates::OnBoidNumberUpdateFinish().Remove(OnBoidNumberUpdateFinishEvent);
+	BoidsDelegates::OnBoidNumberUpdateFinish.Remove(OnBoidNumberUpdateFinishEvent);
 }
 
 void UBoidEditorUtilityWidget::HandleOnBoidNumberUpdateFinishWrapper(FGameplayTag Tag, int32 NewBoidCount)

@@ -14,18 +14,6 @@ class UStaticMeshComponent;
 class UHierarchicalInstancedStaticMeshComponent;
 
 
-#define ENSURE_WALL_DATA_INSTANCE_MESH_COMPONENT()\
-	ENSURE_ALWAYS_MESSAGE_RETURN(IsValid(WallDataInstancedStaticMeshComponent),\
-	"No valid wall datainstanced mesh component.")
-
-#define ENSURE_COLLISION_DATA_INSTANCE_MESH_COMPONENT()\
-	ENSURE_ALWAYS_MESSAGE_RETURN(IsValid(CollisionForcesDataInstancedStaticMeshComponent),\
-	"No valid collision data instanced mesh component.")
-
-#define ENSURE_BOUNDS_MESH_COMPONENT()\
-	ENSURE_ALWAYS_MESSAGE_RETURN(IsValid(SimulationBoundsMeshComponent), "No valid bounds mesh component.")
-
-
 /**
  * Visual representation of voxelized simulation area.
  * Shows voxelized wall data, its repelling forces with instanced static mesh and bounds mesh. 

@@ -5,6 +5,7 @@
 #include "EnvironmentCollisionCellData.h"
 #include "DataAssets/SimulationPlainInfoData/BoundsPlainInfoData.h"
 
+
 template<class T>
 struct FVoxelGridData
 {
@@ -21,11 +22,16 @@ struct FVoxelGridData
 struct FEnvironmentCollisionVoxelGridData
 {
 	/** Struct storing essential bounds data and its content. */
-	FVoxelGridData<FEnvironmentCollisionCellData>& VoxelGridData;
+	FVoxelGridData<FEnvironmentCollisionCellData> VoxelGridData;
 	
 	/** Final multiplier applied to environment collision force before retrieving data. */
 	float EnvironmentCollisionMultiplier = 1.0f;
 	
 	/** Final multiplier applied to bounds collision force before retrieving data. */
 	float BoundsCollisionMultiplier = 1.0f;
+	
+	FEnvironmentCollisionVoxelGridData() {};
+	FEnvironmentCollisionVoxelGridData(const UBoundsData* BoundsData);
+	
+	void OverwriteData(const UBoundsData* BoundsData);
 };

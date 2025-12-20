@@ -8,6 +8,7 @@
 
 class UBoidManagerSubsystem;
 class AVisualBoid;
+struct FLoadedGroup;
 
 /**
  * Manager for the in-scene visual representation of Boids.
@@ -37,13 +38,15 @@ protected:
 
 private:
 
+	void HandleLoadedMaterialAsset(const TArray<FLoadedGroup>& LoadedAssets);
+	
 	/** Populates the VisualBoid array with the correct number of Boids. Called only during object creation. */
 	void InitializeBoids();
 
 	/** Updates the world location and rotation of all visual Boids. */
 	UFUNCTION()
 	void HandleBoidsUpdate();
-
+	
 	/**
 	 * Updates number of Boids.
 	 * @param BoidType The type of Boid that was added or removed.
@@ -52,7 +55,7 @@ private:
 	UFUNCTION()
 	void HandleBoidsNumberUpdate(FGameplayTag BoidType, int32 NewBoidCount);
 	// TODO: Currently unused - Setup for future development.
-
+	
 	/**
 	 * Updates color of certain BoidType.
 	 * @param BoidType The type of Boid whose color was changed.
@@ -61,6 +64,7 @@ private:
 	void HandleBoidsColorUpdate(FGameplayTag BoidType, FLinearColor NewBoidColor);
 	// TODO: Currently unused - Setup for future development.
 	
+	
 	/** Array of all spawned visual Boid actors. */
 	UPROPERTY(VisibleInstanceOnly)
 	TArray<TObjectPtr<AVisualBoid>> VisualBoids;
@@ -68,10 +72,15 @@ private:
 	/** Weak reference to the BoidManagerSubsystem for event binding and unbinding. */
 	TWeakObjectPtr<UBoidManagerSubsystem> BoidManagerSubsystem;
 	
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterialInstance;
+	
 #if WITH_EDITOR
 	/**  */
 	FDelegateHandle  BoidsColorChangeDelegateHandle;
 #endif
 	
 };
+
+
 

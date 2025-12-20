@@ -32,6 +32,8 @@ public:
 	 */
 	void UpdateBoid(const FVector& NewPosition, const FVector& NewVelocity);
 
+	void SetMaterial(UMaterialInterface* NewMaterial);
+	
 protected:
 	
 	UPROPERTY(EditDefaultsOnly)

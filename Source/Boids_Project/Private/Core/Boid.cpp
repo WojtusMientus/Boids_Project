@@ -1,9 +1,8 @@
 
 #include "Core/Boid.h"
-#include "Core/BoidManagerSubsystem.h"
 
 
-FBoid::FBoid(const FVector& InitPosition, const FVector& InitVelocity, const int32 InitID)
+FBoid::FBoid(const FVector& InitPosition, const FVector& InitVelocity)
 			: Position(InitPosition), Velocity(InitVelocity)
 {
 }

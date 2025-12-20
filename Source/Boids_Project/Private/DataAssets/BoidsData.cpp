@@ -14,3 +14,10 @@ void UBoidsData::OverwritePlainData(const FBoidsPlainInfo& NewBoidsData)
 	Color = NewBoidsData.Color;
 }
 
+FBoidsPlainInfo UBoidsData::GetPlainDataInfo() const
+{
+	FBoidsPlainInfo PlainDataInfo;
+	PlainDataInfo.OverwriteData(this);
+	return PlainDataInfo;
+}
+

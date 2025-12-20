@@ -89,7 +89,7 @@ void AVisualSimulationBoundsData::TryToUnsubscribeFromSubsystemEvent()
 
 void AVisualSimulationBoundsData::HandleBoundsChanged(const FVector& NewCenter, const FVector& NewExtent)
 {
-	ENSURE_BOUNDS_MESH_COMPONENT()
+	ENSURE_ALWAYS_RETURN(IsValid(SimulationBoundsMeshComponent))
 	SimulationBoundsMeshComponent->SetWorldLocation(NewCenter);
 	
 	const FVector NewBoundsSize = NewExtent * MeshScaleFactor;
@@ -99,10 +99,9 @@ void AVisualSimulationBoundsData::HandleBoundsChanged(const FVector& NewCenter, 
 
 void AVisualSimulationBoundsData::HandleRegenerationCollisionData(const FCollisionData& CollisionData)
 {
-	ENSURE_WALL_DATA_INSTANCE_MESH_COMPONENT()
-	ENSURE_COLLISION_DATA_INSTANCE_MESH_COMPONENT()
-	ENSURE_ALWAYS_MESSAGE_RETURN(CollisionData.EveryVoxelCenterData.Num() == CollisionData.CollisionForcesData.Num(),
-		"Collision forces data is invalid!")
+	ENSURE_ALWAYS_RETURN(IsValid(WallDataInstancedStaticMeshComponent))
+	ENSURE_ALWAYS_RETURN(IsValid(CollisionForcesDataInstancedStaticMeshComponent))
+	ENSURE_ALWAYS_RETURN(CollisionData.EveryVoxelCenterData.Num() == CollisionData.CollisionForcesData.Num())
 	
 	WallDataInstancedStaticMeshComponent->ClearInstances();
 	CollisionForcesDataInstancedStaticMeshComponent->ClearInstances();
@@ -135,9 +134,9 @@ void AVisualSimulationBoundsData::HandleRegenerationCollisionData(const FCollisi
 
 void AVisualSimulationBoundsData::HandleAnyComponentVisibilityChanged(const FVisualizerVisibility VisualizerVisibility)
 {
-	ENSURE_BOUNDS_MESH_COMPONENT()
-	ENSURE_WALL_DATA_INSTANCE_MESH_COMPONENT()
-	ENSURE_COLLISION_DATA_INSTANCE_MESH_COMPONENT()
+	ENSURE_ALWAYS_RETURN(IsValid(SimulationBoundsMeshComponent))
+	ENSURE_ALWAYS_RETURN(IsValid(WallDataInstancedStaticMeshComponent))
+	ENSURE_ALWAYS_RETURN(IsValid(CollisionForcesDataInstancedStaticMeshComponent))
 	
 	SimulationBoundsMeshComponent->SetVisibility(VisualizerVisibility.bIsBoundsVisible);
 	WallDataInstancedStaticMeshComponent->SetVisibility(VisualizerVisibility.bIsWallDataVisible);

@@ -16,9 +16,8 @@ public:
 	 * Constructs a Boid with an initial position and velocity.
 	 * @param InitPosition Starting world-space position.
 	 * @param InitVelocity Starting velocity vector.
-	 * @param InitID Starting ID.
 	 */
-	FBoid(const FVector& InitPosition, const FVector& InitVelocity, const int32 InitID);	
+	FBoid(const FVector& InitPosition, const FVector& InitVelocity);	
 
 	/**
 	 * Updates the Boid's position based on its velocity.

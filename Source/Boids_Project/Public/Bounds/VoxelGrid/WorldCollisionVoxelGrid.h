@@ -3,6 +3,8 @@
 #pragma once
 
 #include "VoxelGrid.h"
+#include "Bounds/VoxelGrid/VoxelGridData/EnvironmentCollisionCellData.h"
+
 
 
 /**
@@ -12,21 +14,34 @@
  */
 class FWorldCollisionVoxelGrid: public FVoxelGrid<FEnvironmentCollisionCellData>
 {
+	
 public:
 	
-	FWorldCollisionVoxelGrid(const FEnvironmentCollisionVoxelGridData& VoxelGridCollisionData);
+	virtual void InitializeWorldCollisionVoxelGrid(const 
+		FEnvironmentCollisionVoxelGridData& EnvironmentCollisionVoxelGridData);
 	
-	FVector GetFinalCollisionVectorAtIndex(const int32 Index) const;
-	FVector GetFinalCollisionVectorAtLocation(const FVector& Location) const;
+	FORCEINLINE FVector GetFinalCollisionVectorAtIndex(const int32 Index) const;
+	FORCEINLINE FVector GetFinalCollisionVectorAtLocation(const FVector& Location) const;
 	
 	void UpdateCollisionMultiplier(float InEnvironmentCollisionMultiplier, float InBoundsCollisionMultiplier);
-	
+
 private:
 	
-	/** Final multiplier applied to bounds collision force before retrieving data. */
-	float EnvironmentCollisionMultiplier;
-	
 	/** Final multiplier applied to environment collision force before retrieving data. */
-	float BoundsCollisionMultiplier;
+	float EnvironmentCollisionMultiplier = 0.0f;
+	
+	/** Final multiplier applied to bounds collision force before retrieving data. */
+	float BoundsCollisionMultiplier = 0.0f;
 };
 
+inline FVector FWorldCollisionVoxelGrid::GetFinalCollisionVectorAtIndex(const int32 Index) const
+{
+	const FEnvironmentCollisionCellData CollisionData = GetValueAtIndex(Index);
+	return CollisionData.EnvironmentCollisionForce * EnvironmentCollisionMultiplier + 
+		CollisionData.BoundsCollisionForce * BoundsCollisionMultiplier;
+}
+
+inline FVector FWorldCollisionVoxelGrid::GetFinalCollisionVectorAtLocation(const FVector& Location) const
+{
+	return GetFinalCollisionVectorAtIndex(PositionToArrayIndex(Location));
+}

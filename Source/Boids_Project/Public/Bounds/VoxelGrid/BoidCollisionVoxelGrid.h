@@ -8,12 +8,10 @@
 #if WITH_EDITOR
 
 #define ENSURE_ARRAY_INDEX_VALID(Index)\
-	ENSURE_ALWAYS_MESSAGE_RETURN(InternalVoxelGrid.IsValidIndex(Index),\
-	"No valid index.")
+	ENSURE_ALWAYS_RETURN(InternalVoxelGrid.IsValidIndex(Index))
 
 #define ENSURE_ARRAY_CELL_INDEX_VALID(GridIndex, CellIndex)\
-	ENSURE_ALWAYS_MESSAGE_RETURN(InternalVoxelGrid[GridIndex].IsValidIndex(CellIndex),\
-	"No valid cell index.")
+	ENSURE_ALWAYS_RETURN(InternalVoxelGrid[GridIndex].IsValidIndex(CellIndex))
 
 #endif
 
@@ -32,17 +30,18 @@ class FBoidCollisionVoxelGrid: public FVoxelGrid<TArray<int32>>
 {
 public:
 	
-	FBoidCollisionVoxelGrid(const FVoxelGridData<TArray<int32>>& VoxelGridData);
-	
 	/** Delegate broadcast whenever a Boid’s grid index is updated (after add, swap, or remove) */
 	FOnBoidGridIndexChangedEvent OnBoidGridIndexChanged;
 	
 	/** Initializes every cell array with estimated number of Boids in cell. */
-	void InitializeBoidCollisionGrid(const int32 StartingNumberOfBoids);
+	void InitializeBoidCollisionGrid(const FVoxelGridData<TArray<int32>>& VoxelGridData, 
+		const int32 StartingNumberOfBoids);
 	
 	void AddBoidToVoxelGrid(const int32 BoidID, const FVector& BoidPosition);
 	void UpdateBoid(const FVector& BoidPosition, const int32 GridIndex, const int32 GridCellIndex);
 	void RemoveBoid(const int32 GridIndex, const int32 GridCellIndex);
+	
+	FORCEINLINE TArray<TArray<int32>> GetVoxelGrid() { return InternalVoxelGrid; };
 	
 protected:
 	

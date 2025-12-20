@@ -1,5 +1,5 @@
 
-#include "Utilities/Libraries/MainEditorUtilityLibrary.h"
+#include "EditorUtilities/Libraries/MainEditorUtilityLibrary.h"
 #include "GameplayTagContainer.h"
 
 FString UMainEditorUtilityLibrary::GetGameplayTagLeafName(const FGameplayTag Tag)

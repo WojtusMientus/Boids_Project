@@ -6,7 +6,6 @@
 #include "EditorUtilityLibrary.h"
 #include "MainEditorUtilityLibrary.generated.h"
 
-struct FGameplayTag;
 
 /**
  * Main editor utility library. Used for testing purposes.

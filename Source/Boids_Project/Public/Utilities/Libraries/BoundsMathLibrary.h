@@ -1,3 +1,5 @@
+// Copyright WojtusMientus
+
 #pragma once
 
 

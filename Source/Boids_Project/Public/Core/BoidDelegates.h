@@ -1,3 +1,4 @@
+// Copyright WojtusMientus
 
 #pragma once
 
@@ -16,33 +17,9 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnBoidParameterChangeEvent, const FBoidsPla
 
 namespace BoidsDelegates
 {
-	inline FOnBoidColorUpdateEvent& OnBoidColorUpdate()
-	{
-		static FOnBoidColorUpdateEvent InstancedEvent;
-		return InstancedEvent;
-	}
-	
-	inline FOnCollisionMultiplierUpdateEvent& OnCollisionMultiplierUpdate()
-	{
-		static FOnCollisionMultiplierUpdateEvent InstancedEvent;
-		return InstancedEvent;
-	}
-	
-	inline FOnBoidNumberUpdateEvent& OnBoidNumberUpdate()
-	{
-		static FOnBoidNumberUpdateEvent InstancedEvent;
-		return InstancedEvent;
-	}
-	
-	inline FOnBoidNumberUpdateFinishEvent& OnBoidNumberUpdateFinish()
-	{
-		static FOnBoidNumberUpdateFinishEvent InstancedEvent;
-		return InstancedEvent;
-	}
-	
-	inline FOnBoidParameterChangeEvent& OnBoidParameterChange()
-	{
-		static FOnBoidParameterChangeEvent InstancedEvent;
-		return InstancedEvent;
-	}
+	extern BOIDS_PROJECT_API FOnBoidColorUpdateEvent OnBoidColorUpdate;
+	extern BOIDS_PROJECT_API FOnCollisionMultiplierUpdateEvent OnCollisionMultiplierUpdate;
+	extern BOIDS_PROJECT_API FOnBoidNumberUpdateEvent OnBoidNumberUpdate;
+	extern BOIDS_PROJECT_API FOnBoidNumberUpdateFinishEvent OnBoidNumberUpdateFinish;
+	extern BOIDS_PROJECT_API FOnBoidParameterChangeEvent OnBoidParameterChange;
 }

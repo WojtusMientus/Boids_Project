@@ -15,7 +15,6 @@ class FVoxelGrid
 {
 public:
 	
-	FVoxelGrid(const FVoxelGridData<T>& VoxelGridData);
 	virtual ~FVoxelGrid() = default;
 	
 	/** Returns the size of the voxel grid (Max - Min). */
@@ -28,22 +27,24 @@ public:
 	 * Returns T value at given location.
 	 * @param Location Position to sample on.
 	 */
-	FORCEINLINE T GetValueAtLocation(const FVector& Location) const;
+	FORCEINLINE const T& GetValueAtLocation(const FVector& Location) const;
 	
 	/**
 	 * Returns T value at given index.
 	 * @param Index Index to sample on.
 	 */
-	FORCEINLINE T GetValueAtIndex(const int32 Index) const;
+	FORCEINLINE const T& GetValueAtIndex(const int32 Index) const;
 	
 	/** Returns number of voxel grid cells. */
 	FORCEINLINE int32 GetGridCellCount() const { return InternalVoxelGrid.Num(); }
 
 	
+	FORCEINLINE FVector GetRandomPointInsideGrid() const;
+	
 protected:
 	
 	/** Initializes the voxel grid. */
-	virtual void InitializeVoxelGrid();
+	virtual void InitializeVoxelGrid(const FVoxelGridData<T>& InVoxelGridData);
 	
 	/**
 	 * Converts 3D location to 1D array index.
@@ -64,13 +65,13 @@ protected:
 		
 	
 	/** The minimum corner of the voxel grid (left-bottom-back).*/
-	FVector BoundsMin;
+	FVector BoundsMin = FVector::Zero();
 	
 	/** The maximum corner of the voxel grid (right-top-forward). */
-	FVector BoundsMax;
+	FVector BoundsMax = FVector::Zero();
 	
 	/** Grid resolution along the axes. */
-	FIntVector GridResolution = FIntVector(25,25,25);
+	FIntVector GridResolution = FIntVector(10,10,10);
 	
 	/** Calculated voxel sizes along each axis. */
 	FVector VoxelCellSize = FVector();
@@ -80,7 +81,29 @@ protected:
 };
 
 template <class T>
-FVoxelGrid<T>::FVoxelGrid(const FVoxelGridData<T>& InVoxelGridData)
+const T& FVoxelGrid<T>::GetValueAtLocation(const FVector& Location) const
+{
+	const T& Value = GetValueAtIndex(PositionToArrayIndex(Location));
+	return Value;
+}
+
+template <class T>
+const T& FVoxelGrid<T>::GetValueAtIndex(const int32 Index) const
+{
+	const int32 ClampedIndex = FMath::Clamp(Index, 0, InternalVoxelGrid.Num() - 1);
+	return InternalVoxelGrid[ClampedIndex];
+}
+
+template <class T>
+FVector FVoxelGrid<T>::GetRandomPointInsideGrid() const
+{
+	return FVector(FMath::RandRange(BoundsMin.X, BoundsMax.X),
+			FMath::RandRange(BoundsMin.Y, BoundsMax.Y),
+			FMath::RandRange(BoundsMin.Z, BoundsMax.Z));
+}
+
+template <class T>
+void FVoxelGrid<T>::InitializeVoxelGrid(const FVoxelGridData<T>& InVoxelGridData)
 {
 	const FVector HalfExtent = InVoxelGridData.BoundsData.Extent / 2;
 	
@@ -88,26 +111,7 @@ FVoxelGrid<T>::FVoxelGrid(const FVoxelGridData<T>& InVoxelGridData)
 	BoundsMax = InVoxelGridData.BoundsData.Center + HalfExtent;	
 	
 	GridResolution = InVoxelGridData.BoundsData.GridResolution;
-}
-
-template <class T>
-T FVoxelGrid<T>::GetValueAtLocation(const FVector& Location) const
-{
-	const int32 ClampedArrayIndex = FMath::Clamp(PositionToArrayIndex(Location), 
-		0, InternalVoxelGrid.Num() - 1);
-	return InternalVoxelGrid[ClampedArrayIndex];
-}
-
-template <class T>
-T FVoxelGrid<T>::GetValueAtIndex(const int32 Index) const
-{
-	const int32 ClampedIndex = FMath::Clamp(Index, 0, InternalVoxelGrid.Num() - 1);
-	return InternalVoxelGrid[ClampedIndex];
-}
-
-template <class T>
-void FVoxelGrid<T>::InitializeVoxelGrid()
-{
+	
 	InternalVoxelGrid.SetNumZeroed(GridResolution.X * GridResolution.Y * GridResolution.Z);
 	VoxelCellSize = FBoundsMath::GetVoxelCellSize(GetGridCenter(), GetExtent(), GridResolution);
 }

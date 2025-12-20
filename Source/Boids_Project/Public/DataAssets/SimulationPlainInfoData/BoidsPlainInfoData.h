@@ -47,6 +47,8 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	int32 PerceptionAngle = 360;
 	
+	FBoidsPlainInfo(){};
+	FBoidsPlainInfo(const UBoidsData* NewBoidsData);
 	
 	void OverwriteData(const UBoidsData* NewBoidsData);
 };

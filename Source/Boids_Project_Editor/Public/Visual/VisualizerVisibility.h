@@ -10,11 +10,11 @@ struct FVisualizerVisibility
 	GENERATED_BODY()
 	
 	UPROPERTY(BlueprintReadWrite)
-	bool bIsBoundsVisible;
+	bool bIsBoundsVisible = false;
 
 	UPROPERTY(BlueprintReadWrite)
-	bool bIsWallDataVisible;
+	bool bIsWallDataVisible = false;
 
 	UPROPERTY(BlueprintReadWrite)
-	bool bIsCollisionDataVisible;
+	bool bIsCollisionDataVisible = false;
 };

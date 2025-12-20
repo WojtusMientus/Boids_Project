@@ -24,6 +24,16 @@ void AVisualBoid::UpdateBoid(const FVector& NewPosition, const FVector& NewVeloc
 	AlignRotationToVelocity(NewVelocity);
 }
 
+void AVisualBoid::SetMaterial(UMaterialInterface* NewMaterial)
+{
+	if (!IsValid(BoidMeshComponent) || !NewMaterial)
+	{
+		return;
+	}
+	
+	BoidMeshComponent->SetMaterial(0, NewMaterial);
+}
+
 void AVisualBoid::AlignRotationToVelocity(const FVector& Velocity)
 {
 	const FRotator NewActorRotation = Velocity.Rotation();

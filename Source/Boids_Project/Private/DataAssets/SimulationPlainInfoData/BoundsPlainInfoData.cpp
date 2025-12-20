@@ -2,6 +2,11 @@
 #include "DataAssets/SimulationPlainInfoData/BoundsPlainInfoData.h"
 #include "DataAssets/BoundsData.h"
 
+FCollisionBoundsPlainInfo::FCollisionBoundsPlainInfo(const UBoundsData* NewBoundsData)
+{
+	OverwriteData(NewBoundsData);
+}
+
 void FCollisionBoundsPlainInfo::OverwriteData(const UBoundsData* NewBoundsData)
 {
 	if (!NewBoundsData)

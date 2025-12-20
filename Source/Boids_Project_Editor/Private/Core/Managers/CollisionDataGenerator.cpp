@@ -16,8 +16,7 @@ void FCollisionDataGenerator::GenerateCollisionData(FCollisionData& CollisionDat
 	CollisionData.CollisionForcesData.SetNumZeroed(VoxelGridCellCount);
 	
 	UWorld* CurrentWorld = GetCurrentEditorWorld();
-	ENSURE_ALWAYS_MESSAGE_RETURN(CurrentWorld != nullptr, 
-		"Couldn't find world for querying collision data.");
+	ENSURE_ALWAYS_RETURN(IsValid(CurrentWorld));
 	
 	ReserveEstimatedDataSize(VoxelGridCellCount, CollisionData);
 	CalculateWallCollisionDataLocations(CurrentWorld, CollisionData);

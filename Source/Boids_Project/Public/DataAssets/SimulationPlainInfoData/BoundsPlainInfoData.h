@@ -23,7 +23,7 @@ public:
 	FVector Center = FVector::ZeroVector;
 
 	UPROPERTY(BlueprintReadWrite)
-	FVector Extent = FVector(100.0f,100.0f,100.0f);
+	FVector Extent = FVector(1000.0f,1000.0f,1000.0f);
 
 	UPROPERTY(BlueprintReadWrite)
 	FIntVector GridResolution = FIntVector(1,1,1);
@@ -54,6 +54,8 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	float BoundsCollisionMultiplier = 1.0f;
 	
+	FCollisionBoundsPlainInfo() {};
+	FCollisionBoundsPlainInfo(const UBoundsData* NewBoundsData);
 	
 	void OverwriteData(const UBoundsData* NewBoundsData);
 };

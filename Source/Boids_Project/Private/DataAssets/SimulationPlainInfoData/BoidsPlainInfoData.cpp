@@ -2,6 +2,11 @@
 #include "DataAssets/SimulationPlainInfoData/BoidsPlainInfoData.h"
 #include "DataAssets/BoidsData.h"
 
+FBoidsPlainInfo::FBoidsPlainInfo(const UBoidsData* NewBoidsData)
+{
+	OverwriteData(NewBoidsData);
+}
+
 void FBoidsPlainInfo::OverwriteData(const UBoidsData* NewBoidsData)
 {
 	if (!NewBoidsData)

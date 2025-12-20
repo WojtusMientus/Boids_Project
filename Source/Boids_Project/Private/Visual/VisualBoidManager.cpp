@@ -2,7 +2,10 @@
 #include "Visual/VisualBoidManager.h"
 
 #include "Core/BoidDelegates.h"
-#include "Core/BoidManagerSubsystem.h"
+#include "Core/Subsystems/BoidManagerSubsystem.h"
+#include "Utilities/Subsystems/RuntimeDataLoaderSubsystem.h"
+#include "Materials/MaterialInstanceConstant.h"
+#include "Utilities/BoidConstants.h"
 #include "Visual/VisualBoid.h"
 
 
@@ -15,22 +18,42 @@ void AVisualBoidManager::BeginPlay()
 {
 	Super::BeginPlay();
 
+	
 #if WITH_EDITOR
-	BoidsColorChangeDelegateHandle = BoidsDelegates::OnBoidColorUpdate().AddUObject(this,  &AVisualBoidManager::HandleBoidsColorUpdate);
+	BoidsColorChangeDelegateHandle = BoidsDelegates::OnBoidColorUpdate.AddUObject(this,  
+		&AVisualBoidManager::HandleBoidsColorUpdate);
 #endif
+	
 	
 	if (UWorld* World = GetWorld())
 	{
-		BoidManagerSubsystem = World->GetSubsystem<UBoidManagerSubsystem>();
+		// BoidManagerSubsystem = World->GetSubsystem<UBoidManagerSubsystem>();
 	
 		if (BoidManagerSubsystem.IsValid())
 		{			
-			BoidManagerSubsystem->OnBoidsUpdateFinish.AddDynamic(this, &AVisualBoidManager::HandleBoidsUpdate);
-			BoidManagerSubsystem->OnBoidsNumberUpdate.AddDynamic(this, &AVisualBoidManager::HandleBoidsNumberUpdate);
+			BoidManagerSubsystem->OnBoidsUpdateFinish.AddUObject(this, &AVisualBoidManager::HandleBoidsUpdate);
+			BoidManagerSubsystem->OnBoidsNumberUpdate.AddUObject(this, &AVisualBoidManager::HandleBoidsNumberUpdate);
+		}
+		
+		InitializeBoids();
+		
+		if (UGameInstance* GameInstance = World->GetGameInstance())
+		{
+			if (URuntimeDataLoaderSubsystem* RuntimeDataLoader = GameInstance->GetSubsystem<URuntimeDataLoaderSubsystem>())
+			{
+				TArray<FLoadRequest> LoadRequests;
+				
+				FLoadRequest LoadRequest;
+				LoadRequest.AssetClass = UMaterialInstanceConstant::StaticClass();
+				LoadRequest.AssetRequestType = EAssetRequestType::SingleAsset;
+				LoadRequest.AssetPath = FBoidConstants::Paths::MaterialsPath;
+				
+				LoadRequests.Add(LoadRequest);
+				RuntimeDataLoader->LoadAssets(LoadRequests, FOnBatchLoadCompleteEvent::CreateUObject(this, 
+					&AVisualBoidManager::HandleLoadedMaterialAsset));
+			}
 		}
 	}
-	
-	InitializeBoids();
 }
 
 void AVisualBoidManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -38,8 +61,35 @@ void AVisualBoidManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 	
 #if WITH_EDITOR
-	BoidsDelegates::OnBoidColorUpdate().Remove(BoidsColorChangeDelegateHandle);
+	BoidsDelegates::OnBoidColorUpdate.Remove(BoidsColorChangeDelegateHandle);
 #endif
+}
+
+void AVisualBoidManager::HandleLoadedMaterialAsset(const TArray<FLoadedGroup>& LoadedAssets)
+{
+	if (LoadedAssets.IsEmpty() || LoadedAssets[0].LoadedAssets.IsEmpty())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Loaded Assets"));
+		return;
+	}
+	if (UMaterialInstanceConstant* LoadedMaterialInstance = Cast<UMaterialInstanceConstant>(LoadedAssets[0].LoadedAssets[0]))
+	{
+		DynamicMaterialInstance = UMaterialInstanceDynamic::Create(LoadedMaterialInstance, this);
+		
+		if (!IsValid(DynamicMaterialInstance))
+		{
+			return;
+		}
+
+		DynamicMaterialInstance->SetVectorParameterValue(FName(FBoidConstants::BoidMaterialColorParameter), 
+			FLinearColor::Red);
+	}	
+	
+	for (int i = 0; i < VisualBoids.Num(); i++)
+	{
+		VisualBoids[i]->SetMaterial(DynamicMaterialInstance);
+	}
+	
 }
 
 void AVisualBoidManager::InitializeBoids()
@@ -76,10 +126,8 @@ void AVisualBoidManager::HandleBoidsUpdate()
 	{
 		return;
 	}
-
-	const int32 NumberOfBoids = BoidManagerSubsystem->GetBoidsCount(); 
 	
-	for (int i = 0; i < NumberOfBoids; i++)
+	for (int i = 0; i < VisualBoids.Num(); i++)
 	{
 		FVector NewLocation = BoidManagerSubsystem->GetBoidPositionAt(i);
 		FVector NewVelocity = BoidManagerSubsystem->GetBoidVelocityAt(i);
@@ -94,5 +142,10 @@ void AVisualBoidManager::HandleBoidsNumberUpdate(FGameplayTag BoidType, int32 Ne
 
 void AVisualBoidManager::HandleBoidsColorUpdate(FGameplayTag BoidType, FLinearColor NewBoidColor)
 {
-	// TODO: Implement visual color update
+	if (!IsValid(DynamicMaterialInstance))
+	{
+		return;
+	}
+	
+	DynamicMaterialInstance->SetVectorParameterValue(FName(FBoidConstants::BoidMaterialColorParameter), NewBoidColor);
 }
