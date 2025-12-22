@@ -4,11 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "BaseClass/GameInstanceSubsystemBase.h"
+#include "Utilities/Subsystems/BoidDataManagerSubsystem.h"
 #include "VisualBoidManagerSubsystem.generated.h"
 
 
-class URuntimeDataLoaderSubsystem;
-class UBoidManagerSubsystem;
 struct FLoadedGroup;
 class AVisualBoid;
 struct FGameplayTag;
@@ -31,6 +30,8 @@ public:
 	
 private:
 
+	void HandleVisualSimulationInitialization();
+	
 	void PostWorldInitialized(UWorld* World, FWorldInitializationValues WorldInitializationValues);
 	
 	void GetDataFromSimulationSettings();
@@ -40,13 +41,18 @@ private:
 	void InitializeBoids();
 	void InitializeBoid(AVisualBoid* BoidToInitialize, int32 BoidIndex);
 	
+	void InitializeBoidsTest();
+	void InitializeBoidTest(AVisualBoid* BoidToInitialize, int32 SpeciesIndex, int32 BoidIndex);
+	
 	/** Asks for UMaterialInstanceConstant saved on the disk. */
 	void RequestMaterialInstanceAsset();
-	void HandleLoadedMaterialAsset(const TArray<FLoadedGroup>& LoadedAssets);
+	void HandleLoadedMaterialAsset(UMaterialInstanceConstant* LoadedMaterialInstance);
 	
 	
 	/** Updates the world location and rotation of all visual Boids. */
 	void HandleBoidsUpdate();
+	
+	void HandleBoidsUpdateTest();
 	
 	
 	void HandleBoidsNumberUpdate(FGameplayTag BoidType, int32 NewBoidCount);
@@ -57,21 +63,28 @@ private:
 #endif
 	
 	
+	bool bIsVisualSimulationReadyToInitialize = false;
+	bool bIsVisualSimulationInitialized = false;
+	
+
+	TArray<TArray<TObjectPtr<AVisualBoid>>> DifferentSpeciesBoids;
+	
 	UPROPERTY()
 	TSubclassOf<AVisualBoid> VisualBoidClass;
 	
 	/** Array of all spawned visual Boid actors. */
 	UPROPERTY()
 	TArray<TObjectPtr<AVisualBoid>> VisualBoids;
+	
+	UPROPERTY()
+	TArray<TObjectPtr<UMaterialInstanceDynamic>> BoidMaterials;
+	
 
 	/** Weak reference to the BoidManagerSubsystem for event binding and unbinding. */
 	TWeakObjectPtr<UBoidManagerSubsystem> BoidManagerSubsystem;
 	
-	TWeakObjectPtr<URuntimeDataLoaderSubsystem> RuntimeDataLoaderSubsystem;
-	
-	/** Created material for assigning certain color to Boids at runtime. */
-	UPROPERTY()
-	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterialInstance;
+	TWeakObjectPtr<UBoidDataManagerSubsystem> BoidDataManager;
+
 	
 #if WITH_EDITOR
 	FDelegateHandle BoidsColorChangeDelegateHandle;

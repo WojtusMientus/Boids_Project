@@ -16,6 +16,8 @@ void UBoundsData::OverwritePlainData(const FCollisionBoundsPlainInfo& NewCollisi
 	Extent = NewCollisionBoundsData.BoundsPlainData.Extent;
 	GridResolution = NewCollisionBoundsData.BoundsPlainData.GridResolution;
 	EnvironmentCollisionRows = NewCollisionBoundsData.EnvironmentCollisionRows;
+	BoundsCollisionRows = NewCollisionBoundsData.BoundsCollisionRows;
+	EnvironmentCollisionMultiplier = NewCollisionBoundsData.EnvironmentCollisionMultiplier;
 	BoundsCollisionMultiplier = NewCollisionBoundsData.BoundsCollisionMultiplier;
 	CollisionForces = NewCollisionWallData;
 	CollisionArraySize = GridResolution;

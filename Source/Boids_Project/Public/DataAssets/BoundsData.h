@@ -61,6 +61,7 @@ public:
 private:
 	
 	/** Stored calculated collision forces. */
+	UPROPERTY()
 	TArray<FEnvironmentCollisionCellData> CollisionForces;
 
 

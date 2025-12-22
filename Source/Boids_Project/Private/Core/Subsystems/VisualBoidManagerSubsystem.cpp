@@ -1,6 +1,5 @@
 ﻿
 #include "Core/Subsystems/VisualBoidManagerSubsystem.h"
-#include "Utilities/Subsystems/RuntimeDataLoaderSubsystem.h"
 #include "Core/BoidDelegates.h"
 #include "Core/Subsystems/BoidManagerSubsystem.h"
 #include "Materials/MaterialInstanceConstant.h"
@@ -18,14 +17,19 @@ void UVisualBoidManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 	
 	Super::Initialize(Collection);
 	Collection.InitializeDependency(UBoidManagerSubsystem::StaticClass());
+	Collection.InitializeDependency(UBoidDataManagerSubsystem::StaticClass());
 
 	UGameInstance* GameInstance = World->GetGameInstance();
 	ENSURE_ALWAYS_RETURN(IsValid(GameInstance))
 	
 	BoidManagerSubsystem = GameInstance->GetSubsystem<UBoidManagerSubsystem>();
 	ENSURE_ALWAYS_RETURN(BoidManagerSubsystem.IsValid())
+	BoidManagerSubsystem->OnBoidsInitializationFinish.AddUObject(this, 
+		&UVisualBoidManagerSubsystem::HandleVisualSimulationInitialization);
 	
-	RuntimeDataLoaderSubsystem = GameInstance->GetSubsystem<URuntimeDataLoaderSubsystem>();
+	BoidDataManager = GameInstance->GetSubsystem<UBoidDataManagerSubsystem>();
+	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
+	
 	
 	GetDataFromSimulationSettings();
 	BindNecessaryDelegates();
@@ -47,11 +51,28 @@ void UVisualBoidManagerSubsystem::Deinitialize()
 #endif
 }
 
+void UVisualBoidManagerSubsystem::HandleVisualSimulationInitialization()
+{
+	ENSURE_ALWAYS_RETURN(BoidManagerSubsystem.IsValid())
+	
+	if (bIsVisualSimulationReadyToInitialize && !bIsVisualSimulationInitialized)
+	{
+		InitializeBoidsTest();
+		RequestMaterialInstanceAsset();
+	}
+}
+
 void UVisualBoidManagerSubsystem::PostWorldInitialized(UWorld* World,
 	FWorldInitializationValues WorldInitializationValues)
 {
-	InitializeBoids();
-	RequestMaterialInstanceAsset();
+	bIsVisualSimulationReadyToInitialize = true;
+	ENSURE_ALWAYS_RETURN(BoidManagerSubsystem.IsValid())
+	
+	if (BoidManagerSubsystem->IsSimulationReady() && !bIsVisualSimulationInitialized)
+	{
+		InitializeBoidsTest();
+		RequestMaterialInstanceAsset();
+	}
 }
 
 void UVisualBoidManagerSubsystem::GetDataFromSimulationSettings()
@@ -65,7 +86,7 @@ void UVisualBoidManagerSubsystem::GetDataFromSimulationSettings()
 void UVisualBoidManagerSubsystem::BindNecessaryDelegates()
 {
 	BoidManagerSubsystem->OnBoidsUpdateFinish.AddUObject(this, 
-		&UVisualBoidManagerSubsystem::HandleBoidsUpdate);
+		&UVisualBoidManagerSubsystem::HandleBoidsUpdateTest);
 	BoidManagerSubsystem->OnBoidsNumberUpdate.AddUObject(this, 
 		&UVisualBoidManagerSubsystem::HandleBoidsNumberUpdate);
 }
@@ -95,36 +116,81 @@ void UVisualBoidManagerSubsystem::InitializeBoid(AVisualBoid* BoidToInitialize, 
 	VisualBoids.Add(BoidToInitialize);
 }
 
-void UVisualBoidManagerSubsystem::RequestMaterialInstanceAsset()
+void UVisualBoidManagerSubsystem::InitializeBoidsTest()
 {
-	ENSURE_ALWAYS_RETURN(RuntimeDataLoaderSubsystem.IsValid())
+	bIsVisualSimulationInitialized = true;
+	UWorld* World = GetWorld();
+	ENSURE_ALWAYS_RETURN(IsValid(World) && BoidManagerSubsystem.IsValid())
 	
-	TArray<FLoadRequest> LoadRequests = URuntimeDataLoaderSubsystem::CreateLoadRequest(
-		EAssetRequestType::SingleAsset, FBoidConstants::Paths::MaterialsPath, 
-		UMaterialInstanceConstant::StaticClass());
+	const int32 DifferentBoidSpeciesCount = BoidManagerSubsystem->GetDifferentBoidSpeciesCount(); 
+	DifferentSpeciesBoids.Reserve(DifferentBoidSpeciesCount);
 	
-	RuntimeDataLoaderSubsystem->LoadAssets(LoadRequests, FOnBatchLoadCompleteEvent::CreateUObject(this, 
-		&UVisualBoidManagerSubsystem::HandleLoadedMaterialAsset));
+	for (int SpeciesIndex = 0; SpeciesIndex < DifferentBoidSpeciesCount; SpeciesIndex++)
+	{
+		const int32 BoidCount = BoidManagerSubsystem->GetBoidsSpeciesCount(SpeciesIndex);
+		
+		DifferentSpeciesBoids.Add(TArray<TObjectPtr<AVisualBoid>>());
+		DifferentSpeciesBoids.Reserve(BoidCount);
+		
+		for (int i = 0; i < BoidCount; i++)
+		{
+			AVisualBoid* VisualBoid = World->SpawnActor<AVisualBoid>(VisualBoidClass, FVector(), FRotator());		
+			InitializeBoidTest(VisualBoid, SpeciesIndex, i);
+		}
+	}
 }
 
-void UVisualBoidManagerSubsystem::HandleLoadedMaterialAsset(const TArray<FLoadedGroup>& LoadedAssets)
+void UVisualBoidManagerSubsystem::InitializeBoidTest(AVisualBoid* BoidToInitialize, int32 SpeciesIndex, int32 BoidIndex)
 {
-	if (LoadedAssets.IsEmpty() || LoadedAssets[0].LoadedAssets.IsEmpty())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No Loaded Assets"));
-		return;
-	}
-	if (UMaterialInstanceConstant* LoadedMaterialInstance = Cast<UMaterialInstanceConstant>(LoadedAssets[0].LoadedAssets[0]))
-	{
-		DynamicMaterialInstance = UMaterialInstanceDynamic::Create(LoadedMaterialInstance, this);
-		ENSURE_ALWAYS_RETURN(IsValid(DynamicMaterialInstance))
-		DynamicMaterialInstance->SetVectorParameterValue(FName(FBoidConstants::BoidMaterialColorParameter), 
-			FLinearColor::Red);
-	}	
+	ENSURE_ALWAYS_RETURN(IsValid(BoidToInitialize))
 	
-	for (int i = 0; i < VisualBoids.Num(); i++)
+	FVector StartingLocation = BoidManagerSubsystem->GetBoidPositionAtTest(SpeciesIndex, BoidIndex);
+	FVector StartingVelocity = BoidManagerSubsystem->GetBoidVelocityAtTest(SpeciesIndex, BoidIndex);
+	BoidToInitialize->UpdateBoid(StartingLocation, StartingVelocity);
+		
+	DifferentSpeciesBoids[SpeciesIndex].Add(BoidToInitialize);
+}
+
+void UVisualBoidManagerSubsystem::RequestMaterialInstanceAsset()
+{
+	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
+	
+	BoidDataManager->OnBoidMaterialInstanceLoaded.AddUObject(this, 
+	&UVisualBoidManagerSubsystem::HandleLoadedMaterialAsset);
+	BoidDataManager->RequestMaterialInstanceAsset();
+}
+
+void UVisualBoidManagerSubsystem::HandleLoadedMaterialAsset(UMaterialInstanceConstant* LoadedMaterialInstance)
+{
+	ENSURE_ALWAYS_RETURN(IsValid(LoadedMaterialInstance))
+	ENSURE_ALWAYS_RETURN(BoidManagerSubsystem.IsValid())
+	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
+	
+	const int32 DifferentBoidSpeciesCount = BoidManagerSubsystem->GetDifferentBoidSpeciesCount(); 
+	BoidMaterials.Reserve(DifferentBoidSpeciesCount);
+	
+	for (int SpeciesIndex = 0; SpeciesIndex < DifferentBoidSpeciesCount; SpeciesIndex++)
 	{
-		VisualBoids[i]->SetMaterial(DynamicMaterialInstance);
+		UMaterialInstanceDynamic* DynamicMaterialInstance = UMaterialInstanceDynamic::Create(
+			LoadedMaterialInstance, this);
+		ENSURE_ALWAYS_RETURN(IsValid(DynamicMaterialInstance))
+		
+		FLinearColor SpeciesColor = BoidDataManager->GetSpeciesColor(SpeciesIndex);
+		DynamicMaterialInstance->SetVectorParameterValue(FName(FBoidConstants::BoidMaterialColorParameter), 
+			SpeciesColor);
+		
+		BoidMaterials.Add(DynamicMaterialInstance);
+	}
+	
+	
+	for (int SpeciesIndex = 0; SpeciesIndex <  DifferentSpeciesBoids.Num(); SpeciesIndex++)
+	{
+		ENSURE_ALWAYS_CONTINUE(BoidMaterials.IsValidIndex(SpeciesIndex))
+		
+		for (int i = 0 ; i < DifferentSpeciesBoids[SpeciesIndex].Num(); i++)
+		{
+			DifferentSpeciesBoids[SpeciesIndex][i]->SetMaterial(BoidMaterials[SpeciesIndex]);
+		}
 	}
 }
 
@@ -140,6 +206,21 @@ void UVisualBoidManagerSubsystem::HandleBoidsUpdate()
 	}
 }
 
+void UVisualBoidManagerSubsystem::HandleBoidsUpdateTest()
+{
+	ENSURE_ALWAYS_RETURN(BoidManagerSubsystem.IsValid())
+	
+	for (int SpeciesIndex = 0; SpeciesIndex < DifferentSpeciesBoids.Num(); SpeciesIndex++)
+	{
+		for (int i = 0 ; i < DifferentSpeciesBoids[SpeciesIndex].Num(); i++)
+		{
+			FVector NewLocation = BoidManagerSubsystem->GetBoidPositionAtTest(SpeciesIndex, i);
+			FVector NewVelocity = BoidManagerSubsystem->GetBoidVelocityAtTest(SpeciesIndex, i);
+			DifferentSpeciesBoids[SpeciesIndex][i]->UpdateBoid(NewLocation, NewVelocity);
+		}
+	}
+}
+
 void UVisualBoidManagerSubsystem::HandleBoidsNumberUpdate(FGameplayTag BoidType, int32 NewBoidCount)
 {
 	
@@ -147,7 +228,12 @@ void UVisualBoidManagerSubsystem::HandleBoidsNumberUpdate(FGameplayTag BoidType,
 
 void UVisualBoidManagerSubsystem::HandleBoidsColorUpdate(FGameplayTag BoidType, FLinearColor NewBoidColor)
 {
-	ENSURE_ALWAYS_RETURN(IsValid(DynamicMaterialInstance))
-	DynamicMaterialInstance->SetVectorParameterValue(FName(FBoidConstants::BoidMaterialColorParameter), NewBoidColor);
+	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
+	
+	const int32 MappedIndexFromGameplayTag = BoidDataManager->RequestMappedIndex(BoidType);
+	ENSURE_ALWAYS_RETURN(BoidMaterials.IsValidIndex(MappedIndexFromGameplayTag))
+	
+	BoidMaterials[MappedIndexFromGameplayTag]->SetVectorParameterValue(FName(FBoidConstants::BoidMaterialColorParameter),
+		NewBoidColor);
 }
 

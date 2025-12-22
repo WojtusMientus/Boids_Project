@@ -111,9 +111,10 @@ void FVoxelGrid<T>::InitializeVoxelGrid(const FVoxelGridData<T>& InVoxelGridData
 	BoundsMax = InVoxelGridData.BoundsData.Center + HalfExtent;	
 	
 	GridResolution = InVoxelGridData.BoundsData.GridResolution;
+	VoxelCellSize = FBoundsMath::GetVoxelCellSize(InVoxelGridData.BoundsData.Center, 
+		InVoxelGridData.BoundsData.Extent, GridResolution);
 	
-	InternalVoxelGrid.SetNumZeroed(GridResolution.X * GridResolution.Y * GridResolution.Z);
-	VoxelCellSize = FBoundsMath::GetVoxelCellSize(GetGridCenter(), GetExtent(), GridResolution);
+	InternalVoxelGrid = InVoxelGridData.VoxelGridData;
 }
 
 template <class T>

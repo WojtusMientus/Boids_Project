@@ -18,7 +18,7 @@ class FBoidCollisionVoxelGrid;
 struct FEnvironmentCollisionVoxelGridData;
 class UBoidDataManagerSubsystem;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnBoidsInitializationFinishEvent, const TArray<FBoidsPlainInfo> BoidsInfo);
+DECLARE_MULTICAST_DELEGATE(FOnBoidsInitializationFinishEvent);
 DECLARE_MULTICAST_DELEGATE(FOnBoidsUpdateFinishEvent);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBoidsNumberUpdateEvent, FGameplayTag BoidType, int32 NewBoidNumber);
 
@@ -74,9 +74,19 @@ public:
 	 */
 	FVector GetBoidVelocityAt(int32 Index);
 	
+	FVector GetBoidPositionAtTest(int32 SpeciesID, int32 BoidID);
+	FVector GetBoidVelocityAtTest(int32 SpeciesID, int32 BoidID);
+	
 	
 	/** Returns simulated Boid count. */
-	FORCEINLINE int32 GetBoidsCount() { return Boids.Num(); }
+	int32 GetBoidsCount() { return Boids.Num(); }
+	
+	
+	int32 GetDifferentBoidSpeciesCount() { return DifferentSpeciesBoids.Num(); }
+	int32 GetBoidsSpeciesCount(int32 SpeciesIndex);
+	
+	
+	bool IsSimulationReady() const { return bIsSimulationReady; }
 
 	/** Updates internal Boid's IDs used in BoidCollisionVoxelGrid. */
 	void UpdateBoidCellIndices(const int32 ID, const int32 VoxelGridIndex, const int32 VoxelGridCellIndex);
@@ -191,6 +201,7 @@ private:
 	
 	TWeakObjectPtr<UBoidDataManagerSubsystem> BoidDataManager;
 	
+	bool bIsSimulationReady = false;
 	
 	/** Array of all simulated Boids. */
 	TArray<TUniquePtr<FBoid>> Boids;

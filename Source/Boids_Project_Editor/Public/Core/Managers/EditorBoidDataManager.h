@@ -12,13 +12,6 @@ class UBoundsData;
 class UBoidsData;
 
 
-#define ENSURE_BOUNDS_DATA_ASSET()\
-	ENSURE_ALWAYS_RETURN(IsValid(LoadedBoundsDataAsset))
-	
-#define ENSURE_BOUNDS_DATA_ASSET_RETURN_VALUE()\
-	ENSURE_ALWAYS_RETURN_VALUE(IsValid(LoadedBoundsDataAsset), FCollisionBoundsPlainInfo())
-
-
 /*
  * Manager responsible for loading data to BoidEditorUtilityWidget and saving them.
  * Ensures that data exists before loading. 

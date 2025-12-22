@@ -24,7 +24,7 @@ void FEditorBoidDataManager::InitializeBoidSimulationData(FCollisionBoundsPlainI
 void FEditorBoidDataManager::SaveBoundsData(const FCollisionBoundsPlainInfo& CollisionBoundsData, 
 	const TArray<FEnvironmentCollisionCellData>& CalculatedCollisionData)
 {	
-	ENSURE_BOUNDS_DATA_ASSET()
+	ENSURE_ALWAYS_RETURN(IsValid(LoadedBoundsDataAsset))
 	
 	LoadedBoundsDataAsset->OverwritePlainData(CollisionBoundsData, CalculatedCollisionData);
 	FEditorAssetUtils::SaveAsset(LoadedBoundsDataAsset);
@@ -56,11 +56,7 @@ void FEditorBoidDataManager::EnsureNecessarySimulationData()
 
 FCollisionBoundsPlainInfo FEditorBoidDataManager::GetCopyOfBoundsData() const
 {
-	FCollisionBoundsPlainInfo BoundsDataCopy;
-	ENSURE_BOUNDS_DATA_ASSET_RETURN_VALUE()
-	
-	BoundsDataCopy.OverwriteData(LoadedBoundsDataAsset);
-	return BoundsDataCopy;
+	return FCollisionBoundsPlainInfo(LoadedBoundsDataAsset);
 }
 
 TMap<FGameplayTag, FBoidsPlainInfo> FEditorBoidDataManager::GetCopyOfBoidsData() const

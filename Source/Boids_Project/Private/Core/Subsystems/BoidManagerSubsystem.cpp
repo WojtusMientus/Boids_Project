@@ -27,8 +27,18 @@ void UBoidManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	check(WorldCollisionGrid.IsValid())
 }
 
+int32 UBoidManagerSubsystem::GetBoidsSpeciesCount(int32 SpeciesIndex)
+{
+	if (!DifferentSpeciesBoids.IsValidIndex(SpeciesIndex))
+	{
+		return 0;
+	}
+	
+	return DifferentSpeciesBoids[SpeciesIndex].Num();
+}
+
 void UBoidManagerSubsystem::UpdateBoidCellIndices(const int32 ID, const int32 VoxelGridIndex,
-	const int32 VoxelGridCellIndex)
+                                                  const int32 VoxelGridCellIndex)
 {
 	Boids[ID]->VoxelGridIndex = VoxelGridIndex;
 	Boids[ID]->VoxelGridCellIndex = VoxelGridCellIndex;
@@ -85,12 +95,31 @@ FVector UBoidManagerSubsystem::GetBoidVelocityAt(int32 Index)
 	return Boids[Index]->Velocity;
 }
 
+FVector UBoidManagerSubsystem::GetBoidPositionAtTest(int32 SpeciesID, int32 BoidID)
+{
+	if (!DifferentSpeciesBoids.IsValidIndex(SpeciesID) || !DifferentSpeciesBoids[SpeciesID].IsValidIndex(BoidID))
+	{
+		return FVector::ZeroVector;
+	}
+	
+	return DifferentSpeciesBoids[SpeciesID][BoidID]->Position;
+}
+
+FVector UBoidManagerSubsystem::GetBoidVelocityAtTest(int32 SpeciesID, int32 BoidID)
+{
+	if (!DifferentSpeciesBoids.IsValidIndex(SpeciesID) || !DifferentSpeciesBoids[SpeciesID].IsValidIndex(BoidID))
+	{
+		return FVector::ZeroVector;
+	}
+	
+	return DifferentSpeciesBoids[SpeciesID][BoidID]->Velocity;
+}
+
 void UBoidManagerSubsystem::InitializeSimulation(const TArray<FBoidsPlainInfo> BoidsInfo,
-	const FEnvironmentCollisionVoxelGridData VoxelGridData)
+                                                 const FEnvironmentCollisionVoxelGridData VoxelGridData)
 {
 	WorldCollisionGrid->InitializeWorldCollisionVoxelGrid(VoxelGridData);
-	InitializeBoids(BoidsInfo);
-	
+	InitializeBoidsTest(BoidsInfo);
 		
 	// WorldCollisionBounds = MakeUnique<FWorldCollisionBounds>(BOIDS_BOUNDS);
 	
@@ -171,7 +200,8 @@ void UBoidManagerSubsystem::InitializeBoidsTest(const TArray<FBoidsPlainInfo> Bo
 	}
 	
 	CurrentNeighbours.Reserve(CumulativeNumberOfBoids);
-	OnBoidsInitializationFinish.Broadcast(BoidsInfo);
+	bIsSimulationReady = true;
+	OnBoidsInitializationFinish.Broadcast();
 }
 
 FVector UBoidManagerSubsystem::CalculateBoidInitialPosition()
@@ -233,7 +263,7 @@ void UBoidManagerSubsystem::UpdateBoidsTest(float DeltaTime)
 			CurrentBoid->Velocity = CurrentBoid->Velocity.GetClampedToMaxSize(1.5f * SpeciesInfo[SpeciesIndex].DesiredSpeed);
 			CurrentBoid->Update(DeltaTime);
 		}
-	} 
+	}
 }
 
 void UBoidManagerSubsystem::GetNeighbourBoids(int32 BoidIndexToCheckNeighbours, TArray<FBoid*>& ValidBoids)

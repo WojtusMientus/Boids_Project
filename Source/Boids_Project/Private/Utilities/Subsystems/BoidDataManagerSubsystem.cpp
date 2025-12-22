@@ -3,6 +3,7 @@
 #include "DataAssets/BoidsData.h"
 #include "DataAssets/BoundsData.h"
 #include "DataAssets/SimulationPlainInfoData/BoidsPlainInfoData.h"
+#include "Materials/MaterialInstanceConstant.h"
 #include "Utilities/BoidConstants.h"
 #include "Utilities/Macros/DebugMacros.h"
 #include "Utilities/Subsystems/RuntimeDataLoaderSubsystem.h"
@@ -14,6 +15,12 @@ void UBoidDataManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	ENSURE_ALWAYS_RETURN(IsValid(World))
 	ENSURE_ALWAYS_RETURN(World->IsGameWorld())
 	
+	UGameInstance* GameInstance = World->GetGameInstance();
+	ENSURE_ALWAYS_RETURN(IsValid(GameInstance))
+	
+	RuntimeDataLoader = GameInstance->GetSubsystem<URuntimeDataLoaderSubsystem>();
+	ENSURE_ALWAYS_RETURN(RuntimeDataLoader.IsValid())
+	
 	Super::Initialize(Collection);
 }
 
@@ -24,19 +31,25 @@ int32 UBoidDataManagerSubsystem::RequestMappedIndex(const FGameplayTag GameplayT
 
 void UBoidDataManagerSubsystem::LoadSimulationDataAssets()
 {
+	ENSURE_ALWAYS_RETURN(RuntimeDataLoader.IsValid())
+	
 	TArray<FLoadRequest> LoadRequests = CreateBoidAndBoundsLoadRequest();
-	
-	UWorld* World = GetWorld();
-	ENSURE_ALWAYS_RETURN(IsValid(World))
-	
-	UGameInstance* GameInstance = World->GetGameInstance();
-	ENSURE_ALWAYS_RETURN(IsValid(GameInstance))
-	
-	URuntimeDataLoaderSubsystem* RuntimeDataLoader = GameInstance->GetSubsystem<URuntimeDataLoaderSubsystem>();
-	ENSURE_ALWAYS_RETURN(RuntimeDataLoader)
-	
 	RuntimeDataLoader->LoadAssets(LoadRequests, FOnBatchLoadCompleteEvent::CreateUObject(this, 
 		&UBoidDataManagerSubsystem::HandleLoadedBoidsAndBoundsAssets));
+}
+
+void UBoidDataManagerSubsystem::RequestMaterialInstanceAsset()
+{
+	ENSURE_ALWAYS_RETURN(RuntimeDataLoader.IsValid())
+	
+	TArray<FLoadRequest> LoadRequests = CreateBoidMaterialLoadRequest();
+	RuntimeDataLoader->LoadAssets(LoadRequests, FOnBatchLoadCompleteEvent::CreateUObject(this, 
+		&UBoidDataManagerSubsystem::HandleLoadedMaterialAsset));
+}
+
+FLinearColor UBoidDataManagerSubsystem::GetSpeciesColor(int32 SpeciesIndex)
+{
+	return LoadedBoidsPlainInfos.IsValidIndex(SpeciesIndex) ? LoadedBoidsPlainInfos[SpeciesIndex].Color : FLinearColor::White;
 }
 
 TArray<FLoadRequest> UBoidDataManagerSubsystem::CreateBoidAndBoundsLoadRequest()
@@ -53,16 +66,21 @@ TArray<FLoadRequest> UBoidDataManagerSubsystem::CreateBoidAndBoundsLoadRequest()
 	return LoadRequests;
 }
 
+TArray<FLoadRequest> UBoidDataManagerSubsystem::CreateBoidMaterialLoadRequest()
+{
+	return URuntimeDataLoaderSubsystem::CreateLoadRequest(EAssetRequestType::SingleAsset, 
+		FBoidConstants::Paths::MaterialsPath, UMaterialInstanceConstant::StaticClass());
+}
+
 void UBoidDataManagerSubsystem::HandleLoadedBoidsAndBoundsAssets(const TArray<FLoadedGroup>& LoadedAssets)
 {
-	TArray<FBoidsPlainInfo> BoidsPlainInfoArray;
 	FEnvironmentCollisionVoxelGridData VoxelGridData;
 	
 	for (FLoadedGroup LoadedGroup: LoadedAssets)
 	{
 		if (LoadedGroup.AssetClass == UBoidsData::StaticClass())
 		{
-			HandleLoadedBoidsData(LoadedGroup.LoadedAssets, BoidsPlainInfoArray);
+			HandleLoadedBoidsData(LoadedGroup.LoadedAssets);
 		}
 		else if (LoadedGroup.AssetClass == UBoundsData::StaticClass())
 		{
@@ -70,36 +88,37 @@ void UBoidDataManagerSubsystem::HandleLoadedBoidsAndBoundsAssets(const TArray<FL
 		}
 	}
 	
-	for (const FBoidsPlainInfo BoidPlainInfo: BoidsPlainInfoArray)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Loaded Boids Type: %s"), *BoidPlainInfo.Type.ToString())
-	}
-	
-	for (auto Value: BoidSpeciesIndexMap)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Boids Key Type: %s"), *Value.Key.ToString())
-	}
-	
-	UE_LOG(LogTemp, Warning, TEXT("Loaded Bounds Collision Multiplier: %f"), VoxelGridData.BoundsCollisionMultiplier);
-	
-	OnSimulationDataLoaded.Broadcast(BoidsPlainInfoArray, VoxelGridData);
+	OnSimulationDataLoaded.Broadcast(LoadedBoidsPlainInfos, VoxelGridData);
 }
 
-void UBoidDataManagerSubsystem::HandleLoadedBoidsData(TArray<UObject*> LoadedBoidsAssets, 
-	TArray<FBoidsPlainInfo>& OutBoidsInfoArray)
+void UBoidDataManagerSubsystem::HandleLoadedMaterialAsset(const TArray<FLoadedGroup>& LoadedAssets)
+{
+	if (LoadedAssets.IsEmpty() || LoadedAssets[0].LoadedAssets.IsEmpty())
+	{
+		return;
+	}
+	
+	UMaterialInstanceConstant* LoadedMaterialInstance = Cast<UMaterialInstanceConstant>(LoadedAssets[0].LoadedAssets[0]);
+	ENSURE_ALWAYS_RETURN(IsValid(LoadedMaterialInstance))
+	
+	OnBoidMaterialInstanceLoaded.Broadcast(LoadedMaterialInstance);
+}
+
+void UBoidDataManagerSubsystem::HandleLoadedBoidsData(TArray<UObject*> LoadedBoidsAssets)
 {
 	if (LoadedBoidsAssets.Num() == 0)
 	{
 		return;
 	}
 	
-	for (int i = 0; i < LoadedBoidsAssets.Num(); i++)
+	for (UObject* LoadedObject: LoadedBoidsAssets)
 	{
-		const UBoidsData* BoidsData = Cast<UBoidsData>(LoadedBoidsAssets[i]);
+		const UBoidsData* BoidsData = Cast<UBoidsData>(LoadedObject);
 		ENSURE_ALWAYS_CONTINUE(IsValid(BoidsData))
-		OutBoidsInfoArray.Add(FBoidsPlainInfo(BoidsData));
-		BoidSpeciesIndexMap.FindOrAdd(BoidsData->Type, i);
-	}	
+		
+		LoadedBoidsPlainInfos.Add(FBoidsPlainInfo(BoidsData));
+		BoidSpeciesIndexMap.FindOrAdd(BoidsData->Type, BoidSpeciesIndexMap.Num());
+	}
 }
 
 void UBoidDataManagerSubsystem::HandleLoadedBoundsData(TArray<UObject*> LoadedBoundsAsset, 
