@@ -16,9 +16,11 @@ void FCollisionBoundsPlainInfo::OverwriteData(const UBoundsData* NewBoundsData)
 	
 	BoundsPlainData.Center = NewBoundsData->Center;
 	BoundsPlainData.Extent = NewBoundsData->Extent;
-	BoundsPlainData.GridResolution = NewBoundsData->GridResolution;
+	
+	BoundsPlainData.EnvironmentGridResolution = NewBoundsData->EnvironmentGridResolution;
+	BoundsPlainData.BoidCollisionGridResolution = NewBoundsData->BoidCollisionGridResolution;
+	
 	EnvironmentCollisionRows = NewBoundsData->EnvironmentCollisionRows;
 	BoundsCollisionRows = NewBoundsData->BoundsCollisionRows;
-	EnvironmentCollisionMultiplier = NewBoundsData->EnvironmentCollisionMultiplier;
-	BoundsCollisionMultiplier = NewBoundsData->BoundsCollisionMultiplier;
+	SimulationSeedVoxelIndices = NewBoundsData->SimulationSeedVoxelIndices;
 }

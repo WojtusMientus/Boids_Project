@@ -37,9 +37,10 @@ public:
 	
 	/** Returns number of voxel grid cells. */
 	FORCEINLINE int32 GetGridCellCount() const { return InternalVoxelGrid.Num(); }
-
 	
-	FORCEINLINE FVector GetRandomPointInsideGrid() const;
+	virtual FVector GetRandomPointInsideGrid() const;
+	
+	FVector GetVoxelCellSize() const { return VoxelCellSize; }
 	
 protected:
 	

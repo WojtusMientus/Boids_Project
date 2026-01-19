@@ -1,7 +1,9 @@
-﻿
+﻿// Copyright WojtusMientus
+
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BoidCollisionCellData.h"
 #include "EnvironmentCollisionCellData.h"
 #include "DataAssets/SimulationPlainInfoData/BoundsPlainInfoData.h"
 
@@ -17,21 +19,32 @@ struct FVoxelGridData
 };
 
 /**
- * Helper struct for passing saved data from saved assets at simulation startup.
+ * Helper struct for passing saved environment collision data from assets at simulation startup.
  */
 struct FEnvironmentCollisionVoxelGridData
 {
 	/** Struct storing essential bounds data and its content. */
-	FVoxelGridData<FEnvironmentCollisionCellData> VoxelGridData;
+	FVoxelGridData<FEnvironmentCollisionCellData> EnvironmentGridData;
 	
-	/** Final multiplier applied to environment collision force before retrieving data. */
-	float EnvironmentCollisionMultiplier = 1.0f;
-	
-	/** Final multiplier applied to bounds collision force before retrieving data. */
-	float BoundsCollisionMultiplier = 1.0f;
 	
 	FEnvironmentCollisionVoxelGridData() {};
 	FEnvironmentCollisionVoxelGridData(const UBoundsData* BoundsData);
 	
 	void OverwriteData(const UBoundsData* BoundsData);
+};
+
+/**
+ * Helper struct for passing saved boid collision data from assets at simulation startup.
+ */
+struct FBoidCollisionVoxelGridData
+{
+	/** Struct storing essential bounds data and its content. */
+	FVoxelGridData<TArray<FBoidCollisionCellData>> BoidGridData;
+	
+	
+	FBoidCollisionVoxelGridData() {};
+	FBoidCollisionVoxelGridData(const UBoundsData* BoundsData);
+	
+	void OverwriteData(const UBoundsData* BoundsData);
+	void InitializeBoidCollisionArray();
 };

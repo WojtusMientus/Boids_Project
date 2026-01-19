@@ -4,19 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "Bounds/VoxelGrid/VoxelGridData/EnvironmentCollisionCellData.h"
-#include "Bounds/VoxelGrid/VoxelGridData/VoxelGridData.h"
+#include "VoxelGrids/VoxelGridData/EnvironmentCollisionCellData.h"
+#include "VoxelGrids/VoxelGridData/VoxelGridData.h"
 #include "BoundsData.generated.h"
-
 
 struct FCollisionBoundsPlainInfo;
 
 
 /**
  * Data asset defining parameters for simulation bounds.
- * Configures bounds center, its extent, collision multiplier and precomputed collision forces.
+ * Configures bounds center, its extent, grid resolutions, count of collision rows and precomputed forces.
  */
-// TODO: Load saved data at simulation start
 UCLASS(BlueprintType)
 class BOIDS_PROJECT_API UBoundsData : public UPrimaryDataAsset
 {
@@ -32,9 +30,13 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FVector Extent = FVector(1000.0f, 1000.0f, 1000.0f);
 	
-	/** Voxelized grid resolution. */
+	/** Voxelized environment grid resolution. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "512"))
-	FIntVector GridResolution = FIntVector(50,50,50);
+	FIntVector EnvironmentGridResolution = FIntVector(50,50,50);
+	
+	/** Voxelized boid collision grid resolution. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "512"))
+	FIntVector BoidCollisionGridResolution = FIntVector(50,50,50);
 	
 	/** Number of collision voxel rows around static environment.  */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "128"))
@@ -43,17 +45,15 @@ public:
 	/** Number of collision voxel rows around the boundaries.  */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "128"))
 	int32 BoundsCollisionRows = 1;
-		
-	/** Final multiplier applied to environment collision force before retrieving data. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "256"))
-	float EnvironmentCollisionMultiplier = 1.0f;
 	
-	/** Final multiplier applied to bounds collision force before retrieving data. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "256"))
-	float BoundsCollisionMultiplier = 1.0f;
+	/** Voxel that is in simulation area for future FloodFill algorithm for proper collision data. (not in a mesh) */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "512"))
+	FIntVector SimulationSeedVoxelIndices = FIntVector(1,1,1);
 	
-	/** Helper size fo the internal CollisionForces array - overwritten only in OverwriteData function. 
+	
+	/** Helper size of the internal CollisionForces array - overwritten only in OverwriteData function. 
 	 *	Made only so unreal doesn't need to render thousands or millions of array entries after opening the asset view.
+	 *	(still lags a bit)
 	 */
 	UPROPERTY(VisibleDefaultsOnly)
 	FIntVector CollisionArraySize = FIntVector(0,0,0);
@@ -71,8 +71,5 @@ public:
 	
 	void OverwritePlainData(const FCollisionBoundsPlainInfo& NewCollisionBoundsData,
 		const TArray<FEnvironmentCollisionCellData>& NewCollisionWallData);
-	
-	FCollisionBoundsPlainInfo GetPlainDataInfo() const;
-	FEnvironmentCollisionVoxelGridData GetVoxelGridData() const;
 };
 

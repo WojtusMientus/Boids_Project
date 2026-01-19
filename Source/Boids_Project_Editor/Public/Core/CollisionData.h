@@ -1,20 +1,19 @@
-﻿#pragma once
+﻿// Copyright WojtusMientus
+
+#pragma once
 
 #include "CoreMinimal.h"
-#include "Bounds/VoxelGrid/VoxelGridData/VoxelGridData.h"
+#include "VoxelGrids/VoxelGridData/VoxelGridData.h"
 #include "CollisionData.generated.h"
 
 
+/** Helper struct for passing data between UBoidEditorSubsystem and its delegate listeners. */
 USTRUCT()
 struct FCollisionData
 {
 	GENERATED_BODY()
 	
 	FCollisionBoundsPlainInfo CollisionBoundsData;
-	
-	TArray<FVector> WallCollisionCentersData;
-	
-	TArray<FVector> EveryVoxelCenterData;
 	
 	TArray<FEnvironmentCollisionCellData> CollisionForcesData;
 };

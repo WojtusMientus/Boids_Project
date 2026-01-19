@@ -3,10 +3,9 @@
 #pragma once
 
 #include "GameplayTagContainer.h"
-#include "Utilities/Macros/DebugMacros.h"
 
 struct FEnvironmentCollisionCellData;
-struct FBoidsPlainInfo;
+struct FBoidsSpeciesPlainInfo;
 struct FCollisionBoundsPlainInfo;
 class UBoundsData;
 class UBoidsData;
@@ -22,19 +21,19 @@ class FEditorBoidDataManager
 public:
 	
 	void InitializeBoidSimulationData(FCollisionBoundsPlainInfo& OutBoundsData, TMap<FGameplayTag, 
-		FBoidsPlainInfo>& OutBoidsData);
+		FBoidsSpeciesPlainInfo>& OutBoidsData);
 	
 	void SaveBoundsData(const FCollisionBoundsPlainInfo& BoundsDataToSave, 
 		const TArray<FEnvironmentCollisionCellData>& CalculatedCollisionData);
-	void SaveBoidsData(const FBoidsPlainInfo& BoidsDataToSave);
-	void SaveAllBoidsData(const TMap<FGameplayTag, FBoidsPlainInfo>& AllBoidsDataToSave);
+	void SaveBoidsData(const FBoidsSpeciesPlainInfo& BoidsDataToSave);
+	void SaveAllBoidsData(const TMap<FGameplayTag, FBoidsSpeciesPlainInfo>& AllBoidsDataToSave);
 	
 private:
 	
 	void EnsureNecessarySimulationData();
 	
 	FCollisionBoundsPlainInfo GetCopyOfBoundsData() const;
-	TMap<FGameplayTag, FBoidsPlainInfo> GetCopyOfBoidsData() const;
+	TMap<FGameplayTag, FBoidsSpeciesPlainInfo> GetCopyOfBoidsData() const;
 	
 	void EnsureBoidSpeciesDataAssets();
 	void EnsureBoundsDataAssets();

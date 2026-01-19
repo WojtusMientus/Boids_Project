@@ -22,6 +22,19 @@ public:
 		return Indices.X * GridResolution.Z * GridResolution.Y + Indices.Y * GridResolution.Z + Indices.Z;
 	}
 	
+	static FORCEINLINE FIntVector ArrayIndexToXYZ(const int32 ArrayIndex, const FIntVector& GridResolution)
+	{
+		const int32 ResolutionYZ = GridResolution.Y * GridResolution.Z;
+		
+		const int32 IndexX = ArrayIndex / ResolutionYZ;
+		const int32 RemainderAfterCalculationX = ArrayIndex % ResolutionYZ;
+		
+		const int32 IndexY = RemainderAfterCalculationX / GridResolution.Z;
+		const int32 IndexZ = RemainderAfterCalculationX % GridResolution.Z;
+		
+		return FIntVector(IndexX, IndexY, IndexZ);
+	}
+	
 	static FORCEINLINE FVector GetVoxelCenterAt(const FVector& StartingCellCenter, const FVector& CellSize, 
 		const FIntVector Index)
 	{
@@ -54,6 +67,25 @@ public:
 		const float CellSizeZ = GetCellSizeAxis(MaxCorner.Z, MinCorner.Z, GridResolution.Z);
 		
 		return FVector(CellSizeX, CellSizeY, CellSizeZ);
+	}
+	
+	static FORCEINLINE FVector GetRandomPositionInVoxelCell(const int32 LinearGridIndex, const FVector& BoundsCenter, 
+		const FVector& Extent, const FIntVector GridResolution)
+	{
+		const FIntVector IndexXYZ = ArrayIndexToXYZ(LinearGridIndex, GridResolution);
+		const FVector StartingCellLocation = GetStartingCellCenter(BoundsCenter, Extent, GridResolution);
+		
+		const FVector VoxelCellSize = GetVoxelCellSize(BoundsCenter, Extent, GridResolution);
+		const FVector VoxelCenterAtIndex = GetVoxelCenterAt(StartingCellLocation, VoxelCellSize, IndexXYZ);
+		
+		const float LocationX = FMath::RandRange(VoxelCenterAtIndex.X - VoxelCellSize.X / 2, 
+			VoxelCenterAtIndex.X + VoxelCellSize.X / 2);
+		const float LocationY = FMath::RandRange(VoxelCenterAtIndex.Y - VoxelCellSize.Y / 2, 
+			VoxelCenterAtIndex.Y + VoxelCellSize.Y / 2);
+		const float LocationZ = FMath::RandRange(VoxelCenterAtIndex.Z - VoxelCellSize.Z / 2, 
+			VoxelCenterAtIndex.Z + VoxelCellSize.Z / 2);
+		
+		return FVector(LocationX, LocationY, LocationZ);
 	}
 	
 	static FVector GetStartingCellCenter(const FVector& BoundsCenter, const FVector& Extent, 

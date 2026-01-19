@@ -1,9 +1,10 @@
 
 #include "Core/Subsystems/BoidManagerSubsystem.h"
-#include "Bounds/VoxelGrid/VoxelGridData/VoxelGridData.h"
+#include "VoxelGrids/VoxelGridData/BoidCollisionCellData.h"
+#include "VoxelGrids/VoxelGridData/VoxelGridData.h"
+#include "Core/BoidDelegates.h"
 #include "Utilities/Macros/DebugMacros.h"
 #include "Utilities/Subsystems/BoidDataManagerSubsystem.h"
-
 
 
 void UBoidManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -22,41 +23,30 @@ void UBoidManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
 	
 	BoidDataManager->OnSimulationDataLoaded.AddUObject(this, &UBoidManagerSubsystem::InitializeSimulation);
+	FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UBoidManagerSubsystem::InitializeSimulationData);
 	
-	WorldCollisionGrid = MakeUnique<FWorldCollisionVoxelGrid>();
-	check(WorldCollisionGrid.IsValid())
-}
-
-int32 UBoidManagerSubsystem::GetBoidsSpeciesCount(int32 SpeciesIndex)
-{
-	if (!DifferentSpeciesBoids.IsValidIndex(SpeciesIndex))
-	{
-		return 0;
-	}
+	CreateVoxelGrids();
 	
-	return DifferentSpeciesBoids[SpeciesIndex].Num();
+#if WITH_EDITOR
+	SubscribeToGlobalEditorDelegates();
+#endif
 }
 
-void UBoidManagerSubsystem::UpdateBoidCellIndices(const int32 ID, const int32 VoxelGridIndex,
-                                                  const int32 VoxelGridCellIndex)
+void UBoidManagerSubsystem::Deinitialize()
 {
-	Boids[ID]->VoxelGridIndex = VoxelGridIndex;
-	Boids[ID]->VoxelGridCellIndex = VoxelGridCellIndex;
+	Super::Deinitialize();
+	
+#if WITH_EDITOR
+	UnsubscribeFromGlobalEditorDelegates();
+#endif
 }
-
 
 void UBoidManagerSubsystem::Tick(float DeltaTime)
 {
-	UpdateBoidsTest(DeltaTime);
-	
-	// if (BoidVoxelGrid.IsValid())
-	// {
-	// 	for (int i = 0; i < Boids.Num(); i++)
-	// 	{
-	// 		FBoid* Boid = Boids[i].Get();			
-	// 		BoidVoxelGrid->UpdateBoid(Boid->Position, Boid->VoxelGridIndex, Boid->VoxelGridCellIndex);
-	// 	}
-	// }
+	{
+		TRACE_CPUPROFILER_EVENT_SCOPE(BoidManager_Update)
+		UpdateBoids(DeltaTime);	
+	}
 	
 	OnBoidsUpdateFinish.Broadcast();
 }
@@ -72,240 +62,362 @@ bool UBoidManagerSubsystem::IsTickable() const
 	{
 		return false;
 	}
+	
 	return !GetWorld()->IsPaused();
 }
 
-FVector UBoidManagerSubsystem::GetBoidPositionAt(int32 Index)
+int32 UBoidManagerSubsystem::GetBoidsSpeciesCount(int32 SpeciesIndex) const
 {
-	if (!Boids.IsValidIndex(Index) || !Boids[Index])
+	if (!BoidSpecies.IsValidIndex(SpeciesIndex))
 	{
-		return FVector::ZeroVector;
+		return -1;
 	}
-
-	return Boids[Index]->Position;
+	
+	return BoidSpecies[SpeciesIndex]->Num();
 }
 
-FVector UBoidManagerSubsystem::GetBoidVelocityAt(int32 Index)
+FVector UBoidManagerSubsystem::GetBoidPositionAt(int32 SpeciesID, int32 BoidID)
 {
-	if (!Boids.IsValidIndex(Index) || !Boids[Index])
-	{
-		return FVector::ZeroVector;
-	}
-
-	return Boids[Index]->Velocity;
-}
-
-FVector UBoidManagerSubsystem::GetBoidPositionAtTest(int32 SpeciesID, int32 BoidID)
-{
-	if (!DifferentSpeciesBoids.IsValidIndex(SpeciesID) || !DifferentSpeciesBoids[SpeciesID].IsValidIndex(BoidID))
+	if (!BoidSpecies.IsValidIndex(SpeciesID))
 	{
 		return FVector::ZeroVector;
 	}
 	
-	return DifferentSpeciesBoids[SpeciesID][BoidID]->Position;
+	return BoidSpecies[SpeciesID]->BoidPool[BoidID].Position;
 }
 
-FVector UBoidManagerSubsystem::GetBoidVelocityAtTest(int32 SpeciesID, int32 BoidID)
+FVector UBoidManagerSubsystem::GetBoidVelocityAt(int32 SpeciesID, int32 BoidID)
 {
-	if (!DifferentSpeciesBoids.IsValidIndex(SpeciesID) || !DifferentSpeciesBoids[SpeciesID].IsValidIndex(BoidID))
+	if (!BoidSpecies.IsValidIndex(SpeciesID))
 	{
 		return FVector::ZeroVector;
 	}
 	
-	return DifferentSpeciesBoids[SpeciesID][BoidID]->Velocity;
+	return BoidSpecies[SpeciesID]->BoidPool[BoidID].Velocity;
 }
 
-void UBoidManagerSubsystem::InitializeSimulation(const TArray<FBoidsPlainInfo> BoidsInfo,
-                                                 const FEnvironmentCollisionVoxelGridData VoxelGridData)
+int32 UBoidManagerSubsystem::GetDifferentBoidSpeciesCount() const
 {
-	WorldCollisionGrid->InitializeWorldCollisionVoxelGrid(VoxelGridData);
-	InitializeBoidsTest(BoidsInfo);
-		
-	// WorldCollisionBounds = MakeUnique<FWorldCollisionBounds>(BOIDS_BOUNDS);
+	return BoidSpecies.Num();
+}
+
+void UBoidManagerSubsystem::CreateVoxelGrids()
+{
+	WorldCollisionVoxelGrid = MakeUnique<FWorldCollisionVoxelGrid>();
+	check(WorldCollisionVoxelGrid.IsValid())
 	
-	// FVoxelGridData<TArray<int32>> VoxelGridData;
-	// VoxelGridData.BoundsData.GridResolution = FIntVector(10);
-	// VoxelGridData.BoundsData.Extent = FVector(1000);
-	// VoxelGridData.BoundsData.Center = FVector(0, 0, 0);
-	// VoxelGridData.VoxelGridData = TArray<TArray<int32>>();
-	//
-	// BoidVoxelGrid = MakeUnique<FBoidCollisionVoxelGrid>(VoxelGridData);
-	// if (BoidVoxelGrid.IsValid())
-	// {
-	// 	BoidVoxelGrid->InitializeBoidCollisionGrid(BOIDS_COUNT);
-	// 	
-	// 	BoidVoxelGrid->OnBoidGridIndexChanged.AddUObject(this, &UBoidManagerSubsystem::UpdateBoidCellIndices);
-	// 	
-	// 	for (int i = 0; i < Boids.Num(); i++)
-	// 	{
-	// 		FBoid* Boid = Boids[i].Get();
-	// 		BoidVoxelGrid->AddBoidToVoxelGrid(i, Boid->Position);
-	// 	}
-	// }
-}
-
-void UBoidManagerSubsystem::InitializeBoids(const TArray<FBoidsPlainInfo> BoidsInfo)
-{
-	int32 ValidBoidIDs = 0;
-	Boids.Reserve(BOIDS_COUNT);
-	CurrentNeighbours.Reserve(BOIDS_COUNT);
+	BoidCollisionVoxelGrid = MakeUnique<FBoidCollisionVoxelGrid>();
+	check(BoidCollisionVoxelGrid.IsValid())
 	
-	for (int i = 0; i < BOIDS_COUNT; i++)
-	{
-		const FVector InitialPosition = CalculateBoidInitialPosition();
-		const FVector InitialVelocity = FMath::VRand() * BOID_DESIRED_VELOCITY;
-		
-		TUniquePtr<FBoid> CreatedBoid = MakeUnique<FBoid>(InitialPosition, InitialVelocity);
-		
-		if (CreatedBoid.IsValid())
-		{
-			Boids.Add(MoveTemp(CreatedBoid));
-			NewCalculatedVelocityPerBoid.Add(InitialVelocity);
-			ValidBoidIDs++;
-		}
-	}
+	BoidCollisionVoxelGridTwo = MakeUnique<FBoidCollisionVoxelGrid>();
+	check(BoidCollisionVoxelGridTwo.IsValid())
 }
 
-void UBoidManagerSubsystem::InitializeBoidsTest(const TArray<FBoidsPlainInfo> BoidsInfo)
+void UBoidManagerSubsystem::InitializeSimulationData(UWorld* World, FWorldInitializationValues WorldInitializationValues)
 {
-	SpeciesInfo = BoidsInfo;
-	DifferentSpeciesBoids.Reserve(BoidsInfo.Num());
-	NewCalculatedVelocities.Reserve(BoidsInfo.Num());
+	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
+	BoidDataManager->LoadSimulationDataAssets();
+}
+
+void UBoidManagerSubsystem::InitializeSimulation(const TArray<FBoidsSpeciesPlainInfo>& BoidsInfo,
+	const FEnvironmentCollisionVoxelGridData& EnvironmentCollisionVoxelGridData, 
+	const FBoidCollisionVoxelGridData& BoidCollisionVoxelGridData)
+{
+	WorldCollisionVoxelGrid->InitializeWorldCollisionVoxelGrid(EnvironmentCollisionVoxelGridData);
+	InitializeDifferentBoidSpecies(BoidsInfo);
+	InitializeRemainingBoidSpeciesData();
+	
+	InitializeBoidCollisionVoxelGrid(BoidCollisionVoxelGridData);
+	InitializeNeighbourArray();
+}
+
+void UBoidManagerSubsystem::InitializeDifferentBoidSpecies(const TArray<FBoidsSpeciesPlainInfo>& BoidsInfo)
+{
+	BoidSpecies.Reserve(BoidsInfo.Num());
 	
 	int32 CumulativeNumberOfBoids = 0;
 	
-	for (int i = 0; i < BoidsInfo.Num(); i++)
+	for (int SpeciesIndex = 0; SpeciesIndex < BoidsInfo.Num(); SpeciesIndex++)
 	{
-		DifferentSpeciesBoids.Add(TArray<TUniquePtr<FBoid>>());
-		DifferentSpeciesBoids[i].Reserve( BoidsInfo[i].Number);
+		BoidSpecies.Add(MakeUnique<FBoidSpecies>(BoidsInfo[SpeciesIndex]));
+		InitializeBoidSpecies(SpeciesIndex);
 		
-		NewCalculatedVelocities.Add(TArray<FVector>());
-		NewCalculatedVelocities[i].Reserve( BoidsInfo[i].Number);
-		
-		for (int j = 0; j < BoidsInfo[i].Number; j++)
-		{
-			const FVector InitialPosition = WorldCollisionGrid->GetRandomPointInsideGrid();
-			const FVector InitialVelocity = FMath::VRand() * BoidsInfo[i].DesiredSpeed;
-			
-			TUniquePtr<FBoid> CreatedBoid = MakeUnique<FBoid>(InitialPosition, InitialVelocity);
-			
-			if (CreatedBoid.IsValid())
-			{
-				DifferentSpeciesBoids[i].Add(MoveTemp(CreatedBoid));
-				NewCalculatedVelocities[i].Add(InitialVelocity);
-			}
-		}
-		
-		CumulativeNumberOfBoids += DifferentSpeciesBoids[i].Num();
+		CumulativeNumberOfBoids += BoidSpecies[SpeciesIndex]->BoidPool.Num();
 	}
 	
-	CurrentNeighbours.Reserve(CumulativeNumberOfBoids);
-	bIsSimulationReady = true;
+	SameSpeciesNeighbors.Reserve(CumulativeNumberOfBoids);
+	DifferentSpeciesNeighbors.Reserve(CumulativeNumberOfBoids);
 	OnBoidsInitializationFinish.Broadcast();
 }
 
-FVector UBoidManagerSubsystem::CalculateBoidInitialPosition()
+void UBoidManagerSubsystem::InitializeBoidSpecies(const int32 SpeciesID)
 {
-	return FVector(FMath::RandRange(-BOIDS_BOUNDS / 2, BOIDS_BOUNDS / 2),
-				FMath::RandRange(-BOIDS_BOUNDS / 2, BOIDS_BOUNDS / 2),
-				FMath::RandRange(-BOIDS_BOUNDS / 2, BOIDS_BOUNDS / 2));
+	for (int BoidIndex = 0; BoidIndex < BoidSpecies[SpeciesID]->Num(); BoidIndex++)
+	{
+		InitializeBoidObject(SpeciesID, BoidIndex);
+	}	
+}
+
+void UBoidManagerSubsystem::InitializeBoidObject(const int32 SpeciesID, const int32 BoidID)
+{
+	const FVector InitialPosition = WorldCollisionVoxelGrid->GetRandomPointInsideGrid();
+	const FVector InitialVelocity = FMath::VRand() * BoidSpecies[SpeciesID]->SpeciesInfo.DesiredSpeed;
+			
+	BoidSpecies[SpeciesID]->BoidPool[BoidID].Initialize(InitialPosition, InitialVelocity);
+}
+
+void UBoidManagerSubsystem::InitializeRemainingBoidSpeciesData()
+{
+	const FVector CellSize = WorldCollisionVoxelGrid->GetVoxelCellSize();
+	
+	for (int SpeciesIndex = 0; SpeciesIndex < BoidSpecies.Num(); SpeciesIndex++)
+	{
+		const float PerceptionDistance = BoidSpecies[SpeciesIndex]->SpeciesInfo.PerceptionDistance;
+		
+		BoidSpecies[SpeciesIndex]->SpeciesInfo.PerceptionDistanceInVoxelCellCount = FIntVector(
+			PerceptionDistance / CellSize.X,
+			PerceptionDistance / CellSize.Y,
+			PerceptionDistance / CellSize.Z);
+		
+		BoidSpecies[SpeciesIndex]->SpeciesInfo.PerceptionDistanceSquared = PerceptionDistance * PerceptionDistance;
+	}
+}
+
+void UBoidManagerSubsystem::InitializeBoidCollisionVoxelGrid(const FBoidCollisionVoxelGridData& BoidCollisionVoxelGridData)
+{
+	int32 CumulativeNumberOfBoids = 0;
+	
+	for (int i = 0; i < BoidSpecies.Num(); i++)
+	{
+		CumulativeNumberOfBoids += BoidSpecies[i]->Num(); 
+	}
+	
+	BoidCollisionVoxelGrid->InitializeBoidDataCollisionGrid(BoidCollisionVoxelGridData.BoidGridData, 
+		CumulativeNumberOfBoids);
+	BoidCollisionVoxelGrid->ResetVoxelGrid();
+	
+	BoidCollisionVoxelGridTwo->InitializeBoidDataCollisionGrid(BoidCollisionVoxelGridData.BoidGridData, 
+	CumulativeNumberOfBoids);
+	BoidCollisionVoxelGridTwo->ResetVoxelGrid();
+}
+
+void UBoidManagerSubsystem::InitializeNeighbourArray()
+{
+	NeighborsBoidDataSortedNoIf.SetNumZeroed(BoidSpecies.Num());
+	
+	int CumulativeNumberOfBoids = 0;
+	
+	for (int i = 0; i < BoidSpecies.Num(); i++)
+	{
+		NeighborsBoidDataSortedNoIf[i].Reserve(BoidSpecies[i]->Num());
+		CumulativeNumberOfBoids += BoidSpecies[i]->Num();
+	}
+	
+	SameNeighborsBoidDataSortedIf.Reserve(CumulativeNumberOfBoids);
+	DifferentNeighborsBoidDataSortedIf.Reserve(CumulativeNumberOfBoids);
 }
 
 void UBoidManagerSubsystem::UpdateBoids(float DeltaTime)
 {
-	for (int i = 0; i < Boids.Num(); i++)
-	{
-		FBoid* CurrentBoid = Boids[i].Get();
-		
-		CurrentBoid->Acceleration = FVector::ZeroVector;
-		GetNeighbourBoids(i, CurrentNeighbours);
-
-		const FVector Alignment = ComputeAlignment();
-		const FVector Cohesion = ComputeCohesion(CurrentBoid);
-		const FVector Separation = ComputeSeparation(CurrentBoid);
-
-		CurrentBoid->Acceleration += Separation + Alignment + Cohesion;
-		ApplyCollisionForce(CurrentBoid);
-		ApplySpeedAdjustmentForce(CurrentBoid);
-	}
+	CheckForAnyBoidNumberUpdate();
+	RemakeBoidCollisionVoxelGrid();
 	
-	for (int i = 0; i < Boids.Num(); i++)
+	for (int SpeciesIndex = 0; SpeciesIndex < BoidSpecies.Num(); SpeciesIndex++)
 	{
-		FBoid* CurrentBoid = Boids[i].Get();
-		
-		CurrentBoid->Velocity += CurrentBoid->Acceleration * DeltaTime;
-		CurrentBoid->Velocity = CurrentBoid->Velocity.GetClampedToMaxSize(1.5f * BOID_DESIRED_VELOCITY);
-		CurrentBoid->Update(DeltaTime);
-	}
-}
-
-void UBoidManagerSubsystem::UpdateBoidsTest(float DeltaTime)
-{
-	for (int SpeciesIndex = 0; SpeciesIndex < DifferentSpeciesBoids.Num(); SpeciesIndex++)
-	{
-		for (int i = 0; i < DifferentSpeciesBoids[SpeciesIndex].Num(); i++)
+		for (int BoidIndex = 0; BoidIndex < BoidSpecies[SpeciesIndex]->Num(); BoidIndex++)
 		{
-			FBoid* CurrentBoid = DifferentSpeciesBoids[SpeciesIndex][i].Get();
+			FBoid& Boid = BoidSpecies[SpeciesIndex]->BoidPool[BoidIndex];
+			Boid.Acceleration = FVector::ZeroVector;
 		
-			CurrentBoid->Acceleration = FVector::ZeroVector;
-			ApplyCollisionForceTest(CurrentBoid);
-			ApplySpeedAdjustmentForceTest(CurrentBoid, SpeciesIndex);
+			{
+				TRACE_CPUPROFILER_EVENT_SCOPE(BoidManager_Neighbor_Slowest)
+				GetNeighbourBoidsDifferentSpeciesSlow(SpeciesIndex, BoidIndex);
+			}
+			
+			// {
+			// 	TRACE_CPUPROFILER_EVENT_SCOPE(BoidManager_Neighbor_Sorted_No_If)
+			// 	GetNeighborBoidsDifferentSpeciesSorted_OneArray(Boid, SpeciesIndex);
+			// }	
+			//
+			// {
+			// 	TRACE_CPUPROFILER_EVENT_SCOPE(BoidManager_Neighbor_Sorted_With_If)
+			// 	GetNeighborBoidsDifferentSpeciesSorted_TwoArrays(Boid, SpeciesIndex);
+			// }
+			
+			ComputeBoidBehaviourForces(Boid, SpeciesIndex, BoidIndex);
+
+			ApplyEnvironmentCollisionForce(SpeciesIndex, BoidIndex);
+			ApplySpeedAdjustmentForcePerSpecies(SpeciesIndex, BoidIndex);
 		}
 	} 
 	
-	for (int SpeciesIndex = 0; SpeciesIndex < DifferentSpeciesBoids.Num(); SpeciesIndex++)
+	ApplyRecalculatedVelocity(DeltaTime);
+}
+
+void UBoidManagerSubsystem::CheckForAnyBoidNumberUpdate()
+{
+	if (BoidNumberUpdateQueue.IsEmpty())
 	{
-		for (int i = 0; i < DifferentSpeciesBoids[SpeciesIndex].Num(); i++)
-		{
-			FBoid* CurrentBoid = DifferentSpeciesBoids[SpeciesIndex][i].Get();
+		return;
+	}
+	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
+	
+	while(!BoidNumberUpdateQueue.IsEmpty())
+	{
+		FBoidNumberUpdateInfo BoidNumberUpdateInfo;
+		BoidNumberUpdateQueue.Dequeue(BoidNumberUpdateInfo);
 		
-			CurrentBoid->Velocity += CurrentBoid->Acceleration * DeltaTime;
-			CurrentBoid->Velocity = CurrentBoid->Velocity.GetClampedToMaxSize(1.5f * SpeciesInfo[SpeciesIndex].DesiredSpeed);
-			CurrentBoid->Update(DeltaTime);
-		}
-	}
-}
-
-void UBoidManagerSubsystem::GetNeighbourBoids(int32 BoidIndexToCheckNeighbours, TArray<FBoid*>& ValidBoids)
-{
-	ValidBoids.Reset();
-	CheckBoidsSubarrayForValidBoids(0, BoidIndexToCheckNeighbours, BoidIndexToCheckNeighbours, ValidBoids);
-	CheckBoidsSubarrayForValidBoids(BoidIndexToCheckNeighbours + 1, BOIDS_COUNT, BoidIndexToCheckNeighbours, ValidBoids);
-}
-
-void UBoidManagerSubsystem::CheckBoidsSubarrayForValidBoids(int32 StartIndex, int32 EndIndex, int32 BoidIndexToCheckNeighbours, TArray<FBoid*>& ValidBoids)
-{
-	for (int i = StartIndex; i < EndIndex; i++)
-	{
-		if (IsWithinPerceptionRange(BoidIndexToCheckNeighbours, i))
+		const int32 MappedIndexFromGameplayTag = BoidDataManager->RequestMappedIndex(BoidNumberUpdateInfo.Type);
+		
+		if (BoidNumberUpdateInfo.Count > 0)
 		{
-			ValidBoids.Add(Boids[i].Get());
+			HandleBoidAddition(MappedIndexFromGameplayTag, BoidNumberUpdateInfo.Count);
+		}
+		else
+		{
+			BoidSpecies[MappedIndexFromGameplayTag]->RemoveBoids(-BoidNumberUpdateInfo.Count);
 		}
 	}
+	
+	OnBoidsNumberUpdate.Broadcast();
+}
+
+void UBoidManagerSubsystem::HandleBoidAddition(const int32 SpeciesID, const int32 CountToAdd)
+{
+	const int32 NumberOfBoidsBeforeAddition = BoidSpecies[SpeciesID]->Num();
+	BoidSpecies[SpeciesID]->AddBoids(CountToAdd);
+	
+	for (int BoidIndex = NumberOfBoidsBeforeAddition; BoidIndex < BoidSpecies[SpeciesID]->Num(); BoidIndex++)
+	{
+		InitializeBoidObject(SpeciesID, BoidIndex);
+	}
+}
+
+void UBoidManagerSubsystem::RemakeBoidCollisionVoxelGrid()
+{
+	BoidCollisionVoxelGrid->ResetVoxelGrid();
+	BoidCollisionVoxelGridTwo->ResetVoxelGrid();
+	
+	
+	for (int SpeciesIndex = 0; SpeciesIndex < BoidSpecies.Num(); SpeciesIndex++)
+	{
+		for (int BoidIndex = 0; BoidIndex < BoidSpecies[SpeciesIndex]->Num(); BoidIndex++)
+		{
+			BoidCollisionVoxelGrid->AddBoidToVoxelGrid(
+				BoidSpecies[SpeciesIndex]->BoidPool[BoidIndex], SpeciesIndex, BoidIndex);
+			BoidCollisionVoxelGridTwo->AddBoidToVoxelGrid(
+				BoidSpecies[SpeciesIndex]->BoidPool[BoidIndex], SpeciesIndex, BoidIndex);
+		}
+	}
+}
+
+void UBoidManagerSubsystem::GetNeighborBoidsDifferentSpeciesSorted_TwoArrays(const FBoid& Boid, const int SpeciesID)
+{
+	SameNeighborsBoidDataSortedIf.Reset();
+	DifferentNeighborsBoidDataSortedIf.Reset();
+	
+	BoidCollisionVoxelGridTwo->GetNeighboringBoidSorted_TwoArrays(Boid,
+		BoidSpecies[SpeciesID]->SpeciesInfo.PerceptionDistanceInVoxelCellCount, SpeciesID,
+		SameNeighborsBoidDataSortedIf, DifferentNeighborsBoidDataSortedIf);
+}
+
+void UBoidManagerSubsystem::GetNeighborBoidsDifferentSpeciesSorted_OneArray(const FBoid& Boid, const int SpeciesID)
+{
+	for (int i = 0; i < NeighborsBoidDataSortedNoIf.Num(); i++)
+	{
+		NeighborsBoidDataSortedNoIf[i].Reset();
+	}
+	
+	BoidCollisionVoxelGrid->GetNeighboringBoidSorted_OneArray(Boid,
+		BoidSpecies[SpeciesID]->SpeciesInfo.PerceptionDistanceInVoxelCellCount, NeighborsBoidDataSortedNoIf);
+}
+
+void UBoidManagerSubsystem::GetNeighbourBoidsDifferentSpeciesSlow(const int32 SpeciesID, const int32 BoidID)
+{
+	SameSpeciesNeighbors.Reset();
+	DifferentSpeciesNeighbors.Reset();
+	
+	for (int SpeciesIndex = 0; SpeciesIndex < BoidSpecies.Num(); SpeciesIndex++)
+	{
+		if (SpeciesIndex == SpeciesID)
+		{
+			HandleSameSpeciesNeighborSearch(SpeciesID, BoidID);
+		}
+		else
+		{
+			HandleDifferentSpeciesNeighborSearch(SpeciesID, SpeciesIndex, BoidID);
+		}
+	}
+}
+
+void UBoidManagerSubsystem::HandleSameSpeciesNeighborSearch(const int32 SpeciesID, const int32 BoidID)
+{
+	for (int BoidIndex = 0; BoidIndex < BoidID; BoidIndex++)
+	{
+		if (IsWithinPerceptionRangeDifferentSpecies(SpeciesID, BoidID, 
+			SpeciesID, BoidIndex, BoidSpecies[SpeciesID]->SpeciesInfo.PerceptionDistanceSquared))
+		{
+			SameSpeciesNeighbors.Add(BoidIndex);
+		}
+	}
+	
+	for (int BoidIndex = BoidID + 1; BoidIndex < BoidSpecies[SpeciesID]->Num(); BoidIndex++)
+	{
+		if (IsWithinPerceptionRangeDifferentSpecies(SpeciesID, BoidID, 
+	SpeciesID, BoidIndex, BoidSpecies[SpeciesID]->SpeciesInfo.PerceptionDistanceSquared))
+		{
+			SameSpeciesNeighbors.Add(BoidIndex);
+		}
+	}
+}
+
+void UBoidManagerSubsystem::HandleDifferentSpeciesNeighborSearch(const int32 SpeciesID, const int32 OtherSpeciesID,
+	const int32 BoidID)
+{
+	for (int BoidIndex = 0; BoidIndex < BoidSpecies[OtherSpeciesID]->Num(); BoidIndex++)
+	{
+		if (IsWithinPerceptionRangeDifferentSpecies(SpeciesID, BoidID, 
+OtherSpeciesID, BoidIndex, BoidSpecies[SpeciesID]->SpeciesInfo.PerceptionDistanceSquared))
+		{
+			DifferentSpeciesNeighbors.Add(FBoidCollisionCellData(OtherSpeciesID, BoidIndex));
+		}
+	}
+}
+
+void UBoidManagerSubsystem::ComputeBoidBehaviourForces(FBoid& Boid, const uint8 SpeciesID,
+	const uint16 BoidID)
+{
+	const FVector Alignment = ComputeAlignmentMultipleSpecies(SpeciesID);
+	const FVector Cohesion = ComputeCohesionMultipleSpecies(SpeciesID, BoidID);
+	const FVector Separation = ComputeSeparationMultipleSpecies(SpeciesID, BoidID);
+	const FVector OtherSpeciesForce = ComputeForceBetweenDifferentSpecies(SpeciesID, BoidID);
+
+	Boid.Acceleration = Separation + Alignment + Cohesion + OtherSpeciesForce;
 }
 
 // NOTE: These functions could be combined into a single loop for all forces
 //       (Separation, Alignment, Cohesion) to reduce iterations over neighbors.
-//		 For now, since this is still in early development and clarity, I keep them separate
-FVector UBoidManagerSubsystem::ComputeSeparation(const FBoid* CurrentBoid)
+//		 But for the sake of clarity, I keep them separate
+FVector UBoidManagerSubsystem::ComputeSeparationMultipleSpecies(const int32 SpeciesID, const int32 BoidID)
 {
 	FVector FinalSeparationVector = FVector::ZeroVector;
-	int32 NeighboursCount = CurrentNeighbours.Num();
 		
-	for (int i = 0; i < CurrentNeighbours.Num(); i++)
+	for (const int32 NeighborBoidID: SameSpeciesNeighbors)
 	{
-		float DistanceToOtherBoid = FVector::Dist(CurrentBoid->Position, CurrentNeighbours[i]->Position);
-		FVector DesiredDirection = CurrentBoid->Position - CurrentNeighbours[i]->Position;
-		DesiredDirection = DesiredDirection.GetSafeNormal();
-		DesiredDirection *= SEPARATION_FALLOFF - DistanceToOtherBoid / PERCEPTION_DISTANCE;
-			
+		float DistanceToOtherBoid = FVector::Dist(BoidSpecies[SpeciesID]->BoidPool[BoidID].Position,
+			BoidSpecies[SpeciesID]->BoidPool[NeighborBoidID].Position);
+		FVector DesiredDirection = BoidSpecies[SpeciesID]->BoidPool[BoidID].Position - 
+			BoidSpecies[SpeciesID]->BoidPool[NeighborBoidID].Position;
+		
+		DesiredDirection = (1 - DistanceToOtherBoid / BoidSpecies[SpeciesID]->SpeciesInfo.PerceptionDistance)
+		* DesiredDirection.GetSafeNormal();
 		FinalSeparationVector += DesiredDirection;	
 	}
 
-	if (NeighboursCount > 0)
+	if (SameSpeciesNeighbors.Num() > 0)
 	{
-		FinalSeparationVector /= NeighboursCount;
-		FinalSeparationVector *= SEPARATION_FORCE;
+		FinalSeparationVector /= SameSpeciesNeighbors.Num();
+		FinalSeparationVector *= BoidSpecies[SpeciesID]->SpeciesInfo.SeparationForce;
 	}
 
 	return FinalSeparationVector;
@@ -313,22 +425,22 @@ FVector UBoidManagerSubsystem::ComputeSeparation(const FBoid* CurrentBoid)
 
 // NOTE: These functions could be combined into a single loop for all forces
 //       (Separation, Alignment, Cohesion) to reduce iterations over neighbors.
-//		 For now, since this is still in early development and clarity, I keep them separate
-FVector UBoidManagerSubsystem::ComputeAlignment()
+//		 But for the sake of clarity, I keep them separate
+FVector UBoidManagerSubsystem::ComputeAlignmentMultipleSpecies(const int32 SpeciesID)
 {
-	FVector FinalAlignmentVector = FVector::ZeroVector;
-	int32 NeighboursCount = CurrentNeighbours.Num();
+	FVector FinalAlignmentVector = FVector::ZeroVector;	
 	
-	for (int i = 0; i < CurrentNeighbours.Num(); i++)
+	for (const int32 NeighborBoidID: SameSpeciesNeighbors)
 	{
-		FVector NormalizedBoidVelocity = CurrentNeighbours[i]->Velocity.GetSafeNormal();
-		FinalAlignmentVector += NormalizedBoidVelocity;			
+		FVector DesiredBoidVelocity = BoidSpecies[SpeciesID]->BoidPool[NeighborBoidID].Velocity;
+		DesiredBoidVelocity = DesiredBoidVelocity.GetSafeNormal();
+		FinalAlignmentVector += DesiredBoidVelocity;			
 	}
-
-	if (NeighboursCount > 0)
+	
+	if (SameSpeciesNeighbors.Num() > 0)
 	{
-		FinalAlignmentVector /= NeighboursCount;
-		FinalAlignmentVector *= ALIGNMENT_FORCE;
+		FinalAlignmentVector /= SameSpeciesNeighbors.Num();
+		FinalAlignmentVector *= BoidSpecies[SpeciesID]->SpeciesInfo.AlignmentForce;
 	}
 
 	return FinalAlignmentVector;
@@ -336,55 +448,140 @@ FVector UBoidManagerSubsystem::ComputeAlignment()
 
 // NOTE: These functions could be combined into a single loop for all forces
 //       (Separation, Alignment, Cohesion) to reduce iterations over neighbors.
-//		 For now, since this is still in early development and clarity, I keep them separate
-FVector UBoidManagerSubsystem::ComputeCohesion(const FBoid* CurrentBoid)
+//		 But for the sake of clarity, I keep them separate
+FVector UBoidManagerSubsystem::ComputeCohesionMultipleSpecies(const int32 SpeciesID, const int32 BoidID)
 {
 	FVector FinalCohesionVector = FVector::ZeroVector;
-	int32 NeighboursCount = CurrentNeighbours.Num();
 		
-	for (int i = 0; i < CurrentNeighbours.Num(); i++)
+	for (const int32 NeighborBoidID: SameSpeciesNeighbors)
 	{
-		FinalCohesionVector += CurrentNeighbours[i]->Position;		
+		FinalCohesionVector += BoidSpecies[SpeciesID]->BoidPool[NeighborBoidID].Position;		
 	}
 
-	if (NeighboursCount > 0)
+	if (SameSpeciesNeighbors.Num() > 0)
 	{
-		FinalCohesionVector /= NeighboursCount;
-		FinalCohesionVector -= CurrentBoid->Position;
+		FinalCohesionVector /= SameSpeciesNeighbors.Num();
+		FinalCohesionVector -= BoidSpecies[SpeciesID]->BoidPool[BoidID].Position;
 		FinalCohesionVector = FinalCohesionVector.GetSafeNormal();
-		FinalCohesionVector *= COHESION_FORCE;
+		FinalCohesionVector *= BoidSpecies[SpeciesID]->SpeciesInfo.CohesionForce;
 	}
 
 	return FinalCohesionVector;
 }
 
-bool UBoidManagerSubsystem::IsWithinPerceptionRange(int32 FirstIndex, int32 SecondIndex)
+FVector UBoidManagerSubsystem::ComputeForceBetweenDifferentSpecies(const int32 SpeciesID, const int32 BoidID)
 {
-	float DistanceBetweenBoids = FVector::DistSquared(Boids[FirstIndex]->Position, Boids[SecondIndex]->Position);
-	return DistanceBetweenBoids <= PERCEPTION_DISTANCE_SQUARED;
+	FVector FinalOtherSpeciesVector = FVector::ZeroVector;
+		
+	for (const FBoidCollisionCellData OtherSpeciesData: DifferentSpeciesNeighbors)
+	{
+		FinalOtherSpeciesVector += (BoidSpecies[SpeciesID]->BoidPool[BoidID].Position - 
+			BoidSpecies[OtherSpeciesData.SpeciesIndex]->BoidPool[OtherSpeciesData.BoidIndex].Position).GetSafeNormal();		
+	}
+	
+	if (DifferentSpeciesNeighbors.Num() > 0)
+	{
+		FinalOtherSpeciesVector /= DifferentSpeciesNeighbors.Num();
+		FinalOtherSpeciesVector *= BoidSpecies[SpeciesID]->SpeciesInfo.OtherSpeciesForceMultiplier;
+	}
+	
+	return FinalOtherSpeciesVector;
 }
 
-void UBoidManagerSubsystem::ApplyCollisionForce(FBoid* CurrentBoid)
+bool UBoidManagerSubsystem::IsWithinPerceptionRangeDifferentSpecies(const int32 CallerSpeciesID,
+	const int32 CalledID, const int32 NeighborSpeciesID, const int32 NeighborID, const float DistanceSquared)
 {
-	CurrentBoid->Acceleration += WorldCollisionBounds->GetCollisionForceAt(CurrentBoid->Position);
+	float DistanceBetweenBoids = FVector::DistSquared(BoidSpecies[CallerSpeciesID]->BoidPool[CalledID].Position,
+	BoidSpecies[NeighborSpeciesID]->BoidPool[NeighborID].Position);
+	return DistanceBetweenBoids <= DistanceSquared;
 }
 
-void UBoidManagerSubsystem::ApplyCollisionForceTest(FBoid* CurrentBoid)
+void UBoidManagerSubsystem::ApplyEnvironmentCollisionForce(const int32 SpeciesID, const int32 BoidID)
 {
-	CurrentBoid->Acceleration += WorldCollisionGrid->GetFinalCollisionVectorAtLocation(CurrentBoid->Position);
+	BoidSpecies[SpeciesID]->BoidPool[BoidID].Acceleration += WorldCollisionVoxelGrid->GetFinalCollisionVectorAtLocation(
+	BoidSpecies[SpeciesID]->BoidPool[BoidID].Position, BoidSpecies[SpeciesID]->SpeciesInfo.EnvironmentCollisionMultiplier, 
+	 BoidSpecies[SpeciesID]->SpeciesInfo.BoundsCollisionMultiplier);
 }
 
-void UBoidManagerSubsystem::ApplySpeedAdjustmentForce(FBoid* CurrentBoid)
+void UBoidManagerSubsystem::ApplySpeedAdjustmentForcePerSpecies(const int32 SpeciesID, const int32 BoidID)
 {
-	const FVector DesiredVelocity = CurrentBoid->Velocity.GetSafeNormal() * BOID_DESIRED_VELOCITY;
-	const FVector CorrectionVector = DesiredVelocity - CurrentBoid->Velocity;
-	CurrentBoid->Acceleration += CorrectionVector * SPEED_CORRECTION_FORCE;
+	const FVector DesiredVelocity = BoidSpecies[SpeciesID]->BoidPool[BoidID].Velocity.GetSafeNormal() * 
+	BoidSpecies[SpeciesID]->SpeciesInfo.DesiredSpeed;
+	const FVector CorrectionVector = DesiredVelocity - BoidSpecies[SpeciesID]->BoidPool[BoidID].Velocity;
+	BoidSpecies[SpeciesID]->BoidPool[BoidID].Acceleration += CorrectionVector * SPEED_CORRECTION_FORCE;
 }
 
-void UBoidManagerSubsystem::ApplySpeedAdjustmentForceTest(FBoid* CurrentBoid, int SpeciesIndex)
+void UBoidManagerSubsystem::ApplyRecalculatedVelocity(float DeltaTime)
 {
-	const FVector DesiredVelocity = CurrentBoid->Velocity.GetSafeNormal() * SpeciesInfo[SpeciesIndex].DesiredSpeed;
-	const FVector CorrectionVector = DesiredVelocity - CurrentBoid->Velocity;
-	CurrentBoid->Acceleration += CorrectionVector * SPEED_CORRECTION_FORCE;
+	for (int SpeciesIndex = 0; SpeciesIndex < BoidSpecies.Num(); SpeciesIndex++)
+	{
+		for (int BoidIndex = 0; BoidIndex < BoidSpecies[SpeciesIndex]->Num(); BoidIndex++)
+		{
+			FBoid& CurrentBoid = BoidSpecies[SpeciesIndex]->BoidPool[BoidIndex];
+		
+			CurrentBoid.Velocity += CurrentBoid.Acceleration * DeltaTime;
+			CurrentBoid.Velocity = CurrentBoid.Velocity.GetClampedToMaxSize(1.5f * BoidSpecies[SpeciesIndex]->SpeciesInfo.DesiredSpeed);
+			CurrentBoid.Update(DeltaTime);
+		}
+	}
 }
 
+
+
+
+void UBoidManagerSubsystem::SubscribeToGlobalEditorDelegates()
+{
+	OnBoidNumberUpdateHandle = BoidsDelegates::OnBoidNumberUpdate.AddUObject(this, 
+		&UBoidManagerSubsystem::HandleBoidNumberUpdateHandle);
+	
+	OnBoidForceParametersChangeHandle = BoidsDelegates::OnBoidForceParametersChange.AddUObject(this,  
+		&UBoidManagerSubsystem::HandleBoidsForceParametersChange);
+	
+	OnBoidSpatialAwarenessParametersChangeHandle = BoidsDelegates::OnBoidSpatialAwarenessParametersChange.AddUObject(
+		this, &UBoidManagerSubsystem::HandleBoidsSpatialAwarenessParametersChange);
+	
+	OnBoidCollisionMultiplierUpdateHandle = BoidsDelegates::OnBoidCollisionMultiplierChange.AddUObject(this, 
+		&UBoidManagerSubsystem::HandleBoidCollisionMultiplierChange);
+}
+
+void UBoidManagerSubsystem::UnsubscribeFromGlobalEditorDelegates()
+{
+	BoidsDelegates::OnBoidForceParametersChange.Remove(OnBoidForceParametersChangeHandle);
+	BoidsDelegates::OnBoidSpatialAwarenessParametersChange.Remove(OnBoidSpatialAwarenessParametersChangeHandle);
+	BoidsDelegates::OnBoidCollisionMultiplierChange.Remove(OnBoidCollisionMultiplierUpdateHandle);
+}
+
+void UBoidManagerSubsystem::HandleBoidNumberUpdateHandle(const FBoidNumberUpdateInfo& InBoidNumberUpdateInfo)
+{
+	BoidNumberUpdateQueue.Enqueue(InBoidNumberUpdateInfo);
+}
+
+void UBoidManagerSubsystem::HandleBoidsForceParametersChange(const FGameplayTag Tag, float NewSeparationForce,
+                                                             float NewAlignmentForce, float NewCohesionForce, float NewOtherSpeciesMultiplier)
+{
+	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
+	const int32 MappedIndexFromGameplayTag = BoidDataManager->RequestMappedIndex(Tag);
+	
+	BoidSpecies[MappedIndexFromGameplayTag]->SpeciesInfo.OverwriteForcesData(NewSeparationForce, NewAlignmentForce, 
+		NewCohesionForce, NewOtherSpeciesMultiplier);
+}
+
+void UBoidManagerSubsystem::HandleBoidsSpatialAwarenessParametersChange(FGameplayTag Tag, float NewDesiredSpeed,
+	float NewPerceptionDistance)
+{
+	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
+	const int32 MappedIndexFromGameplayTag = BoidDataManager->RequestMappedIndex(Tag);
+	
+	BoidSpecies[MappedIndexFromGameplayTag]->SpeciesInfo.OverwriteSpatialAwarenessData(NewDesiredSpeed, 
+		NewPerceptionDistance);
+}
+
+void UBoidManagerSubsystem::HandleBoidCollisionMultiplierChange(FGameplayTag Tag, float NewEnvironmentCollisionMultiplier,
+	float NewBoundsCollisionMultiplier)
+{
+	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
+	const int32 MappedIndexFromGameplayTag = BoidDataManager->RequestMappedIndex(Tag);
+	
+	BoidSpecies[MappedIndexFromGameplayTag]->SpeciesInfo.OverwriteCollisionMultiplierData(NewEnvironmentCollisionMultiplier, 
+		NewBoundsCollisionMultiplier);
+}

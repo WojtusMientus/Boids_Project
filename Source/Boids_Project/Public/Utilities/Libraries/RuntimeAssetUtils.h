@@ -1,9 +1,9 @@
 ﻿// Copyright WojtusMientus
 
-
 #pragma once
 
 #include "CoreMinimal.h"
+
 
 /**
  * Runtime asset helper. Used in URuntimeDataLoaderSubsystem and Editor Module.

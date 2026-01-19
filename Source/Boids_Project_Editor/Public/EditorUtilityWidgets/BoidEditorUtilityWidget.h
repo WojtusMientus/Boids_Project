@@ -6,9 +6,9 @@
 #include "EditorUtilityWidget.h"
 #include "BoidEditorUtilityWidget.generated.h"
 
-
+struct FBoidNumberUpdateInfo;
 struct FGameplayTag;
-struct FBoidsPlainInfo;
+struct FBoidsSpeciesPlainInfo;
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPIEBeginEvent);
@@ -37,17 +37,23 @@ protected:
 	void HandleBoidColorUpdate(const FGameplayTag Tag, const FLinearColor NewColor);
 	
 	UFUNCTION(BlueprintCallable)
-	void HandleCollisionMultiplierUpdate(float NewEnvironmentCollisionMultiplier, 
-		float NewBoundsCollisionMultiplier);
-	
-	UFUNCTION(BlueprintCallable)
 	void HandleBoidNumberUpdate(const FGameplayTag Tag, int32 CountToUpdate);
 	
 	UFUNCTION(BlueprintNativeEvent)
-	void HandleOnBoidNumberUpdateFinish_BP(const FGameplayTag Tag, int32 NewBoidCount);
+	void HandleOnBoidNumberUpdateFinish_BP(const TArray<FBoidNumberUpdateInfo>& UpdatedBoidNumber);
+	
 	
 	UFUNCTION(BlueprintCallable)
-	void HandleOnBoidParameterChange(const FBoidsPlainInfo& BoidInfo);
+	void HandleBoidForceParametersChange(const FGameplayTag Tag, float NewSeparationForce, float NewAlignmentForce,
+		float NewCohesionForce, float NewOtherSpeciesMultiplier);
+	
+	UFUNCTION(BlueprintCallable)
+	void HandleBoidSpatialAwarenessParameterChangeEvent(const FGameplayTag Tag, float NewDesiredSpeed,
+		float NewPerceptionDistance);
+	
+	UFUNCTION(BlueprintCallable)
+	void HandleCollisionMultiplierUpdate(const FGameplayTag Tag, float EnvironmentCollisionMultiplier, 
+		float BoundsCollisionMultiplier);
 	
 	
 	
@@ -66,7 +72,7 @@ private:
 	void HandleOnPIEBegin(bool bPIEStatus);
 	void HandleOnPIEEnd(bool bPIEStatus);
 	
-	void HandleOnBoidNumberUpdateFinishWrapper(FGameplayTag Tag, int32 NewBoidCount);
+	void HandleOnBoidNumberUpdateFinishWrapper(const TArray<FBoidNumberUpdateInfo>& UpdatedBoidNumber);
 	
 	
 	FDelegateHandle OnPIEBeginDelegateHandle;

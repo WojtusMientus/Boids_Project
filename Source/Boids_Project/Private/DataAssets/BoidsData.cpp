@@ -2,22 +2,25 @@
 #include "DataAssets/BoidsData.h"
 #include "DataAssets/SimulationPlainInfoData/BoidsPlainInfoData.h"
 
-void UBoidsData::OverwritePlainData(const FBoidsPlainInfo& NewBoidsData)
+
+void UBoidsData::OverwritePlainData(const FBoidsSpeciesPlainInfo& NewBoidsData)
 {
-	Number = NewBoidsData.Number;;
+	Number = NewBoidsData.Number;
+	
 	SeparationForce = NewBoidsData.SeparationForce;
 	AlignmentForce = NewBoidsData.AlignmentForce;
 	CohesionForce = NewBoidsData.CohesionForce;
+	OtherSpeciesForceMultiplier = NewBoidsData.OtherSpeciesForceMultiplier;
+	
 	DesiredSpeed = NewBoidsData.DesiredSpeed;
 	PerceptionDistance = NewBoidsData.PerceptionDistance;
-	PerceptionAngle = NewBoidsData.PerceptionAngle;
 	Color = NewBoidsData.Color;
+	
+	EnvironmentCollisionMultiplier = NewBoidsData.EnvironmentCollisionMultiplier;
+	BoundsCollisionMultiplier = NewBoidsData.BoundsCollisionMultiplier;
 }
 
-FBoidsPlainInfo UBoidsData::GetPlainDataInfo() const
+FBoidsSpeciesPlainInfo UBoidsData::GetPlainDataInfo() const
 {
-	FBoidsPlainInfo PlainDataInfo;
-	PlainDataInfo.OverwriteData(this);
-	return PlainDataInfo;
+	return FBoidsSpeciesPlainInfo(this);
 }
-

@@ -1,9 +1,11 @@
-﻿#pragma once
+﻿// Copyright WojtusMientus
+
+#pragma once
 
 #include "CoreMinimal.h"
 #include "VisualizerVisibility.generated.h"
 
-
+/** Helper struct for passing visibility data from UBoidEditorUtilityWidget and its delegate listeners. */
 USTRUCT(BlueprintType)
 struct FVisualizerVisibility
 {
@@ -17,4 +19,7 @@ struct FVisualizerVisibility
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bIsCollisionDataVisible = false;
+	
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsSimulationAreaVoxelVisible = false;
 };

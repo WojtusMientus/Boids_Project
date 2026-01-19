@@ -29,6 +29,11 @@ int32 UBoidDataManagerSubsystem::RequestMappedIndex(const FGameplayTag GameplayT
 	return BoidSpeciesIndexMap.FindChecked(GameplayTag); 
 }
 
+FGameplayTag UBoidDataManagerSubsystem::RequestMappedKey(const int32 SpeciesIndex)
+{
+	return *BoidSpeciesIndexMap.FindKey(SpeciesIndex);
+}
+
 void UBoidDataManagerSubsystem::LoadSimulationDataAssets()
 {
 	ENSURE_ALWAYS_RETURN(RuntimeDataLoader.IsValid())
@@ -49,10 +54,15 @@ void UBoidDataManagerSubsystem::RequestMaterialInstanceAsset()
 
 FLinearColor UBoidDataManagerSubsystem::GetSpeciesColor(int32 SpeciesIndex)
 {
-	return LoadedBoidsPlainInfos.IsValidIndex(SpeciesIndex) ? LoadedBoidsPlainInfos[SpeciesIndex].Color : FLinearColor::White;
+	if (!LoadedBoidsPlainInfos.IsValidIndex(SpeciesIndex))
+	{
+		return FLinearColor::White;
+	}
+	
+	return LoadedBoidsPlainInfos[SpeciesIndex].Color;
 }
 
-TArray<FLoadRequest> UBoidDataManagerSubsystem::CreateBoidAndBoundsLoadRequest()
+TArray<FLoadRequest> UBoidDataManagerSubsystem::CreateBoidAndBoundsLoadRequest() const
 {
 	TArray<FLoadRequest> LoadRequests;
 	
@@ -66,7 +76,7 @@ TArray<FLoadRequest> UBoidDataManagerSubsystem::CreateBoidAndBoundsLoadRequest()
 	return LoadRequests;
 }
 
-TArray<FLoadRequest> UBoidDataManagerSubsystem::CreateBoidMaterialLoadRequest()
+TArray<FLoadRequest> UBoidDataManagerSubsystem::CreateBoidMaterialLoadRequest() const 
 {
 	return URuntimeDataLoaderSubsystem::CreateLoadRequest(EAssetRequestType::SingleAsset, 
 		FBoidConstants::Paths::MaterialsPath, UMaterialInstanceConstant::StaticClass());
@@ -74,7 +84,8 @@ TArray<FLoadRequest> UBoidDataManagerSubsystem::CreateBoidMaterialLoadRequest()
 
 void UBoidDataManagerSubsystem::HandleLoadedBoidsAndBoundsAssets(const TArray<FLoadedGroup>& LoadedAssets)
 {
-	FEnvironmentCollisionVoxelGridData VoxelGridData;
+	FEnvironmentCollisionVoxelGridData EnvironmentCollisioVoxelGridData;
+	FBoidCollisionVoxelGridData BoidCollisionVoxelGridData;
 	
 	for (FLoadedGroup LoadedGroup: LoadedAssets)
 	{
@@ -84,11 +95,12 @@ void UBoidDataManagerSubsystem::HandleLoadedBoidsAndBoundsAssets(const TArray<FL
 		}
 		else if (LoadedGroup.AssetClass == UBoundsData::StaticClass())
 		{
-			HandleLoadedBoundsData(LoadedGroup.LoadedAssets, VoxelGridData);
+			HandleLoadedBoundsData(LoadedGroup.LoadedAssets, EnvironmentCollisioVoxelGridData, 
+				BoidCollisionVoxelGridData);
 		}
 	}
 	
-	OnSimulationDataLoaded.Broadcast(LoadedBoidsPlainInfos, VoxelGridData);
+	OnSimulationDataLoaded.Broadcast(LoadedBoidsPlainInfos, EnvironmentCollisioVoxelGridData, BoidCollisionVoxelGridData);
 }
 
 void UBoidDataManagerSubsystem::HandleLoadedMaterialAsset(const TArray<FLoadedGroup>& LoadedAssets)
@@ -116,13 +128,14 @@ void UBoidDataManagerSubsystem::HandleLoadedBoidsData(TArray<UObject*> LoadedBoi
 		const UBoidsData* BoidsData = Cast<UBoidsData>(LoadedObject);
 		ENSURE_ALWAYS_CONTINUE(IsValid(BoidsData))
 		
-		LoadedBoidsPlainInfos.Add(FBoidsPlainInfo(BoidsData));
+		LoadedBoidsPlainInfos.Add(FBoidsSpeciesPlainInfo(BoidsData));
 		BoidSpeciesIndexMap.FindOrAdd(BoidsData->Type, BoidSpeciesIndexMap.Num());
 	}
 }
 
 void UBoidDataManagerSubsystem::HandleLoadedBoundsData(TArray<UObject*> LoadedBoundsAsset, 
-	FEnvironmentCollisionVoxelGridData& OutVoxelGridData)
+	FEnvironmentCollisionVoxelGridData& OutEnvironmentCollisionVoxelGridData,
+	FBoidCollisionVoxelGridData& OutBoidCollisionVoxelGridData)
 {
 	if (LoadedBoundsAsset.Num() == 0)
 	{
@@ -130,5 +143,7 @@ void UBoidDataManagerSubsystem::HandleLoadedBoundsData(TArray<UObject*> LoadedBo
 	}
 	
 	const UBoundsData* LoadedBounds = Cast<UBoundsData>(LoadedBoundsAsset[0]);
-	OutVoxelGridData.OverwriteData(LoadedBounds);
+	OutEnvironmentCollisionVoxelGridData.OverwriteData(LoadedBounds);
+	OutBoidCollisionVoxelGridData.OverwriteData(LoadedBounds);
+	OutBoidCollisionVoxelGridData.InitializeBoidCollisionArray();
 }

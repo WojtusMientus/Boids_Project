@@ -7,18 +7,20 @@
 #include "GameplayTagContainer.h"
 #include "BoidDataManagerSubsystem.generated.h"
 
-
 class URuntimeDataLoaderSubsystem;
 struct FEnvironmentCollisionVoxelGridData;
-struct FBoidsPlainInfo;
+struct FBoidCollisionVoxelGridData;
+struct FBoidsSpeciesPlainInfo;
 struct FLoadRequest;
 struct FLoadedGroup;
 
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSimulationDataLoadedEvent, const TArray<FBoidsPlainInfo> BoidsInfo, 
-	const FEnvironmentCollisionVoxelGridData VoxelGridData)
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnSimulationDataLoadedEvent, const TArray<FBoidsSpeciesPlainInfo>& BoidsInfo, 
+	const FEnvironmentCollisionVoxelGridData& EnvironmentVoxelGridData, 
+	const FBoidCollisionVoxelGridData& BoidCollisionVoexlGridData)
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnBoidMaterialInstanceLoadedEvent, 
 	UMaterialInstanceConstant* LoadedMaterialInstance)
+
 
 /**
  * Data manager responsible for loading simulation data.
@@ -41,6 +43,7 @@ public:
 	//~ End UGameInstanceSubsystem Interface
 	
 	int32 RequestMappedIndex(const FGameplayTag GameplayTag);
+	FGameplayTag RequestMappedKey(const int32 SpeciesIndex);
 	void LoadSimulationDataAssets();
 	void RequestMaterialInstanceAsset();
 	
@@ -48,23 +51,25 @@ public:
 	
 private:
 	
-	TArray<FLoadRequest> CreateBoidAndBoundsLoadRequest();
-	TArray<FLoadRequest> CreateBoidMaterialLoadRequest();
+	TArray<FLoadRequest> CreateBoidAndBoundsLoadRequest() const;
+	TArray<FLoadRequest> CreateBoidMaterialLoadRequest() const;
 	
 	void HandleLoadedBoidsAndBoundsAssets(const TArray<FLoadedGroup>& LoadedAssets);
 	void HandleLoadedMaterialAsset(const TArray<FLoadedGroup>& LoadedAssets);
 	
-	
 	void HandleLoadedBoidsData(TArray<UObject*> LoadedBoidsAssets);
-	void HandleLoadedBoundsData(TArray<UObject*> LoadedBoundsAsset, FEnvironmentCollisionVoxelGridData& OutVoxelGridData);
+	void HandleLoadedBoundsData(TArray<UObject*> LoadedBoundsAsset, 
+		FEnvironmentCollisionVoxelGridData& OutEnvironmentCollisionVoxelGridData,
+		FBoidCollisionVoxelGridData& OutBoidCollisionVoxelGridData);
 	
 	
 	UPROPERTY()
 	TWeakObjectPtr<URuntimeDataLoaderSubsystem> RuntimeDataLoader;
 	
 	UPROPERTY()
+	/** Global map of boids species and its index. */
 	TMap<FGameplayTag, int32> BoidSpeciesIndexMap;
 	
 	UPROPERTY()
-	TArray<FBoidsPlainInfo> LoadedBoidsPlainInfos;
+	TArray<FBoidsSpeciesPlainInfo> LoadedBoidsPlainInfos;
 };

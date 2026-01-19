@@ -1,5 +1,6 @@
 
 #include "Core/Subsystems//BoidDataEditorSubsystem.h"
+#include "Utilities/Macros/DebugMacros.h"
 #include "Core/CollisionData.h"
 
 
@@ -12,7 +13,7 @@ void UBoidDataEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 }
 
 void UBoidDataEditorSubsystem::InitializeNecessarySimulationData(FCollisionBoundsPlainInfo& BoundsData,
-	TMap<FGameplayTag, FBoidsPlainInfo>& BoidsData)
+	TMap<FGameplayTag, FBoidsSpeciesPlainInfo>& BoidsData)
 {
 	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
 	BoidDataManager->InitializeBoidSimulationData(BoundsData, BoidsData);
@@ -25,18 +26,18 @@ void UBoidDataEditorSubsystem::RegenerateCollisionDataAndSave(const FCollisionBo
 	
 	FCollisionData CollisionData;
 	CollisionData.CollisionBoundsData = CollisionBoundsData;
-	CollisionDataGenerator->GenerateCollisionData(CollisionData);
+	CollisionDataGenerator->GenerateCollisionData_NEW(CollisionData);
 	BoidDataManager->SaveBoundsData(CollisionBoundsData, CollisionData.CollisionForcesData);
-	OnCollisionDataRegenerationEvent.Broadcast(CollisionData);
+	OnCollisionDataRegeneration.Broadcast(CollisionData);
 }
 
-void UBoidDataEditorSubsystem::SaveBoidsData(const FBoidsPlainInfo& BoidsData)
+void UBoidDataEditorSubsystem::SaveBoidsData(const FBoidsSpeciesPlainInfo& BoidsData)
 {
 	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
 	BoidDataManager->SaveBoidsData(BoidsData);
 }
 
-void UBoidDataEditorSubsystem::SaveAllBoidsData(const TMap<FGameplayTag, FBoidsPlainInfo>& AllBoidsData)
+void UBoidDataEditorSubsystem::SaveAllBoidsData(const TMap<FGameplayTag, FBoidsSpeciesPlainInfo>& AllBoidsData)
 {
 	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
 	BoidDataManager->SaveAllBoidsData(AllBoidsData);
@@ -44,10 +45,16 @@ void UBoidDataEditorSubsystem::SaveAllBoidsData(const TMap<FGameplayTag, FBoidsP
 
 void UBoidDataEditorSubsystem::HandleBoundsChanged(const FVector& NewCenter, const FVector& NewExtent)
 {
-	OnSimulationBoundsChangedEvent.Broadcast(NewCenter, NewExtent);
+	OnSimulationBoundsChanged.Broadcast(NewCenter, NewExtent);
 }
 
 void UBoidDataEditorSubsystem::HandleSimulationBoundsDataVisibilityChanged(const FVisualizerVisibility VisualizerVisibility)
 {
 	OnAnySimulationBoundsDataVisibilityChanged.Broadcast(VisualizerVisibility);
+}
+
+void UBoidDataEditorSubsystem::HandleSimulationAreaVoxelChanged(
+	const FCollisionBoundsPlainInfo& CollisionBoundsPlainInfo)
+{
+	OnSimulationAreaVoxelChanged.Broadcast(CollisionBoundsPlainInfo);
 }

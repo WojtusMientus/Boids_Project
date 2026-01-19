@@ -4,31 +4,25 @@
 
 #include "CoreMinimal.h"
 
+
 /**
- * Simple Boid class representing position and velocity in 3D space.
+ * Simple Boid class representing position, velocity and acceleration in 3D space.
  */
 class BOIDS_PROJECT_API FBoid
 {
 	
 public:
+	
+	FBoid(const FVector& InitPosition = FVector::ZeroVector, const FVector& InitVelocity = FVector::ZeroVector);	
 
-	/**
-	 * Constructs a Boid with an initial position and velocity.
-	 * @param InitPosition Starting world-space position.
-	 * @param InitVelocity Starting velocity vector.
-	 */
-	FBoid(const FVector& InitPosition, const FVector& InitVelocity);	
-
-	/**
-	 * Updates the Boid's position based on its velocity.
-	 * @param DeltaTime Time elapsed since the last frame.
-	 */
+	void Initialize(const FVector& InitPosition = FVector::ZeroVector, 
+	const FVector& InitVelocity = FVector::ZeroVector);
+	void Reset();
+	
 	void Update(float DeltaTime);
 	
-	FVector Position;
-	FVector Velocity;
-	FVector Acceleration;
 	
-	int32 VoxelGridIndex = INDEX_NONE;
-	int32 VoxelGridCellIndex = INDEX_NONE;
+	FVector Position = FVector::ZeroVector;
+	FVector Velocity = FVector::ZeroVector;
+	FVector Acceleration = FVector::ZeroVector;
 };

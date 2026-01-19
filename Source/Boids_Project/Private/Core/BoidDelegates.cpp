@@ -5,8 +5,10 @@
 namespace BoidsDelegates
 {
 	FOnBoidColorUpdateEvent OnBoidColorUpdate;
-	FOnCollisionMultiplierUpdateEvent OnCollisionMultiplierUpdate;
 	FOnBoidNumberUpdateEvent OnBoidNumberUpdate;
 	FOnBoidNumberUpdateFinishEvent OnBoidNumberUpdateFinish;
-	FOnBoidParameterChangeEvent OnBoidParameterChange;
+	
+	FOnBoidForceParametersChangeEvent OnBoidForceParametersChange;
+	FOnBoidSpatialAwarenessParametersChangeEvent OnBoidSpatialAwarenessParametersChange;
+	FOnBoidCollisionMultiplierUpdateEvent OnBoidCollisionMultiplierChange;
 }

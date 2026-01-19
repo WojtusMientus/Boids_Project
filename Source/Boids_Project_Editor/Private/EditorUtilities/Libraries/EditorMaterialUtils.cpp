@@ -4,7 +4,6 @@
 #include "EditorUtilities/Libraries/EditorAssetUtils.h"
 #include "Factories/MaterialInstanceConstantFactoryNew.h"
 #include "Materials/MaterialExpressionVectorParameter.h"
-#include "Utilities/BoidConstants.h"
 
 
 UMaterialExpressionVectorParameter* FEditorMaterialUtils::CreateMaterialExpressionVectorParameter(

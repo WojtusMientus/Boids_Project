@@ -1,13 +1,12 @@
 ﻿
 #include "Slate/SCustomColorPicker.h"
-
 #include "Widgets/Colors/SColorBlock.h"
 #include "Widgets/Colors/SColorSpectrum.h"
 #include "Slate/SCustomColorSlider.h"
 
+
 const FVector2D SCustomColorPicker::DEFAULT_WINDOW_SIZE = FVector2D(340, 300);
 const FVector2D SCustomColorPicker::ADDITIONAL_WINDOW_SPAWN_PADDING = FVector2D(0, 200);
-
 
 void SCustomColorPicker::Construct(const FArguments& InArgs)
 {

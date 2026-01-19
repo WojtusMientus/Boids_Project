@@ -1,8 +1,8 @@
 ﻿
 #include "DataAssets/BoundsData.h"
-
-#include "Bounds/VoxelGrid/VoxelGridData/VoxelGridData.h"
+#include "VoxelGrids/VoxelGridData/VoxelGridData.h"
 #include "DataAssets/SimulationPlainInfoData/BoundsPlainInfoData.h"
+
 
 TArray<FEnvironmentCollisionCellData> UBoundsData::GetCollisionForcesArray() const
 {
@@ -14,21 +14,15 @@ void UBoundsData::OverwritePlainData(const FCollisionBoundsPlainInfo& NewCollisi
 {
 	Center = NewCollisionBoundsData.BoundsPlainData.Center;
 	Extent = NewCollisionBoundsData.BoundsPlainData.Extent;
-	GridResolution = NewCollisionBoundsData.BoundsPlainData.GridResolution;
+	
+	EnvironmentGridResolution = NewCollisionBoundsData.BoundsPlainData.EnvironmentGridResolution;
+	BoidCollisionGridResolution = NewCollisionBoundsData.BoundsPlainData.BoidCollisionGridResolution;
+	
 	EnvironmentCollisionRows = NewCollisionBoundsData.EnvironmentCollisionRows;
 	BoundsCollisionRows = NewCollisionBoundsData.BoundsCollisionRows;
-	EnvironmentCollisionMultiplier = NewCollisionBoundsData.EnvironmentCollisionMultiplier;
-	BoundsCollisionMultiplier = NewCollisionBoundsData.BoundsCollisionMultiplier;
+	SimulationSeedVoxelIndices = NewCollisionBoundsData.SimulationSeedVoxelIndices;
+	
 	CollisionForces = NewCollisionWallData;
-	CollisionArraySize = GridResolution;
+	CollisionArraySize = EnvironmentGridResolution;
 }
 
-FCollisionBoundsPlainInfo UBoundsData::GetPlainDataInfo() const
-{
-	return FCollisionBoundsPlainInfo(this);
-}
-
-FEnvironmentCollisionVoxelGridData UBoundsData::GetVoxelGridData() const
-{
-	return FEnvironmentCollisionVoxelGridData(this);
-}

@@ -5,13 +5,9 @@
 #include "CoreMinimal.h"
 #include "BoundsPlainInfoData.generated.h"
 
-
 class UBoundsData;
 
 
-/**
- * Helper struct for passing data between EditorBoidDataManager and its delegate listeners.
- */
 USTRUCT(BlueprintType)
 struct BOIDS_PROJECT_API FBoundsPlainInfo
 {
@@ -24,9 +20,33 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	FVector Extent = FVector(1000.0f,1000.0f,1000.0f);
-
+	
 	UPROPERTY(BlueprintReadWrite)
 	FIntVector GridResolution = FIntVector(1,1,1);
+};
+
+
+/**
+ * Helper struct for passing data between EditorBoidDataManager and its delegate listeners.
+ */
+USTRUCT(BlueprintType)
+struct BOIDS_PROJECT_API FSimulationBoundsPlainInfo
+{
+	GENERATED_BODY()
+
+public:
+	
+	UPROPERTY(BlueprintReadWrite)
+	FVector Center = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadWrite)
+	FVector Extent = FVector(1000.0f,1000.0f,1000.0f);
+
+	UPROPERTY(BlueprintReadWrite)
+	FIntVector EnvironmentGridResolution = FIntVector(1,1,1);
+	
+	UPROPERTY(BlueprintReadWrite)
+	FIntVector BoidCollisionGridResolution = FIntVector(1,1,1);
 };
 
 /**
@@ -40,7 +60,7 @@ struct BOIDS_PROJECT_API FCollisionBoundsPlainInfo
 public:
 	
 	UPROPERTY(BlueprintReadWrite)
-	FBoundsPlainInfo BoundsPlainData;
+	FSimulationBoundsPlainInfo BoundsPlainData;
 	
 	UPROPERTY(BlueprintReadWrite)
 	int32 EnvironmentCollisionRows = 1;
@@ -49,10 +69,8 @@ public:
 	int32 BoundsCollisionRows = 1;
 	
 	UPROPERTY(BlueprintReadWrite)
-	float EnvironmentCollisionMultiplier = 1.0f;
+	FIntVector SimulationSeedVoxelIndices = FIntVector(1,1,1);
 	
-	UPROPERTY(BlueprintReadWrite)
-	float BoundsCollisionMultiplier = 1.0f;
 	
 	FCollisionBoundsPlainInfo() {};
 	FCollisionBoundsPlainInfo(const UBoundsData* NewBoundsData);

@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "BoidSimulationSettings.generated.h"
 
-
 class AVisualBoid;
 
 
@@ -23,6 +22,3 @@ public:
 	UPROPERTY(Config, EditAnywhere)
 	TSubclassOf<AVisualBoid> VisualBoidClass = nullptr;
 };
-
-
-

@@ -1,6 +1,6 @@
 
 #include "EditorUtilityWidgets/BoidEditorUtilityWidget.h"
-
+#include "Utilities/BoidNumberUpdateInfo.h"
 #include "Core/BoidDelegates.h"
 #include "Editor/UnrealEd/Public/Editor.h"
 
@@ -32,24 +32,34 @@ void UBoidEditorUtilityWidget::HandleBoidColorUpdate(const FGameplayTag Tag, con
 	BoidsDelegates::OnBoidColorUpdate.Broadcast(Tag, NewColor);
 }
 
-void UBoidEditorUtilityWidget::HandleCollisionMultiplierUpdate(float NewEnvironmentCollisionMultiplier,
-	float NewBoundsCollisionMultiplier)
-{
-	BoidsDelegates::OnCollisionMultiplierUpdate.Broadcast(NewEnvironmentCollisionMultiplier,
-		NewBoundsCollisionMultiplier);
-}
-
 void UBoidEditorUtilityWidget::HandleBoidNumberUpdate(const FGameplayTag Tag, int32 CountToUpdate)
 {
-	BoidsDelegates::OnBoidNumberUpdate.Broadcast(Tag, CountToUpdate);
+	BoidsDelegates::OnBoidNumberUpdate.Broadcast(FBoidNumberUpdateInfo(Tag, CountToUpdate));
 }
 
-void UBoidEditorUtilityWidget::HandleOnBoidParameterChange(const FBoidsPlainInfo& BoidInfo)
+void UBoidEditorUtilityWidget::HandleBoidForceParametersChange(const FGameplayTag Tag, float NewSeparationForce,
+	float NewAlignmentForce, float NewCohesionForce, float NewOtherSpeciesMultiplier)
 {
-	BoidsDelegates::OnBoidParameterChange.Broadcast(BoidInfo);
+	BoidsDelegates::OnBoidForceParametersChange.Broadcast(Tag, NewSeparationForce, NewAlignmentForce, 
+		NewCohesionForce, NewOtherSpeciesMultiplier);
 }
 
-void UBoidEditorUtilityWidget::HandleOnBoidNumberUpdateFinish_BP_Implementation(FGameplayTag Tag, int32 NewBoidCount)
+void UBoidEditorUtilityWidget::HandleBoidSpatialAwarenessParameterChangeEvent(const FGameplayTag Tag,
+	float NewDesiredSpeed, float NewPerceptionDistance)
+{
+	BoidsDelegates::OnBoidSpatialAwarenessParametersChange.Broadcast(Tag, NewDesiredSpeed, NewPerceptionDistance);
+}
+
+void UBoidEditorUtilityWidget::HandleCollisionMultiplierUpdate(const FGameplayTag Tag, 
+	float EnvironmentCollisionMultiplier, float BoundsCollisionMultiplier)
+{
+	BoidsDelegates::OnBoidCollisionMultiplierChange.Broadcast(Tag, EnvironmentCollisionMultiplier,
+		BoundsCollisionMultiplier);
+}
+
+
+void UBoidEditorUtilityWidget::HandleOnBoidNumberUpdateFinish_BP_Implementation(const TArray<FBoidNumberUpdateInfo>&
+	UpdatedBoidNumber)
 {
 }
 
@@ -70,7 +80,7 @@ void UBoidEditorUtilityWidget::HandleOnPIEEnd(bool bPIEStatus)
 	BoidsDelegates::OnBoidNumberUpdateFinish.Remove(OnBoidNumberUpdateFinishEvent);
 }
 
-void UBoidEditorUtilityWidget::HandleOnBoidNumberUpdateFinishWrapper(FGameplayTag Tag, int32 NewBoidCount)
+void UBoidEditorUtilityWidget::HandleOnBoidNumberUpdateFinishWrapper(const TArray<FBoidNumberUpdateInfo>& UpdatedBoidNumber)
 {
-	HandleOnBoidNumberUpdateFinish_BP_Implementation(Tag, NewBoidCount);
+	HandleOnBoidNumberUpdateFinish_BP(UpdatedBoidNumber);
 }

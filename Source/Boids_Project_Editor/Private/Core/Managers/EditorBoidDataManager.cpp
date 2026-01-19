@@ -10,11 +10,12 @@
 #include "EditorUtilities/Libraries/EditorMaterialUtils.h"
 #include "Materials/MaterialExpressionVectorParameter.h"
 #include "Materials/MaterialInstanceConstant.h"
+#include "Utilities//Macros/DebugMacros.h"
 #include "Utilities/Libraries/RuntimeAssetUtils.h"
 
 
 void FEditorBoidDataManager::InitializeBoidSimulationData(FCollisionBoundsPlainInfo& OutBoundsData,
-                                                          TMap<FGameplayTag, FBoidsPlainInfo>& OutBoidsData)
+                                                          TMap<FGameplayTag, FBoidsSpeciesPlainInfo>& OutBoidsData)
 {
 	EnsureNecessarySimulationData();
 	OutBoundsData = GetCopyOfBoundsData();
@@ -30,7 +31,7 @@ void FEditorBoidDataManager::SaveBoundsData(const FCollisionBoundsPlainInfo& Col
 	FEditorAssetUtils::SaveAsset(LoadedBoundsDataAsset);
 }
 
-void FEditorBoidDataManager::SaveBoidsData(const FBoidsPlainInfo& BoidsDataToSave)
+void FEditorBoidDataManager::SaveBoidsData(const FBoidsSpeciesPlainInfo& BoidsDataToSave)
 {
 	UBoidsData* BoidsAssetToSave = LoadedBoidsDataAssets[BoidsDataToSave.Type];
 	ENSURE_ALWAYS_RETURN(IsValid(BoidsAssetToSave))
@@ -39,9 +40,9 @@ void FEditorBoidDataManager::SaveBoidsData(const FBoidsPlainInfo& BoidsDataToSav
 	FEditorAssetUtils::SaveAsset(BoidsAssetToSave);
 }
 
-void FEditorBoidDataManager::SaveAllBoidsData(const TMap<FGameplayTag, FBoidsPlainInfo>& AllBoidsDataToSave)
+void FEditorBoidDataManager::SaveAllBoidsData(const TMap<FGameplayTag, FBoidsSpeciesPlainInfo>& AllBoidsDataToSave)
 {
-	for (const TPair<FGameplayTag, FBoidsPlainInfo>& Pair: AllBoidsDataToSave)
+	for (const TPair<FGameplayTag, FBoidsSpeciesPlainInfo>& Pair: AllBoidsDataToSave)
 	{
 		SaveBoidsData(Pair.Value);
 	}
@@ -59,16 +60,16 @@ FCollisionBoundsPlainInfo FEditorBoidDataManager::GetCopyOfBoundsData() const
 	return FCollisionBoundsPlainInfo(LoadedBoundsDataAsset);
 }
 
-TMap<FGameplayTag, FBoidsPlainInfo> FEditorBoidDataManager::GetCopyOfBoidsData() const
+TMap<FGameplayTag, FBoidsSpeciesPlainInfo> FEditorBoidDataManager::GetCopyOfBoidsData() const
 {
-	TMap<FGameplayTag, FBoidsPlainInfo> BoidsDataCopy;
+	TMap<FGameplayTag, FBoidsSpeciesPlainInfo> BoidsDataCopy;
 	
 	for (const TPair<FGameplayTag, UBoidsData*>& Pair: LoadedBoidsDataAssets)
 	{
 		const UBoidsData* OriginalBoidData = Pair.Value;
 		ENSURE_ALWAYS_CONTINUE(IsValid(OriginalBoidData))
 		
-		FBoidsPlainInfo BoidSpeciesDataCopy = OriginalBoidData->GetPlainDataInfo();
+		FBoidsSpeciesPlainInfo BoidSpeciesDataCopy = OriginalBoidData->GetPlainDataInfo();
 		BoidsDataCopy.Add(OriginalBoidData->Type, BoidSpeciesDataCopy);
 	}
 	
@@ -150,7 +151,6 @@ void FEditorBoidDataManager::EnsureMaterialInstanceAsset()
 		FEditorAssetUtils::SaveAsset(CreatedMaterialInstance);
 	}
 }
-
 
 void FEditorBoidDataManager::EnsureBoidsDataDirectoryExist() const
 {

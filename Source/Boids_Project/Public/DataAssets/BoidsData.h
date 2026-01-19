@@ -7,15 +7,13 @@
 #include "Engine/DataAsset.h"
 #include "BoidsData.generated.h"
 
-
-struct FBoidsPlainInfo;
+struct FBoidsSpeciesPlainInfo;
 
 
 /**
  * Data asset defining parameters for a single Boid species.
  * Configures spawning, visual appearance and behavioral forces.
  */
-// TODO: Load saved data at simulation start
 UCLASS()
 class BOIDS_PROJECT_API UBoidsData : public UDataAsset
 {
@@ -33,35 +31,45 @@ public:
 	
 	/** Separation force multiplier. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Forces")
-	float SeparationForce = 100.0f;
+	float SeparationForce = 750.0f;
 	
 	/** Alignment force multiplier. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Forces")
-	float AlignmentForce = 100.0f;
+	float AlignmentForce = 200.0f;
 	
 	/** Cohesion force multiplier. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Forces")
-	float CohesionForce = 100.0f;
+	float CohesionForce = 750.0f;
 
+	/** Other species force multiplier (Additional multiplier for interspecies interactions 
+	 * creating behaviors like avoiding each other or maybe in future chasing different species). */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Forces")
+	float OtherSpeciesForceMultiplier = 100.0f;
+	
+	
 	/** Desired movement speed. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Perception")
-	float DesiredSpeed = 100.0f;
+	float DesiredSpeed = 250.0f;
 	 
 	/** Maximum perception radius. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Perception")
-	int32 PerceptionDistance = 100;
-
-	/** Maximum perception angle. */
-	// TODO: Implement angular perception
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = 30, ClampMax = 360), Category = "Perception")
-	int32 PerceptionAngle = 360;
+	float PerceptionDistance = 175.0f;
 	
 	/** Visual Boid's color. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Color")
 	FLinearColor Color = FLinearColor::White;
 	
 	
-	void OverwritePlainData(const FBoidsPlainInfo& NewBoidsData);
-	FBoidsPlainInfo GetPlainDataInfo() const;
+	/** Final multiplier applied to environment collision force before retrieving data. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "10000"), Category = "Environment")
+	float EnvironmentCollisionMultiplier = 1.0f;
+	
+	/** Final multiplier applied to bounds collision force before retrieving data. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "10000"), Category = "Environment")
+	float BoundsCollisionMultiplier = 1.0f;
+	
+	
+	void OverwritePlainData(const FBoidsSpeciesPlainInfo& NewBoidsData);
+	FBoidsSpeciesPlainInfo GetPlainDataInfo() const;
 };
 
