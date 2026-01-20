@@ -143,7 +143,7 @@ This section covers data management, asset loading, and the tools enabling in-ed
 
 ---
 
-**Evolution of the Editor Tool**
+### Evolution of the Editor Tool
 
 The primary goal of this tool has always been the **real-time manipulation of Boid parameters** (cohesion, alignment, separation, speed) to allow for instant feedback during the simulation.
 *Note: Bounds and collision data are not manipulated in real-time as they require a pre-generation step.*
