@@ -69,7 +69,7 @@ void UVisualBoidManagerSubsystem::InitializeAllBoidsSpecies()
 	ENSURE_ALWAYS_RETURN(IsValid(World) && BoidManagerSubsystem.IsValid())
 	
 	const int32 DifferentBoidSpeciesCount = BoidManagerSubsystem->GetDifferentBoidSpeciesCount(); 
-	VisualBoids.Reserve(DifferentBoidSpeciesCount);
+	VisualBoidsSpecies.Reserve(DifferentBoidSpeciesCount);
 	
 	TSubclassOf<AVisualBoid> VisualBoidClass = GetVisualBoidClass();
 	
@@ -82,12 +82,12 @@ void UVisualBoidManagerSubsystem::InitializeAllBoidsSpecies()
 void UVisualBoidManagerSubsystem::InitializeBoidSpecies(const int SpeciesIndex, const TSubclassOf<AVisualBoid> VisualBoidClass)
 {
 	const int32 BoidCount = BoidManagerSubsystem->GetBoidsSpeciesCount(SpeciesIndex);
-	VisualBoids.Add(NewObject<UVisualBoidSpecies>());
-	check(VisualBoids[SpeciesIndex] != nullptr);
+	VisualBoidsSpecies.Add(NewObject<UVisualBoidSpecies>());
+	check(VisualBoidsSpecies[SpeciesIndex] != nullptr);
 	
-	VisualBoids[SpeciesIndex]->InitializeSpecies(BoidCount, VisualBoidClass, GetWorld());
+	VisualBoidsSpecies[SpeciesIndex]->InitializeSpecies(BoidCount, VisualBoidClass, GetWorld());
 	
-	for (int BoidIndex = 0; BoidIndex < VisualBoids[SpeciesIndex]->Num(); BoidIndex++)
+	for (int BoidIndex = 0; BoidIndex < VisualBoidsSpecies[SpeciesIndex]->Num(); BoidIndex++)
 	{
 		InitializeVisualBoid(SpeciesIndex, BoidIndex);
 	}
@@ -95,7 +95,7 @@ void UVisualBoidManagerSubsystem::InitializeBoidSpecies(const int SpeciesIndex, 
 
 void UVisualBoidManagerSubsystem::InitializeVisualBoid(int32 SpeciesIndex, int32 BoidIndex)
 {
-	AVisualBoid* VisualBoid = VisualBoids[SpeciesIndex]->Get(BoidIndex);
+	AVisualBoid* VisualBoid = VisualBoidsSpecies[SpeciesIndex]->Get(BoidIndex);
 	FVector StartingLocation = BoidManagerSubsystem->GetBoidPositionAt(SpeciesIndex, BoidIndex);
 	FVector StartingVelocity = BoidManagerSubsystem->GetBoidVelocityAt(SpeciesIndex, BoidIndex);
 	
@@ -128,11 +128,11 @@ void UVisualBoidManagerSubsystem::InitializeBoidMaterials(UMaterialInstanceConst
 {
 	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
 	
-	for (int SpeciesIndex = 0; SpeciesIndex < VisualBoids.Num(); SpeciesIndex++)
+	for (int SpeciesIndex = 0; SpeciesIndex < VisualBoidsSpecies.Num(); SpeciesIndex++)
 	{
-		VisualBoids[SpeciesIndex]->InitializeMaterial(LoadedMaterialInstance);
+		VisualBoidsSpecies[SpeciesIndex]->InitializeMaterial(LoadedMaterialInstance);
 		FLinearColor SpeciesColor = BoidDataManager->GetSpeciesColor(SpeciesIndex);
-		VisualBoids[SpeciesIndex]->UpdateMaterialColor(SpeciesColor);
+		VisualBoidsSpecies[SpeciesIndex]->UpdateMaterialColor(SpeciesColor);
 	}
 }
 
@@ -143,11 +143,11 @@ void UVisualBoidManagerSubsystem::HandleBoidsUpdate()
 		
 		ENSURE_ALWAYS_RETURN(BoidManagerSubsystem.IsValid())
 	
-		for (int SpeciesIndex = 0; SpeciesIndex < VisualBoids.Num(); SpeciesIndex++)
+		for (int SpeciesIndex = 0; SpeciesIndex < VisualBoidsSpecies.Num(); SpeciesIndex++)
 		{
-			for (int BoidIndex = 0 ; BoidIndex < VisualBoids[SpeciesIndex]->Num(); BoidIndex++)
+			for (int BoidIndex = 0 ; BoidIndex < VisualBoidsSpecies[SpeciesIndex]->Num(); BoidIndex++)
 			{
-				AVisualBoid* CurrentBoid = VisualBoids[SpeciesIndex]->Get(BoidIndex);			
+				AVisualBoid* CurrentBoid = VisualBoidsSpecies[SpeciesIndex]->Get(BoidIndex);			
 				FVector NewLocation = BoidManagerSubsystem->GetBoidPositionAt(SpeciesIndex, BoidIndex);
 				FVector NewVelocity = BoidManagerSubsystem->GetBoidVelocityAt(SpeciesIndex, BoidIndex);
 					
@@ -172,14 +172,14 @@ void UVisualBoidManagerSubsystem::HandleBoidsNumberUpdate()
 {
 	ENSURE_ALWAYS_RETURN(BoidManagerSubsystem.IsValid())
 	
-	for (int SpeciesIndex = 0; SpeciesIndex < VisualBoids.Num(); SpeciesIndex++)
+	for (int SpeciesIndex = 0; SpeciesIndex < VisualBoidsSpecies.Num(); SpeciesIndex++)
 	{
 		const int32 LogicalBoidNumber = BoidManagerSubsystem->GetBoidsSpeciesCount(SpeciesIndex);
-		const int32 DifferenceInBoidNumber = LogicalBoidNumber - VisualBoids[SpeciesIndex]->Num();
+		const int32 DifferenceInBoidNumber = LogicalBoidNumber - VisualBoidsSpecies[SpeciesIndex]->Num();
 		
 		if (DifferenceInBoidNumber < 0)
 		{
-			VisualBoids[SpeciesIndex]->RemoveBoids(-DifferenceInBoidNumber);
+			VisualBoidsSpecies[SpeciesIndex]->RemoveBoids(-DifferenceInBoidNumber);
 		}
 		else if (DifferenceInBoidNumber > 0)
 		{
@@ -192,8 +192,8 @@ void UVisualBoidManagerSubsystem::HandleBoidsNumberUpdate()
 
 void UVisualBoidManagerSubsystem::HandleBoidAddition(const int32 SpeciesID, const int32 CountToAdd)
 {
-	const int32 NumberOfBoidsBeforeAddition = VisualBoids[SpeciesID]->Num();
-	VisualBoids[SpeciesID]->AddBoids(CountToAdd);
+	const int32 NumberOfBoidsBeforeAddition = VisualBoidsSpecies[SpeciesID]->Num();
+	VisualBoidsSpecies[SpeciesID]->AddBoids(CountToAdd);
 	const int32 NumberAfterAddition = NumberOfBoidsBeforeAddition + CountToAdd;
 	
 	for (int BoidIndex = NumberOfBoidsBeforeAddition; BoidIndex < NumberAfterAddition; BoidIndex++)
@@ -201,7 +201,7 @@ void UVisualBoidManagerSubsystem::HandleBoidAddition(const int32 SpeciesID, cons
 		InitializeVisualBoid(SpeciesID, BoidIndex);
 	}
 	
-	VisualBoids[SpeciesID]->ApplyMaterial(NumberOfBoidsBeforeAddition, NumberAfterAddition);
+	VisualBoidsSpecies[SpeciesID]->ApplyMaterial(NumberOfBoidsBeforeAddition, NumberAfterAddition);
 }
 
 void UVisualBoidManagerSubsystem::BroadcastOnBoidsNumberUpdateFinish()
@@ -209,12 +209,12 @@ void UVisualBoidManagerSubsystem::BroadcastOnBoidsNumberUpdateFinish()
 	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
 	
 	TArray<FBoidNumberUpdateInfo> BoidNumberUpdateInfos;
-	BoidNumberUpdateInfos.Reserve(VisualBoids.Num());
+	BoidNumberUpdateInfos.Reserve(VisualBoidsSpecies.Num());
 	
-	for (int i = 0; i < VisualBoids.Num(); i++)
+	for (int i = 0; i < VisualBoidsSpecies.Num(); i++)
 	{
 		const FGameplayTag BoidSpecies = BoidDataManager->RequestMappedKey(i);
-		BoidNumberUpdateInfos.Add(FBoidNumberUpdateInfo(BoidSpecies, VisualBoids[i]->Num()));
+		BoidNumberUpdateInfos.Add(FBoidNumberUpdateInfo(BoidSpecies, VisualBoidsSpecies[i]->Num()));
 	}
 	
 	BoidsDelegates::OnBoidNumberUpdateFinish.Broadcast(BoidNumberUpdateInfos);
@@ -225,6 +225,6 @@ void UVisualBoidManagerSubsystem::HandleBoidsColorUpdate(FGameplayTag BoidType, 
 	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
 	
 	const int32 MappedIndexFromGameplayTag = BoidDataManager->RequestMappedIndex(BoidType);
-	ENSURE_ALWAYS_RETURN(VisualBoids.IsValidIndex(MappedIndexFromGameplayTag))
-	VisualBoids[MappedIndexFromGameplayTag]->UpdateMaterialColor(NewBoidColor);
+	ENSURE_ALWAYS_RETURN(VisualBoidsSpecies.IsValidIndex(MappedIndexFromGameplayTag))
+	VisualBoidsSpecies[MappedIndexFromGameplayTag]->UpdateMaterialColor(NewBoidColor);
 }

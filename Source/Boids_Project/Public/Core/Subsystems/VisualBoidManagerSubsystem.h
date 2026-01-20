@@ -52,7 +52,7 @@ private:
 	
 	
 	UPROPERTY()
-	TArray<TObjectPtr<UVisualBoidSpecies>> VisualBoids;
+	TArray<TObjectPtr<UVisualBoidSpecies>> VisualBoidsSpecies;
 
 	/** Weak reference to the BoidManagerSubsystem for event binding and unbinding. */
 	TWeakObjectPtr<UBoidManagerSubsystem> BoidManagerSubsystem;

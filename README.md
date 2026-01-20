@@ -15,8 +15,8 @@ My goal isn't just to get something that looks cool but also to develop an effic
 2. [Project Architecture and Class Structure](#project-architecture-and-class-structure)
    - [Core Simulation Layer](#core-simulation-layer)
    - [Visual Layer](#visual-layer)
-   - [Data Structures](#data-structures)
-   - [Data, Tooling & Slate](#data-tooling--slate)
+   - [Data Management & Asset Pipeline](#data-management--asset-pipeline)
+   - [Evolution of the Editor Tool](#evolution-of-the-editor-tool)
 3. [Spatial Partitioning: Voxel Grid vs. Octree](#spatial-partitioning-voxel-grid-vs-octree)
 4. [Future Development Roadmap](#future-development-roadmap)
 
@@ -52,42 +52,96 @@ And here's with boundry collisions:
 
 ## Project Architecture and Class Structure
 
-The simulation works on **2 different layers** that separates the main logic from its visual representation. For now there is no data loading, just hardcoded values. Editor tool is creating necessary data, if that data doesn't exist - still no loading yet.
+The simulation works on **3 different layers** that separate the main logic from its visual representation and the data pipeline.
 
-### Core Simulation Layer 
+### Core Simulation Layer 
 
 C++ classes and structs that manage data without relying on Unreal's Actor framework.  
+
+
+**Logical Boids & Management**
+
 * `FBoid`: Simple data struct representing one boid with `Position`, `Velocity` and `Acceleration`. It has no logic besides a basic `Update` to adjust its position.
-* `UBoidManagerSubsystem`: Core of the simulation. This `UTickableWorldSubsystem` owns and updates all boids each frame. Its responsibilities include:  
-    * Calculating all boid forces (separation, alignment, cohesion, collision).  
-    * Broadcasting delegates when simulation data changes.  
-* `BoundsMathLibrary`: Helper math library handling all bounds-related calculations.
+* `FBoidPool`: Object pool managing my logical `FBoids`. Allows for dynamic addition and removal of boids.
+* `FBoidSpecies`: Struct storing `FBoidPool` for tracking currently simulated boids and `FBoidsSpeciesPlainInfo` for all necessary boid species related info.
 
-### Visual Layer 
+* `UBoidManagerSubsystem`: Core of the simulation. This `UTickableWorldSubsystem` manages a collection of `FBoidSpecies` and updates them every frame. Its responsibilities include:  
+	* Calculating all boid forces (separation, alignment, cohesion, collision). 
+	* Handling parameter updates (force multipliers, speed or collision multipliers) received from the editor tools.
+	* Broadcasting delegates when simulation data changes. 
 
-Couple of `AActor` classes that represent the simulation within the game world. They mostly listen and respond to the `UBoidManagerSubsystem` and `UBoidDataEditorSubsystem`.  
-* `AVisualBoid`: Visual representation of a single boid, containing only a mesh. Its position and rotation updates are handled by the `AVisualBoidManager`.  
-* `AVisualBoidManager`: Actor that listens to the `BoidManagerSubsystem`. It manages a pool of `AVisualBoid` actors, updating their position and rotation to align with their simulation's counterparts.  
-* `UVisualSimulationBoundsData`: Successor of the previous `AVisualWorldBounds` class. This actor visualizes the simulation boundaries and allows to see the precomputed collision and wall data.
 
-### Data Structures
-
-I am currently transitioning from a specific grid implementation to a **generic voxel grid** to handle spatial partitioning and collision data.
+**Spatial Partitioning**
 
 * `FVoxelGrid<T>`: A template voxel grid class for storing `T` data with basic getters. This acts as a base for my specialized grid classes.
-* `FWorldCollisionVoxelGrid`: A specialized child of `FVoxelGrid`. Each cell stores two `FVectors`: an environment collision vector and a bounds collision vector. This serves as a fast lookup table for collision forces during runtime. Currently work in progress.
-* `FBoidCollisionVoxelGrid`: A specialized child of `FVoxelGrid` that stores the IDs of Boids present in that cell. This is updated every frame to optimize the neighbor search algorithm from `O(N²)` to `O(N * K)`. Currently work in progress.
+* `FWorldCollisionVoxelGrid`: A specialized child of `FVoxelGrid`. Each cell contains pre-calculated environment and bounds collision forces, as well as a flag determining valid simulation areas. This serves as a fast lookup table for collision forces during runtime.
+* `FBoidCollisionVoxelGrid`: A specialized child of `FVoxelGrid`. Each cell stores unique species and boids IDs of all boids present in that cell. This is rebuild every frame to optimize the neighbor search algorithm from `O(N²)` to `O(N * K)`.
 
-### Data, Tooling & Slate
 
-This section covers the tools enabling in-editor tweaking of the simulation's parameters.
+**Communication & Math**
 
-**Data Assets & Managers**
+* `BoidDelegates.h`: Header with global delegates, allowing for communication between editor world and the runtime world.
+* `FBoidNumberUpdateInfo`: Helper struct used to transfer data between tool and `UBoidManagerSubsystem`. Has tag of a boid that should be added/removed and the count of it.
+* `BoundsMathLibrary`: Helper math library handling all bounds-related calculations.
+
+
+
+### Visual Layer 
+
+Couple of `AActor` and `UObject` classes that represent the simulation within the game world. They mostly listen and respond to the `UBoidManagerSubsystem` and `UBoidDataEditorSubsystem`.  
+
+
+**Visual Boids & Management**
+
+* `AVisualBoid`: Visual representation of a single boid, containing only a mesh. Its position and rotation updates are handled by the `UVisualBoidManagerSubsystem`.
+* `UVisualBoidPool`: Actor object pool managing visual representation of my `AVisualBoid` actors.
+* `UVisualBoidSpecies`: UObject visual counterpart to the `FBoidSpecies` struct. It contains the `UVisualBoidPool` of active boids and shared dynamic material for color updates.
+
+* `UVisualBoidManagerSubsystem`: Successor of the previous visual manager actor. It manages a collection of `UVisualBoidSpecies` uobjects and updates visual boids' position and rotation to align with their simulation's counterparts.
+
+
+**Environment & Config**
+
+* `AVisualSimulationBoundsData`: Actor in the world that visualizes simulation environment data. Is able to show simulation bounds, voxelized wall environment data and collision data as well as starting point of collision generation algorithm. Listens to events from `UBoidDataEditorSubsystem` for visual updates.
+* `UBoidSimulationSettings`: Helper `UDeveloperSettings` class for setting initial `AVisualBoid` actor class for my `UVisualBoidManagerSubsystem`.
+
+
+
+### Data Management & Asset Pipeline
+
+This section covers data management, asset loading, and the tools enabling in-editor tweaking.
+
+
+**Assets & Data Transfer**
+
 * `UBoidsData` & `UBoundsData`: `UDataAsset`-based classes containing all relevant configuration data (force multipliers, speed, perception radius, grid resolution).
+* `FBoidsSpeciesPlainInfo`: Helper struct for converting loaded `UBoidsData` into a struct, so I don't work on the original. Stores all of the essential info about boid species.
+* `FBoundsPlainInfo` / `FSimulationBoundsPlainInfo` / `FCollisionBoundsPlainInfo`: Helper structs for converting `UBoundsData` into manageable structs. Also used for passing data between systems for easier communication (e.g. for static geometry collision generation).
+
+
+**Runtime Data Loading**
+
+* `URuntimeDataLoaderSubsystem`: Generic runtime data loader subsystem. Asynchronously loads assets on demand and broadcasts delegate on completion.
+* `UBoidDataManagerSubsystem`: Specialized runtime data loader for simulation data. Stores additional relevant simulation data like global GameplayTag to species index map.
+
+
+**Editor Data Generation**
+
 * `UBoidDataEditorSubsystem`: An `UEditorSubsystem` responsible for creating, saving, and generating the simulation data, as well as broadcasting events for any bounds changes in the editor.
 * `FEditorBoidDataManager`: Creates necessary `UBoidsData` & `UBoundsData` during editor time for the runtime simulation.
-* `FCollisionDataGenerator`: Generates necessary collision data, which includes voxelized environment wall data and collision forces in the simulation bounds. It creates the "soft-wall" around the environment so Boids will steer away naturally.
+* `FCollisionDataGenerator`: Generates necessary collision data, which includes voxelized environment wall data and collision forces in the simulation bounds. It creates the "soft-wall" around the environment so boids will steer away naturally.
+
+
+**Utilities & Helpers**
+
+* `UGameInstanceSubsystemBase`: Base class for my subsystem classes. Created dependency to `URuntimeDataLoaderSubsystem` so it is loaded always first.
+* `FEditorAssetUtils`: Helper struct for editor related asset functions like creation and saving.
+* `FEditorMaterialUtils`: Helper struct for material related functions like creating additional expression in the material graph or creating material itself.
+* `FRuntimeAssetUtils`: Helper struct for asset related functions like generating asset filters by class. Used in runtime and editor modules.
+* `FBoidConstants`: Struct containing necessary string constants like asset paths and prefixes for data creation.
 * `DebugMacros`: Header with a couple of template macros for easier debugging and development.
+
+---
 
 **Evolution of the Editor Tool**
 
@@ -102,12 +156,12 @@ In the early development stage I initially planned to make checkboxes, float and
 
 As I continued developing the tool, I realized I would need to create a color picker so that the user could pick desired color. This requirement pushed me to explore **Unreal Engine's Slate API** for the first time, which was a really nice challenge. It allowed me to take a deep dive into Slate and develop my own widgets based on Unreal's original implementations.
 
-* `UBoidEditorUtilityWidget`: Base class for the Boids' tool. Broadcasts event on begin and PIE end. Still work in progress.
+* `UBoidEditorUtilityWidget`: Base class for the Boids' tool. Broadcasts event on begin and PIE end.
 * `UColorButtonEditorUtilityWidget`: Widget spawning `SCustomColorPicker`. It serves as the bridge between the Slate widget and Blueprint implementation.
 * `SCustomColorSlider`: Custom-made color slider with a background gradient of the managed color.
 * `SCustomColorPicker`: Custom-made color picker with a color spectrum and RGB channel sliders. It handles events like `OnColorChanged`, `OnColorCancelled`, and `OnColorCommitted`.
 
-And here is current, and probably final design of the tool and the color picker:
+And here is final design of the tool and the color picker:
 
 ![Tool Final Design](Content/Assets/Github/Images/BoidsToolFinal.png)
 

@@ -1,4 +1,4 @@
-// COpyright
+// Copyright WojtusMientus
 
 #pragma once
 
