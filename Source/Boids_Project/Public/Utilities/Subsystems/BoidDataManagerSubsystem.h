@@ -4,20 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "Core/Subsystems/BaseClass/GameInstanceSubsystemBase.h"
+#include "Materials/MaterialInstanceConstant.h"
+#include "DataAssets/SimulationPlainInfoData/BoidsPlainInfoData.h"
+#include "VoxelGrids/VoxelGridData/VoxelGridData.h"
 #include "GameplayTagContainer.h"
 #include "BoidDataManagerSubsystem.generated.h"
 
 class URuntimeDataLoaderSubsystem;
-struct FEnvironmentCollisionVoxelGridData;
-struct FBoidCollisionVoxelGridData;
-struct FBoidsSpeciesPlainInfo;
 struct FLoadRequest;
 struct FLoadedGroup;
 
 
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnSimulationDataLoadedEvent, const TArray<FBoidsSpeciesPlainInfo>& BoidsInfo, 
 	const FEnvironmentCollisionVoxelGridData& EnvironmentVoxelGridData, 
-	const FBoidCollisionVoxelGridData& BoidCollisionVoexlGridData)
+	const FBoidCollisionVoxelGridData& BoidCollisionVoxelGridData)
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnBoidMaterialInstanceLoadedEvent, 
 	UMaterialInstanceConstant* LoadedMaterialInstance)
 

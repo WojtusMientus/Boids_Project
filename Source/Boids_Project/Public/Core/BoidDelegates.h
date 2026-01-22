@@ -4,8 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "Utilities/BoidNumberUpdateInfo.h"
 
-struct FBoidNumberUpdateInfo;
+
 
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnBoidColorUpdateEvent, const FGameplayTag Tag, const FLinearColor NewColor);

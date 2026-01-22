@@ -46,9 +46,8 @@ void UBoidManagerSubsystem::Tick(float DeltaTime)
 	{
 		TRACE_CPUPROFILER_EVENT_SCOPE(BoidManager_Update)
 		UpdateBoids(DeltaTime);	
+		OnBoidsUpdateFinish.Broadcast();
 	}
-	
-	OnBoidsUpdateFinish.Broadcast();
 }
 
 TStatId UBoidManagerSubsystem::GetStatId() const
@@ -64,41 +63,6 @@ bool UBoidManagerSubsystem::IsTickable() const
 	}
 	
 	return !GetWorld()->IsPaused();
-}
-
-int32 UBoidManagerSubsystem::GetBoidsSpeciesCount(int32 SpeciesIndex) const
-{
-	if (!BoidSpecies.IsValidIndex(SpeciesIndex))
-	{
-		return -1;
-	}
-	
-	return BoidSpecies[SpeciesIndex]->Num();
-}
-
-FVector UBoidManagerSubsystem::GetBoidPositionAt(int32 SpeciesID, int32 BoidID)
-{
-	if (!BoidSpecies.IsValidIndex(SpeciesID))
-	{
-		return FVector::ZeroVector;
-	}
-	
-	return BoidSpecies[SpeciesID]->BoidPool[BoidID].Position;
-}
-
-FVector UBoidManagerSubsystem::GetBoidVelocityAt(int32 SpeciesID, int32 BoidID)
-{
-	if (!BoidSpecies.IsValidIndex(SpeciesID))
-	{
-		return FVector::ZeroVector;
-	}
-	
-	return BoidSpecies[SpeciesID]->BoidPool[BoidID].Velocity;
-}
-
-int32 UBoidManagerSubsystem::GetDifferentBoidSpeciesCount() const
-{
-	return BoidSpecies.Num();
 }
 
 void UBoidManagerSubsystem::CreateVoxelGrids()
@@ -140,6 +104,7 @@ void UBoidManagerSubsystem::InitializeDifferentBoidSpecies(const TArray<FBoidsSp
 	for (int SpeciesIndex = 0; SpeciesIndex < BoidsInfo.Num(); SpeciesIndex++)
 	{
 		BoidSpecies.Add(MakeUnique<FBoidSpecies>(BoidsInfo[SpeciesIndex]));
+		check(BoidSpecies[SpeciesIndex]);
 		InitializeBoidSpecies(SpeciesIndex);
 		
 		CumulativeNumberOfBoids += BoidSpecies[SpeciesIndex]->BoidPool.Num();
@@ -162,7 +127,6 @@ void UBoidManagerSubsystem::InitializeBoidObject(const int32 SpeciesID, const in
 {
 	const FVector InitialPosition = WorldCollisionVoxelGrid->GetRandomPointInsideGrid();
 	const FVector InitialVelocity = FMath::VRand() * BoidSpecies[SpeciesID]->SpeciesInfo.DesiredSpeed;
-			
 	BoidSpecies[SpeciesID]->BoidPool[BoidID].Initialize(InitialPosition, InitialVelocity);
 }
 
@@ -219,7 +183,9 @@ void UBoidManagerSubsystem::InitializeNeighbourArray()
 
 void UBoidManagerSubsystem::UpdateBoids(float DeltaTime)
 {
+#if WITH_EDITOR
 	CheckForAnyBoidNumberUpdate();
+#endif
 	RemakeBoidCollisionVoxelGrid();
 	
 	for (int SpeciesIndex = 0; SpeciesIndex < BoidSpecies.Num(); SpeciesIndex++)
@@ -228,11 +194,7 @@ void UBoidManagerSubsystem::UpdateBoids(float DeltaTime)
 		{
 			FBoid& Boid = BoidSpecies[SpeciesIndex]->BoidPool[BoidIndex];
 			Boid.Acceleration = FVector::ZeroVector;
-		
-			{
-				TRACE_CPUPROFILER_EVENT_SCOPE(BoidManager_Neighbor_Slowest)
-				GetNeighbourBoidsDifferentSpeciesSlow(SpeciesIndex, BoidIndex);
-			}
+			GetNeighbourBoidsDifferentSpeciesSlow(SpeciesIndex, BoidIndex);
 			
 			// {
 			// 	TRACE_CPUPROFILER_EVENT_SCOPE(BoidManager_Neighbor_Sorted_No_If)
@@ -252,45 +214,6 @@ void UBoidManagerSubsystem::UpdateBoids(float DeltaTime)
 	} 
 	
 	ApplyRecalculatedVelocity(DeltaTime);
-}
-
-void UBoidManagerSubsystem::CheckForAnyBoidNumberUpdate()
-{
-	if (BoidNumberUpdateQueue.IsEmpty())
-	{
-		return;
-	}
-	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
-	
-	while(!BoidNumberUpdateQueue.IsEmpty())
-	{
-		FBoidNumberUpdateInfo BoidNumberUpdateInfo;
-		BoidNumberUpdateQueue.Dequeue(BoidNumberUpdateInfo);
-		
-		const int32 MappedIndexFromGameplayTag = BoidDataManager->RequestMappedIndex(BoidNumberUpdateInfo.Type);
-		
-		if (BoidNumberUpdateInfo.Count > 0)
-		{
-			HandleBoidAddition(MappedIndexFromGameplayTag, BoidNumberUpdateInfo.Count);
-		}
-		else
-		{
-			BoidSpecies[MappedIndexFromGameplayTag]->RemoveBoids(-BoidNumberUpdateInfo.Count);
-		}
-	}
-	
-	OnBoidsNumberUpdate.Broadcast();
-}
-
-void UBoidManagerSubsystem::HandleBoidAddition(const int32 SpeciesID, const int32 CountToAdd)
-{
-	const int32 NumberOfBoidsBeforeAddition = BoidSpecies[SpeciesID]->Num();
-	BoidSpecies[SpeciesID]->AddBoids(CountToAdd);
-	
-	for (int BoidIndex = NumberOfBoidsBeforeAddition; BoidIndex < BoidSpecies[SpeciesID]->Num(); BoidIndex++)
-	{
-		InitializeBoidObject(SpeciesID, BoidIndex);
-	}
 }
 
 void UBoidManagerSubsystem::RemakeBoidCollisionVoxelGrid()
@@ -527,6 +450,46 @@ void UBoidManagerSubsystem::ApplyRecalculatedVelocity(float DeltaTime)
 }
 
 
+#if WITH_EDITOR
+
+void UBoidManagerSubsystem::CheckForAnyBoidNumberUpdate()
+{
+	if (BoidNumberUpdateQueue.IsEmpty())
+	{
+		return;
+	}
+	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
+	
+	while(!BoidNumberUpdateQueue.IsEmpty())
+	{
+		FBoidNumberUpdateInfo BoidNumberUpdateInfo;
+		BoidNumberUpdateQueue.Dequeue(BoidNumberUpdateInfo);
+		
+		const int32 MappedIndexFromGameplayTag = BoidDataManager->RequestMappedIndex(BoidNumberUpdateInfo.Type);
+		
+		if (BoidNumberUpdateInfo.Count > 0)
+		{
+			HandleBoidAddition(MappedIndexFromGameplayTag, BoidNumberUpdateInfo.Count);
+		}
+		else
+		{
+			BoidSpecies[MappedIndexFromGameplayTag]->RemoveBoids(-BoidNumberUpdateInfo.Count);
+		}
+	}
+	
+	OnBoidsNumberUpdate.Broadcast();
+}
+
+void UBoidManagerSubsystem::HandleBoidAddition(const int32 SpeciesID, const int32 CountToAdd)
+{
+	const int32 NumberOfBoidsBeforeAddition = BoidSpecies[SpeciesID]->Num();
+	BoidSpecies[SpeciesID]->AddBoids(CountToAdd);
+	
+	for (int BoidIndex = NumberOfBoidsBeforeAddition; BoidIndex < BoidSpecies[SpeciesID]->Num(); BoidIndex++)
+	{
+		InitializeBoidObject(SpeciesID, BoidIndex);
+	}
+}
 
 
 void UBoidManagerSubsystem::SubscribeToGlobalEditorDelegates()
@@ -585,3 +548,5 @@ void UBoidManagerSubsystem::HandleBoidCollisionMultiplierChange(FGameplayTag Tag
 	BoidSpecies[MappedIndexFromGameplayTag]->SpeciesInfo.OverwriteCollisionMultiplierData(NewEnvironmentCollisionMultiplier, 
 		NewBoundsCollisionMultiplier);
 }
+
+#endif

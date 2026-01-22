@@ -47,10 +47,10 @@ void UVisualBoidManagerSubsystem::BindNecessarySimulationDelegates()
 	BoidManagerSubsystem->OnBoidsUpdateFinish.AddUObject(this, 
 		&UVisualBoidManagerSubsystem::HandleBoidsUpdate);
 	
+#if WITH_EDITOR
 	BoidManagerSubsystem->OnBoidsNumberUpdate.AddUObject(this, 
 		&UVisualBoidManagerSubsystem::HandleBoidsNumberUpdate);
 	
-#if WITH_EDITOR
 	SubscribeToGlobalEditorDelegates();
 #endif
 }
@@ -157,6 +157,7 @@ void UVisualBoidManagerSubsystem::HandleBoidsUpdate()
 	}
 }
 
+#if WITH_EDITOR
 void UVisualBoidManagerSubsystem::SubscribeToGlobalEditorDelegates()
 {
 	BoidsColorUpdateDelegateHandle = BoidsDelegates::OnBoidColorUpdate.AddUObject(this,  
@@ -228,3 +229,5 @@ void UVisualBoidManagerSubsystem::HandleBoidsColorUpdate(FGameplayTag BoidType, 
 	ENSURE_ALWAYS_RETURN(VisualBoidsSpecies.IsValidIndex(MappedIndexFromGameplayTag))
 	VisualBoidsSpecies[MappedIndexFromGameplayTag]->UpdateMaterialColor(NewBoidColor);
 }
+
+#endif

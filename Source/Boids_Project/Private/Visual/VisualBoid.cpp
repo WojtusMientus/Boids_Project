@@ -32,11 +32,6 @@ void AVisualBoid::UpdateBoid(const FVector& NewPosition, const FVector& NewVeloc
 
 void AVisualBoid::SetMaterial(UMaterialInterface* NewMaterial)
 {
-	if (!IsValid(BoidMeshComponent) || !NewMaterial)
-	{
-		return;
-	}
-	
 	BoidMeshComponent->SetMaterial(0, NewMaterial);
 }
 
@@ -44,6 +39,7 @@ void AVisualBoid::CreateRootSceneComponent()
 {
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Scene Root"));
 	SetRootComponent(SceneRoot);
+	check(SceneRoot)
 }
 
 void AVisualBoid::CreateBoidMeshComponent()
@@ -51,6 +47,7 @@ void AVisualBoid::CreateBoidMeshComponent()
 	BoidMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Boid Mesh"));
 	BoidMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	BoidMeshComponent->SetupAttachment(GetRootComponent());
+	check(BoidMeshComponent)
 }
 
 

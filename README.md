@@ -148,7 +148,7 @@ This section covers data management, asset loading, and the tools enabling in-ed
 The primary goal of this tool has always been the **real-time manipulation of Boid parameters** (cohesion, alignment, separation, speed) to allow for instant feedback during the simulation.
 *Note: Bounds and collision data are not manipulated in real-time as they require a pre-generation step.*
 
-In the early development stage I initially planned to make checkboxes, float and vector fields **transactable**. In the end I ultimately had to drop that feature due to time constraints in order to prioritize the custom color picker made in Slate and its integration. Below is an early design of how I envisioned the tool in the beginning (*don't take the color scheme seriously, it's was a prototype*).
+In the early development stage I initially planned to make checkboxes, float and vector fields **transactable**. In the end I ultimately had to drop that feature due to time constraints in order to prioritize the custom color picker made in Slate and its integration. Below is an early design of how I envisioned the tool in the beginning (*don't take the color scheme seriously, it was a prototype*).
 
 ![Tool Prototype](Content/Assets/Github/Images/BoidsToolPrototype.png)
 

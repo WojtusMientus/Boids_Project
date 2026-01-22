@@ -12,6 +12,6 @@ public class Boids_ProjectTarget : TargetRules
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_6;
 		ExtraModuleNames.Add("Boids_Project");
 		
-		CppStandard = CppStandardVersion.Cpp17;
-	}
+		CppStandard = CppStandardVersion.Cpp20;
+    }
 }

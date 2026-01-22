@@ -63,11 +63,24 @@ public:
 	//~ End FTickableGameObject Interface
 	
 	
-	FORCEINLINE FVector GetBoidPositionAt(int32 SpeciesID, int32 BoidID);
-	FORCEINLINE FVector GetBoidVelocityAt(int32 SpeciesID, int32 BoidID);
+	FORCEINLINE FVector GetBoidPositionAt(int32 SpeciesID, int32 BoidID)
+	{
+		return BoidSpecies[SpeciesID]->BoidPool[BoidID].Position;
+	}
+	FORCEINLINE FVector GetBoidVelocityAt(int32 SpeciesID, int32 BoidID)
+	{
+		return BoidSpecies[SpeciesID]->BoidPool[BoidID].Velocity;
+	}
 	
-	int32 GetDifferentBoidSpeciesCount() const;
-	int32 GetBoidsSpeciesCount(int32 SpeciesIndex) const;
+	FORCEINLINE int32 GetDifferentBoidSpeciesCount() const
+	{
+		return BoidSpecies.Num();
+	}
+	
+	FORCEINLINE int32 GetBoidsSpeciesCount(int32 SpeciesIndex) const
+	{
+		return BoidSpecies[SpeciesIndex]->Num();
+	}
 
 private:
 		
@@ -91,9 +104,6 @@ private:
 	
 	
 	void UpdateBoids(float DeltaTime);
-	
-	void CheckForAnyBoidNumberUpdate();
-	void HandleBoidAddition(const int32 SpeciesID, const int32 CountToAdd);
 	
 	void RemakeBoidCollisionVoxelGrid();
 	void GetNeighborBoidsDifferentSpeciesSorted_TwoArrays(const FBoid& Boid, const int SpeciesID);
@@ -144,6 +154,9 @@ private:
 	
 	
 #if WITH_EDITOR
+	void CheckForAnyBoidNumberUpdate();
+	void HandleBoidAddition(const int32 SpeciesID, const int32 CountToAdd);
+	
 	void SubscribeToGlobalEditorDelegates();
 	void UnsubscribeFromGlobalEditorDelegates();
 	
