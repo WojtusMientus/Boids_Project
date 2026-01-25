@@ -77,7 +77,7 @@ public:
 		return BoidSpecies.Num();
 	}
 	
-	FORCEINLINE int32 GetBoidsSpeciesCount(int32 SpeciesIndex) const
+	FORCEINLINE int32 GetBoidsInSpeciesCount(int32 SpeciesIndex) const
 	{
 		return BoidSpecies[SpeciesIndex]->Num();
 	}

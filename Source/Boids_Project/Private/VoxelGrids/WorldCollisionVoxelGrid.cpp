@@ -12,7 +12,7 @@ FVector FWorldCollisionVoxelGrid::GetRandomPointInsideGrid() const
 {
 	int32 RandomLinearGridIndex;
 	FEnvironmentCollisionCellData EnvironmentCollisionVoxelGridData;
-	
+
 	do
 	{
 		RandomLinearGridIndex = FMath::RandRange(0, InternalVoxelGrid.Num() - 1);

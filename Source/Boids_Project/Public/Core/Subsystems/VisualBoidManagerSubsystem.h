@@ -7,6 +7,7 @@
 #include "Utilities/Subsystems/BoidDataManagerSubsystem.h"
 #include "VisualBoidManagerSubsystem.generated.h"
 
+class AVisualBoidSpecies;
 class UVisualBoidSpecies;
 struct FLoadedGroup;
 class AVisualBoid;
@@ -37,10 +38,10 @@ private:
 	void HandleVisualSimulationInitialization();
 	
 	void InitializeAllBoidsSpecies();
-	void InitializeBoidSpecies(const int SpeciesIndex, const TSubclassOf<AVisualBoid> VisualBoidClass);
-	void InitializeVisualBoid(int32 SpeciesIndex, int32 BoidIndex);
+	void InitializeBoidSpecies(UWorld* World, const int SpeciesIndex, UStaticMesh* VisualBoidMesh);
+	void UpdateBoidsTransformPerSpecies(int32 SpeciesIndex);
 	
-	TSubclassOf<AVisualBoid> GetVisualBoidClass();
+	UStaticMesh* GetVisualBoidMesh();
 	
 	/** Sends request to UBoidRuntimeDataManager for UMaterialInstanceConstant asset. */
 	void RequestMaterialInstanceAsset();
@@ -52,14 +53,14 @@ private:
 	
 	
 	UPROPERTY()
-	TArray<TObjectPtr<UVisualBoidSpecies>> VisualBoidsSpecies;
+	TArray<TObjectPtr<AVisualBoidSpecies>> NewVisualBoidsSpecies;
 
 	/** Weak reference to the BoidManagerSubsystem for event binding and unbinding. */
 	TWeakObjectPtr<UBoidManagerSubsystem> BoidManagerSubsystem;
 	
 	/** Weak reference to the BoidDataManager for getting converted gameplay tag to array index. */
 	TWeakObjectPtr<UBoidDataManagerSubsystem> BoidDataManager;
-
+	
 	
 #if WITH_EDITOR
 	void SubscribeToGlobalEditorDelegates();
@@ -67,7 +68,7 @@ private:
 	
 	/** Handler function for any boid number update from UBoidManagerSubsystem.  */
 	void HandleBoidsNumberUpdate();
-	void HandleBoidAddition(const int32 SpeciesID, const int32 CountToAdd);
+	void HandleBoidAddition(const int32 SpeciesID,	const int32 DifferenceInBoidNumber,	const int32 NewBoidsCount);
 	void BroadcastOnBoidsNumberUpdateFinish();
 	
 	/** Handler function for UBoidEditorUtilityWidget color changes. */

@@ -1,58 +1,91 @@
 ﻿
 #include "Visual/VisualBoidSpecies.h"
+#include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "Utilities/BoidConstants.h"
-#include "Utilities/ObjectPools/VisualBoidPool.h"
-#include "Visual/VisualBoid.h"
 
 
-void UVisualBoidSpecies::InitializeSpecies(const int32 BoidCount, TSubclassOf<AVisualBoid> VisualBoidClass, 
-	 UWorld* InSimulationWorld)
+AVisualBoidSpecies::AVisualBoidSpecies()
 {
-	VisualBoidPool = NewObject<UVisualBoidPool>();
-	check(VisualBoidPool != nullptr);
-	VisualBoidPool->InitializeVisualBoidPool(BoidCount, 100, VisualBoidClass, InSimulationWorld);
-	VisualBoidPool->AddVisualBoids(BoidCount);
+	PrimaryActorTick.bCanEverTick = false;
+	
+	InitializeInstancedStaticMeshComponent();
 }
 
-void UVisualBoidSpecies::InitializeMaterial(UMaterialInstanceConstant* LoadedMaterialInstance)
+void AVisualBoidSpecies::InitializeSpecies(UStaticMesh* BoidMesh, const int32 BoidsCount)
+{
+	check(IsValid(BoidMesh));
+	VisualBoidMeshes->SetStaticMesh(BoidMesh);
+	VisualBoidTransforms.AddDefaulted(BoidsCount);
+	AddBoidsInternal(VisualBoidTransforms);
+}
+
+void AVisualBoidSpecies::InitializeMaterial(UMaterialInstanceConstant* LoadedMaterialInstance)
 {
 	BoidMaterial = UMaterialInstanceDynamic::Create(LoadedMaterialInstance, this);
 	check(BoidMaterial != nullptr);
-	ApplyMaterial(0, Num());
+	ApplyMaterial();
 }
 
-void UVisualBoidSpecies::ApplyMaterial(const int32 StartIndex, const int32 EndIndex)
+void AVisualBoidSpecies::ApplyMaterial()
 {
-	const int32 FinalIndex = FMath::Clamp(EndIndex, 0, VisualBoidPool->Num());
-	
-	for (int BoidIndex = StartIndex; BoidIndex < FinalIndex; BoidIndex++)
-	{
-		VisualBoidPool->Get(BoidIndex)->SetMaterial(BoidMaterial);
-	}
+	VisualBoidMeshes->SetMaterial(0, BoidMaterial);
 }
 
-void UVisualBoidSpecies::UpdateMaterialColor(FLinearColor NewBoidColor)
+void AVisualBoidSpecies::UpdateMaterialColor(FLinearColor NewBoidColor)
 {
 	BoidMaterial->SetVectorParameterValue(FName(FBoidConstants::BoidMaterialColorParameter), NewBoidColor);
 }
 
-AVisualBoid* UVisualBoidSpecies::Get(const int32 BoidIndex)
+void AVisualBoidSpecies::UpdateBoidTransform(const int32 BoidIndex, const FVector& NewPosition,
+	const FVector& NewRotation)
 {
-	return VisualBoidPool->Get(BoidIndex);
+	VisualBoidTransforms[BoidIndex].SetLocation(NewPosition);
+	VisualBoidTransforms[BoidIndex].SetRotation(NewRotation.ToOrientationQuat());
 }
 
-void UVisualBoidSpecies::AddBoids(const int32 CountToAdd)
+void AVisualBoidSpecies::UpdateBoidTransforms()
 {
-	VisualBoidPool->AddVisualBoids(CountToAdd);
+	{
+		TRACE_CPUPROFILER_EVENT_SCOPE(BoidManager_BatchUpdate)
+		VisualBoidMeshes->BatchUpdateInstancesTransforms(0, VisualBoidTransforms, true, false, false);
+	}
 }
 
-void UVisualBoidSpecies::RemoveBoids(const int32 CountToRemove)
+void AVisualBoidSpecies::AddBoids(const TArray<FTransform>& NewBoidTransforms)
 {
-	VisualBoidPool->RemoveLastUsed(CountToRemove);
+	for (int Index = 0; Index < NewBoidTransforms.Num(); Index++)
+	{
+		VisualBoidTransforms.Add(NewBoidTransforms[Index]);
+	}
+	
+	AddBoidsInternal(NewBoidTransforms);
 }
 
-int32 UVisualBoidSpecies::Num() const
+void AVisualBoidSpecies::RemoveBoids(const int32 CountToRemove)
 {
-	return VisualBoidPool->Num();
+	for (int i = 0; i < CountToRemove; i++)
+	{
+		VisualBoidTransforms.Pop(EAllowShrinking::No);
+		VisualBoidMeshes->RemoveInstance(VisualBoidMeshes->GetInstanceCount() - 1);
+	}
+}
+
+int32 AVisualBoidSpecies::Num() const
+{
+	return VisualBoidMeshes->GetInstanceCount();
+}
+
+void AVisualBoidSpecies::InitializeInstancedStaticMeshComponent()
+{
+	VisualBoidMeshes = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("BoidInstancedMesh"));
+	check(IsValid(VisualBoidMeshes));
+	VisualBoidMeshes->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	VisualBoidMeshes->SetMobility(EComponentMobility::Type::Movable);
+	SetRootComponent(VisualBoidMeshes);
+}
+
+void AVisualBoidSpecies::AddBoidsInternal(const TArray<FTransform>& NewBoidTransforms)
+{
+	VisualBoidMeshes->AddInstances(NewBoidTransforms, false, true);
 }

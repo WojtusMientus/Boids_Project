@@ -22,6 +22,6 @@ public:
 	UPROPERTY(Config, EditAnywhere)
 	TSubclassOf<AVisualBoid> VisualBoidClass = nullptr;
 	
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UStaticMesh> BoidMesh = nullptr;
+	UPROPERTY(Config, EditAnywhere)
+	TSoftObjectPtr<UStaticMesh> BoidMesh = nullptr;
 };

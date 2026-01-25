@@ -46,8 +46,8 @@ void UBoidManagerSubsystem::Tick(float DeltaTime)
 	{
 		TRACE_CPUPROFILER_EVENT_SCOPE(BoidManager_Update)
 		UpdateBoids(DeltaTime);	
-		OnBoidsUpdateFinish.Broadcast();
 	}
+	OnBoidsUpdateFinish.Broadcast();
 }
 
 TStatId UBoidManagerSubsystem::GetStatId() const
@@ -183,10 +183,12 @@ void UBoidManagerSubsystem::InitializeNeighbourArray()
 
 void UBoidManagerSubsystem::UpdateBoids(float DeltaTime)
 {
+	/*
 #if WITH_EDITOR
 	CheckForAnyBoidNumberUpdate();
 #endif
 	RemakeBoidCollisionVoxelGrid();
+	*/
 	
 	for (int SpeciesIndex = 0; SpeciesIndex < BoidSpecies.Num(); SpeciesIndex++)
 	{
@@ -195,17 +197,7 @@ void UBoidManagerSubsystem::UpdateBoids(float DeltaTime)
 			FBoid& Boid = BoidSpecies[SpeciesIndex]->BoidPool[BoidIndex];
 			Boid.Acceleration = FVector::ZeroVector;
 			GetNeighbourBoidsDifferentSpeciesSlow(SpeciesIndex, BoidIndex);
-			
-			// {
-			// 	TRACE_CPUPROFILER_EVENT_SCOPE(BoidManager_Neighbor_Sorted_No_If)
-			// 	GetNeighborBoidsDifferentSpeciesSorted_OneArray(Boid, SpeciesIndex);
-			// }	
-			//
-			// {
-			// 	TRACE_CPUPROFILER_EVENT_SCOPE(BoidManager_Neighbor_Sorted_With_If)
-			// 	GetNeighborBoidsDifferentSpeciesSorted_TwoArrays(Boid, SpeciesIndex);
-			// }
-			
+						
 			ComputeBoidBehaviourForces(Boid, SpeciesIndex, BoidIndex);
 
 			ApplyEnvironmentCollisionForce(SpeciesIndex, BoidIndex);

@@ -24,7 +24,7 @@ public:
 		const float EnvironmentCollisionMultiplier, const float BoundsCollisionMultiplier) const;
 	
 	virtual FVector GetRandomPointInsideGrid() const override;
-	
+
 };
 
 inline FVector FWorldCollisionVoxelGrid::GetFinalCollisionVectorAtIndex(const int32 Index, 

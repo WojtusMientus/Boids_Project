@@ -3,44 +3,55 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/Object.h"
+#include "GameFramework/Actor.h"
 #include "VisualBoidSpecies.generated.h"
 
-class UVisualBoidPool;
-class AVisualBoid;
-class UMaterialInstanceConstant;
+class UInstancedStaticMeshComponent;
 
 
 /**
- *  Runtime container for visual boids of a single species and their material.
+ *  Runtime container for visual boids of a single species.
+ *  Uses an Instanced Static Mesh Component to batch-render all boids.
  */
 UCLASS()
-class BOIDS_PROJECT_API UVisualBoidSpecies : public UObject
+class BOIDS_PROJECT_API AVisualBoidSpecies : public AActor
 {
 	GENERATED_BODY()
 
 public:
 	
-	UVisualBoidSpecies() {}
+	AVisualBoidSpecies();
 	
-	void InitializeSpecies(const int32 BoidCount, TSubclassOf<AVisualBoid> VisualBoidClass, UWorld* InSimulationWorld);
+	void InitializeSpecies(UStaticMesh* BoidMesh, const int32 BoidsCount);
 	void InitializeMaterial(UMaterialInstanceConstant* LoadedMaterialInstance);
 	
-	void ApplyMaterial(const int32 StartIndex, const int32 EndIndex);
-	void UpdateMaterialColor(FLinearColor NewColor);
+	void ApplyMaterial();
+	void UpdateMaterialColor(FLinearColor NewBoidColor);
 	
-	/** Visual boid pool wrappers. */
-	AVisualBoid* Get(const int32 BoidIndex);
+	void UpdateBoidTransform(const int32 BoidIndex, const FVector& NewPosition, const FVector& NewRotation);
+	void UpdateBoidTransforms();
 	
-	void AddBoids(const int32 CountToAdd);
+	void AddBoids(const TArray<FTransform>& NewBoidTransforms);
 	void RemoveBoids(const int32 CountToRemove);
 	
 	int32 Num() const;
 	
 	
-	UPROPERTY()
-	TObjectPtr<UVisualBoidPool> VisualBoidPool;
+protected:
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UInstancedStaticMeshComponent> VisualBoidMeshes;
 	
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> BoidMaterial;	
+
+	TArray<FTransform> VisualBoidTransforms;
+
+	
+private:
+	
+	void InitializeInstancedStaticMeshComponent();
+	
+	void AddBoidsInternal(const TArray<FTransform>& NewBoidTransforms);
+	
 };
