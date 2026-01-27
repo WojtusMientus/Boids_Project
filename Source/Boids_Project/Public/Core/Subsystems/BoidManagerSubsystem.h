@@ -109,25 +109,41 @@ private:
 	void RemakeBoidCollisionVoxelGrid();
 	void GetNeighborBoidsDifferentSpeciesVoxelGrid(const FBoid& Boid, const int SpeciesID);
 	
-	void GetNeighbourBoidsDifferentSpeciesSlow(const int32 SpeciesID, const int32 BoidID);
-	void HandleSameSpeciesNeighborSearch(const int32 SpeciesID, const int32 BoidID);
-	void HandleDifferentSpeciesNeighborSearch(const int32 SpeciesID, const int32 OtherSpeciesID, const int32 BoidID);
+	void GetNeighbourBoidsDifferentSpeciesBruteForce(const int32 SpeciesID, const int32 BoidID, 
+		const float PerceptionDistanceSquared);
+	void HandleSameSpeciesNeighborSearch(const int32 SpeciesID, const int32 BoidID, 
+		const float PerceptionDistanceSquared);
+	void HandleDifferentSpeciesNeighborSearch(const int32 SpeciesID, const int32 OtherSpeciesID, const int32 BoidID, 
+		const float PerceptionDistanceSquared);
 	
-	void ComputeBoidBehaviourForces(FBoid& Boid, const uint8 SpeciesID, const uint16 BoidID);
-	FVector ComputeSeparationMultipleSpecies(const int32 SpeciesID, const int32 BoidID);
-	FVector ComputeAlignmentMultipleSpecies(const int32 SpeciesID);
-	FVector ComputeCohesionMultipleSpecies(const int32 SpeciesID, const int32 BoidID);
+	void ApplyAllBoidBehaviourForces(FBoid& Boid, const uint8 SpeciesID, const uint16 BoidID);
+	void ComputeBoidBehaviorForces(const int32 SpeciesID, const int32 BoidID, FVector& SeparationVector, 
+		FVector& AlignmentVector, FVector& CohesionVector);
+	
+	void AddSeparationForcePerNeighbor(const FVector& CurrentBoidPosition, const FVector& OtherBoidPosition, 
+		const float PerceptionDistance,	FVector& SeparationVector);
+	void AddAlignmentForcePerNeighbor(const FVector& OtherBoidVelocity, FVector& AlignmentVector);
+	void AddCohesionForcePerNeighbor(const FVector& OtherBoidPosition, FVector& CohesionVector);
+	
+	void ComputeFinalSeparationForce(const float SeparationMultiplier, FVector& SeparationVector);
+	void ComputeFinalAlignmentForce(const float AlignmentMultiplier, FVector& AlignmentVector);
+	void ComputeFinalCohesionForce(const FVector& CurrentBoidPosition, const float CohesionMultiplier, 
+		FVector& CohesionVector);
+	
 	FVector ComputeForceBetweenDifferentSpecies(const int32 SpeciesID, const int32 BoidID);
 	
-	void ApplyEnvironmentCollisionForce(const int32 SpeciesID, const int32 BoidID);
-	void ApplySpeedAdjustmentForcePerSpecies(const int32 SpeciesID, const int32 BoidID);
+	void ApplyEnvironmentCollisionForce(FBoid& CurrentBoid, const float EnvironmentCollisionMultiplier, 
+		const float BoundsCollisionMultiplier);
+	void ApplySpeedAdjustmentForcePerSpecies(FBoid& CurrentBoid, const float DesiredSpeed);
 	void ApplyRecalculatedVelocity(float DeltaTime);
 	
 	
-	bool IsWithinPerceptionRangeDifferentSpecies(const int32 CallerSpeciesID, const int32 CalledID,
-	const int32 NeighborSpeciesID, const int32 NeighborID, const float DistanceSquared);
-	
-	
+	FORCEINLINE bool IsWithinPerceptionRangeDifferentSpecies(const FVector& FirstBoidPosition, 
+		const FVector& SecondBoidPosition, const float DistanceSquared)
+	{
+		return FVector::DistSquared(FirstBoidPosition, SecondBoidPosition) <= DistanceSquared;
+	}
+		
 	
 	static constexpr float SPEED_CORRECTION_FORCE = 0.85f;
 		
@@ -136,7 +152,6 @@ private:
 	
 	TArray<int32> SameSpeciesNeighbors;
 	TArray<FBoidCollisionCellData> DifferentSpeciesNeighbors;
-	
 	
 	TArray<TArray<uint16>> NeighborsBoidData;
 	
@@ -148,7 +163,7 @@ private:
 
 	/** World collision bounds for boid to boid collision calculations. */
 	TUniquePtr<FBoidCollisionVoxelGrid> BoidCollisionVoxelGrid;
-
+	
 	
 #if WITH_EDITOR
 	void CheckForAnyBoidNumberUpdate();

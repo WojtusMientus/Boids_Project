@@ -96,7 +96,7 @@ void UBoidManagerSubsystem::InitializeSimulation(const TArray<FBoidsSpeciesPlain
 void UBoidManagerSubsystem::InitializeDifferentBoidSpecies(const TArray<FBoidsSpeciesPlainInfo>& BoidsInfo)
 {
 	BoidSpecies.Reserve(BoidsInfo.Num());
-	
+
 	int32 CumulativeNumberOfBoids = 0;
 	
 	for (int SpeciesIndex = 0; SpeciesIndex < BoidsInfo.Num(); SpeciesIndex++)
@@ -180,24 +180,29 @@ void UBoidManagerSubsystem::UpdateBoids(float DeltaTime)
 #endif
 	*/
 	
-	RemakeBoidCollisionVoxelGrid();
+	// RemakeBoidCollisionVoxelGrid();
 	
 	for (int SpeciesIndex = 0; SpeciesIndex < BoidSpecies.Num(); SpeciesIndex++)
 	{
+		const FBoidsSpeciesPlainInfo& CurrentSpeciesInfo = BoidSpecies[SpeciesIndex]->SpeciesInfo;
+		
 		for (int BoidIndex = 0; BoidIndex < BoidSpecies[SpeciesIndex]->Num(); BoidIndex++)
 		{
 			FBoid& Boid = BoidSpecies[SpeciesIndex]->BoidPool[BoidIndex];
 			Boid.Acceleration = FVector::ZeroVector;
-			GetNeighbourBoidsDifferentSpeciesSlow(SpeciesIndex, BoidIndex);
-
-			{
-				TRACE_CPUPROFILER_EVENT_SCOPE(BoidManager_Neighbor_VoxelGrid_ContinuousIndexing)
-				GetNeighborBoidsDifferentSpeciesVoxelGrid(Boid, SpeciesIndex);
-			}
 			
-			ComputeBoidBehaviourForces(Boid, SpeciesIndex, BoidIndex);
-			ApplyEnvironmentCollisionForce(SpeciesIndex, BoidIndex);
-			ApplySpeedAdjustmentForcePerSpecies(SpeciesIndex, BoidIndex);
+			GetNeighbourBoidsDifferentSpeciesBruteForce(SpeciesIndex, BoidIndex, CurrentSpeciesInfo.PerceptionDistanceSquared);
+			
+			// {
+			// 	TRACE_CPUPROFILER_EVENT_SCOPE(BoidManager_Neighbor_VoxelGrid)
+			// 	GetNeighborBoidsDifferentSpeciesVoxelGrid(Boid, SpeciesIndex);
+			// }
+
+			ApplyAllBoidBehaviourForces(Boid, SpeciesIndex, BoidIndex);
+			
+			ApplyEnvironmentCollisionForce(Boid, CurrentSpeciesInfo.EnvironmentCollisionMultiplier, 
+				CurrentSpeciesInfo.BoundsCollisionMultiplier);
+			ApplySpeedAdjustmentForcePerSpecies(Boid, CurrentSpeciesInfo.DesiredSpeed);
 		}
 	} 
 	
@@ -229,30 +234,32 @@ void UBoidManagerSubsystem::GetNeighborBoidsDifferentSpeciesVoxelGrid(const FBoi
 		BoidSpecies[SpeciesID]->SpeciesInfo.PerceptionDistanceInVoxelCellCount, NeighborsBoidData);
 }
 
-void UBoidManagerSubsystem::GetNeighbourBoidsDifferentSpeciesSlow(const int32 SpeciesID, const int32 BoidID)
+void UBoidManagerSubsystem::GetNeighbourBoidsDifferentSpeciesBruteForce(const int32 SpeciesID, const int32 BoidID, 
+	const float PerceptionDistanceSquared)
 {
 	SameSpeciesNeighbors.Reset();
 	DifferentSpeciesNeighbors.Reset();
 	
-	for (int SpeciesIndex = 0; SpeciesIndex < BoidSpecies.Num(); SpeciesIndex++)
+	HandleSameSpeciesNeighborSearch(SpeciesID, BoidID, PerceptionDistanceSquared);
+	
+	int32 OtherSpeciesID = (SpeciesID + 1) % BoidSpecies.Num();
+	
+	while (OtherSpeciesID != SpeciesID)
 	{
-		if (SpeciesIndex == SpeciesID)
-		{
-			HandleSameSpeciesNeighborSearch(SpeciesID, BoidID);
-		}
-		else
-		{
-			HandleDifferentSpeciesNeighborSearch(SpeciesID, SpeciesIndex, BoidID);
-		}
+		HandleDifferentSpeciesNeighborSearch(SpeciesID, OtherSpeciesID, BoidID, PerceptionDistanceSquared);
+		OtherSpeciesID = (OtherSpeciesID + 1) % BoidSpecies.Num();
 	}
 }
 
-void UBoidManagerSubsystem::HandleSameSpeciesNeighborSearch(const int32 SpeciesID, const int32 BoidID)
+void UBoidManagerSubsystem::HandleSameSpeciesNeighborSearch(const int32 SpeciesID, const int32 BoidID, 
+                                                            const float PerceptionDistanceSquared)
 {
+	const FVector& CurrentBoidPositon = BoidSpecies[SpeciesID]->BoidPool[BoidID].Position;
+
 	for (int BoidIndex = 0; BoidIndex < BoidID; BoidIndex++)
 	{
-		if (IsWithinPerceptionRangeDifferentSpecies(SpeciesID, BoidID, 
-			SpeciesID, BoidIndex, BoidSpecies[SpeciesID]->SpeciesInfo.PerceptionDistanceSquared))
+		if (IsWithinPerceptionRangeDifferentSpecies(CurrentBoidPositon, 
+			BoidSpecies[SpeciesID]->BoidPool[BoidIndex].Position, PerceptionDistanceSquared))
 		{
 			SameSpeciesNeighbors.Add(BoidIndex);
 		}
@@ -260,8 +267,8 @@ void UBoidManagerSubsystem::HandleSameSpeciesNeighborSearch(const int32 SpeciesI
 	
 	for (int BoidIndex = BoidID + 1; BoidIndex < BoidSpecies[SpeciesID]->Num(); BoidIndex++)
 	{
-		if (IsWithinPerceptionRangeDifferentSpecies(SpeciesID, BoidID, 
-	SpeciesID, BoidIndex, BoidSpecies[SpeciesID]->SpeciesInfo.PerceptionDistanceSquared))
+		if (IsWithinPerceptionRangeDifferentSpecies(CurrentBoidPositon, 
+			BoidSpecies[SpeciesID]->BoidPool[BoidIndex].Position, PerceptionDistanceSquared))
 		{
 			SameSpeciesNeighbors.Add(BoidIndex);
 		}
@@ -269,110 +276,107 @@ void UBoidManagerSubsystem::HandleSameSpeciesNeighborSearch(const int32 SpeciesI
 }
 
 void UBoidManagerSubsystem::HandleDifferentSpeciesNeighborSearch(const int32 SpeciesID, const int32 OtherSpeciesID,
-	const int32 BoidID)
+                                                                 const int32 BoidID, const float PerceptionDistanceSquared)
 {
+	const FVector& CurrentBoidPositon = BoidSpecies[SpeciesID]->BoidPool[BoidID].Position;
+	
 	for (int BoidIndex = 0; BoidIndex < BoidSpecies[OtherSpeciesID]->Num(); BoidIndex++)
 	{
-		if (IsWithinPerceptionRangeDifferentSpecies(SpeciesID, BoidID, 
-OtherSpeciesID, BoidIndex, BoidSpecies[SpeciesID]->SpeciesInfo.PerceptionDistanceSquared))
+		if (IsWithinPerceptionRangeDifferentSpecies(CurrentBoidPositon,
+			BoidSpecies[OtherSpeciesID]->BoidPool[BoidIndex].Position, PerceptionDistanceSquared))
 		{
 			DifferentSpeciesNeighbors.Add(FBoidCollisionCellData(OtherSpeciesID, BoidIndex));
 		}
 	}
 }
 
-void UBoidManagerSubsystem::ComputeBoidBehaviourForces(FBoid& Boid, const uint8 SpeciesID,
-	const uint16 BoidID)
+void UBoidManagerSubsystem::ApplyAllBoidBehaviourForces(FBoid& Boid, const uint8 SpeciesID, const uint16 BoidID)
 {
-	const FVector Alignment = ComputeAlignmentMultipleSpecies(SpeciesID);
-	const FVector Cohesion = ComputeCohesionMultipleSpecies(SpeciesID, BoidID);
-	const FVector Separation = ComputeSeparationMultipleSpecies(SpeciesID, BoidID);
+	FVector Alignment = FVector::Zero();
+	FVector Cohesion = FVector::Zero();
+	FVector Separation = FVector::Zero();
+	
+	ComputeBoidBehaviorForces(SpeciesID, BoidID, Separation, Alignment, Cohesion);
 	const FVector OtherSpeciesForce = ComputeForceBetweenDifferentSpecies(SpeciesID, BoidID);
-
+	
 	Boid.Acceleration = Separation + Alignment + Cohesion + OtherSpeciesForce;
 }
 
-// NOTE: These functions could be combined into a single loop for all forces
-//       (Separation, Alignment, Cohesion) to reduce iterations over neighbors.
-//		 But for the sake of clarity, I keep them separate
-FVector UBoidManagerSubsystem::ComputeSeparationMultipleSpecies(const int32 SpeciesID, const int32 BoidID)
+void UBoidManagerSubsystem::ComputeBoidBehaviorForces(const int32 SpeciesID, const int32 BoidID, 
+                                                      FVector& SeparationVector, FVector& AlignmentVector, FVector& CohesionVector)
 {
-	FVector FinalSeparationVector = FVector::ZeroVector;
-		
-	for (const int32 NeighborBoidID: SameSpeciesNeighbors)
-	{
-		float DistanceToOtherBoid = FVector::Dist(BoidSpecies[SpeciesID]->BoidPool[BoidID].Position,
-			BoidSpecies[SpeciesID]->BoidPool[NeighborBoidID].Position);
-		FVector DesiredDirection = BoidSpecies[SpeciesID]->BoidPool[BoidID].Position - 
-			BoidSpecies[SpeciesID]->BoidPool[NeighborBoidID].Position;
-		
-		DesiredDirection = (1 - DistanceToOtherBoid / BoidSpecies[SpeciesID]->SpeciesInfo.PerceptionDistance)
-		* DesiredDirection.GetSafeNormal();
-		FinalSeparationVector += DesiredDirection;	
-	}
-
-	if (SameSpeciesNeighbors.Num() > 0)
-	{
-		FinalSeparationVector /= SameSpeciesNeighbors.Num();
-		FinalSeparationVector *= BoidSpecies[SpeciesID]->SpeciesInfo.SeparationForce;
-	}
-
-	return FinalSeparationVector;
-}
-
-// NOTE: These functions could be combined into a single loop for all forces
-//       (Separation, Alignment, Cohesion) to reduce iterations over neighbors.
-//		 But for the sake of clarity, I keep them separate
-FVector UBoidManagerSubsystem::ComputeAlignmentMultipleSpecies(const int32 SpeciesID)
-{
-	FVector FinalAlignmentVector = FVector::ZeroVector;	
+	const FVector& CurrentBoidPosition = BoidSpecies[SpeciesID]->BoidPool[BoidID].Position;
+	const FBoidsSpeciesPlainInfo& CurrentSpeciesInfo = BoidSpecies[SpeciesID]->SpeciesInfo;
 	
 	for (const int32 NeighborBoidID: SameSpeciesNeighbors)
 	{
-		FVector DesiredBoidVelocity = BoidSpecies[SpeciesID]->BoidPool[NeighborBoidID].Velocity;
-		DesiredBoidVelocity = DesiredBoidVelocity.GetSafeNormal();
-		FinalAlignmentVector += DesiredBoidVelocity;			
+		const FBoid& NeighborBoid = BoidSpecies[SpeciesID]->BoidPool[NeighborBoidID];
+		
+		AddSeparationForcePerNeighbor(CurrentBoidPosition, NeighborBoid.Position, 
+			CurrentSpeciesInfo.PerceptionDistance, SeparationVector);
+		AddAlignmentForcePerNeighbor(NeighborBoid.Velocity, AlignmentVector);
+		AddCohesionForcePerNeighbor(NeighborBoid.Position, CohesionVector);
 	}
 	
 	if (SameSpeciesNeighbors.Num() > 0)
 	{
-		FinalAlignmentVector /= SameSpeciesNeighbors.Num();
-		FinalAlignmentVector *= BoidSpecies[SpeciesID]->SpeciesInfo.AlignmentForce;
+		ComputeFinalSeparationForce(CurrentSpeciesInfo.SeparationForce, SeparationVector);
+		ComputeFinalAlignmentForce(CurrentSpeciesInfo.AlignmentForce, AlignmentVector);
+		ComputeFinalCohesionForce(CurrentBoidPosition, CurrentSpeciesInfo.CohesionForce, CohesionVector);
 	}
-
-	return FinalAlignmentVector;
 }
 
-// NOTE: These functions could be combined into a single loop for all forces
-//       (Separation, Alignment, Cohesion) to reduce iterations over neighbors.
-//		 But for the sake of clarity, I keep them separate
-FVector UBoidManagerSubsystem::ComputeCohesionMultipleSpecies(const int32 SpeciesID, const int32 BoidID)
+void UBoidManagerSubsystem::AddSeparationForcePerNeighbor(const FVector& CurrentBoidPosition, const FVector& OtherBoidPosition,
+	const float PerceptionDistance, FVector& SeparationVector)
 {
-	FVector FinalCohesionVector = FVector::ZeroVector;
+	FVector DesiredDirection = CurrentBoidPosition - OtherBoidPosition;
+	float DistanceToOtherBoid = DesiredDirection.Length();
 		
-	for (const int32 NeighborBoidID: SameSpeciesNeighbors)
-	{
-		FinalCohesionVector += BoidSpecies[SpeciesID]->BoidPool[NeighborBoidID].Position;		
-	}
+	DesiredDirection = (1 - DistanceToOtherBoid / PerceptionDistance) * DesiredDirection.GetSafeNormal();
+	SeparationVector += DesiredDirection;	
+}
 
-	if (SameSpeciesNeighbors.Num() > 0)
-	{
-		FinalCohesionVector /= SameSpeciesNeighbors.Num();
-		FinalCohesionVector -= BoidSpecies[SpeciesID]->BoidPool[BoidID].Position;
-		FinalCohesionVector = FinalCohesionVector.GetSafeNormal();
-		FinalCohesionVector *= BoidSpecies[SpeciesID]->SpeciesInfo.CohesionForce;
-	}
+void UBoidManagerSubsystem::AddAlignmentForcePerNeighbor(const FVector& OtherBoidVelocity, FVector& AlignmentVector)
+{
+	FVector DesiredBoidVelocity = OtherBoidVelocity;
+	DesiredBoidVelocity = DesiredBoidVelocity.GetSafeNormal();
+	AlignmentVector += DesiredBoidVelocity;
+}
 
-	return FinalCohesionVector;
+void UBoidManagerSubsystem::AddCohesionForcePerNeighbor(const FVector& OtherBoidPosition, FVector& CohesionVector)
+{
+	CohesionVector += OtherBoidPosition;		
+}
+
+void UBoidManagerSubsystem::ComputeFinalSeparationForce(const float SeparationMultiplier, FVector& SeparationVector)
+{
+	SeparationVector /= SameSpeciesNeighbors.Num();
+	SeparationVector *= SeparationMultiplier;
+}
+
+void UBoidManagerSubsystem::ComputeFinalAlignmentForce(const float AlignmentMultiplier, FVector& AlignmentVector)
+{
+	AlignmentVector /= SameSpeciesNeighbors.Num();
+	AlignmentVector *= AlignmentMultiplier;
+}
+
+void UBoidManagerSubsystem::ComputeFinalCohesionForce(const FVector& CurrentBoidPosition, const float CohesionMultiplier,
+	FVector& CohesionVector)
+{
+	CohesionVector /= SameSpeciesNeighbors.Num();
+	CohesionVector -= CurrentBoidPosition;
+	CohesionVector = CohesionVector.GetSafeNormal();
+	CohesionVector *= CohesionMultiplier;
 }
 
 FVector UBoidManagerSubsystem::ComputeForceBetweenDifferentSpecies(const int32 SpeciesID, const int32 BoidID)
 {
 	FVector FinalOtherSpeciesVector = FVector::ZeroVector;
-		
+	const FVector& CurrentBoidPosition = BoidSpecies[SpeciesID]->BoidPool[BoidID].Position;
+	
 	for (const FBoidCollisionCellData OtherSpeciesData: DifferentSpeciesNeighbors)
 	{
-		FinalOtherSpeciesVector += (BoidSpecies[SpeciesID]->BoidPool[BoidID].Position - 
+		FinalOtherSpeciesVector += (CurrentBoidPosition - 
 			BoidSpecies[OtherSpeciesData.SpeciesIndex]->BoidPool[OtherSpeciesData.BoidIndex].Position).GetSafeNormal();		
 	}
 	
@@ -381,43 +385,36 @@ FVector UBoidManagerSubsystem::ComputeForceBetweenDifferentSpecies(const int32 S
 		FinalOtherSpeciesVector /= DifferentSpeciesNeighbors.Num();
 		FinalOtherSpeciesVector *= BoidSpecies[SpeciesID]->SpeciesInfo.OtherSpeciesForceMultiplier;
 	}
-	
+
 	return FinalOtherSpeciesVector;
 }
 
-bool UBoidManagerSubsystem::IsWithinPerceptionRangeDifferentSpecies(const int32 CallerSpeciesID,
-	const int32 CalledID, const int32 NeighborSpeciesID, const int32 NeighborID, const float DistanceSquared)
+void UBoidManagerSubsystem::ApplyEnvironmentCollisionForce(FBoid& CurrentBoid, 
+	const float EnvironmentCollisionMultiplier, const float BoundsCollisionMultiplier)
 {
-	float DistanceBetweenBoids = FVector::DistSquared(BoidSpecies[CallerSpeciesID]->BoidPool[CalledID].Position,
-	BoidSpecies[NeighborSpeciesID]->BoidPool[NeighborID].Position);
-	return DistanceBetweenBoids <= DistanceSquared;
+	CurrentBoid.Acceleration += WorldCollisionVoxelGrid->GetFinalCollisionVectorAtLocation(
+	CurrentBoid.Position, EnvironmentCollisionMultiplier, BoundsCollisionMultiplier);
 }
 
-void UBoidManagerSubsystem::ApplyEnvironmentCollisionForce(const int32 SpeciesID, const int32 BoidID)
+void UBoidManagerSubsystem::ApplySpeedAdjustmentForcePerSpecies(FBoid& CurrentBoid, const float DesiredSpeed)
 {
-	BoidSpecies[SpeciesID]->BoidPool[BoidID].Acceleration += WorldCollisionVoxelGrid->GetFinalCollisionVectorAtLocation(
-	BoidSpecies[SpeciesID]->BoidPool[BoidID].Position, BoidSpecies[SpeciesID]->SpeciesInfo.EnvironmentCollisionMultiplier, 
-	 BoidSpecies[SpeciesID]->SpeciesInfo.BoundsCollisionMultiplier);
-}
-
-void UBoidManagerSubsystem::ApplySpeedAdjustmentForcePerSpecies(const int32 SpeciesID, const int32 BoidID)
-{
-	const FVector DesiredVelocity = BoidSpecies[SpeciesID]->BoidPool[BoidID].Velocity.GetSafeNormal() * 
-	BoidSpecies[SpeciesID]->SpeciesInfo.DesiredSpeed;
-	const FVector CorrectionVector = DesiredVelocity - BoidSpecies[SpeciesID]->BoidPool[BoidID].Velocity;
-	BoidSpecies[SpeciesID]->BoidPool[BoidID].Acceleration += CorrectionVector * SPEED_CORRECTION_FORCE;
+	const FVector DesiredVelocity = CurrentBoid.Velocity.GetSafeNormal() * DesiredSpeed;
+	const FVector CorrectionVector = DesiredVelocity - CurrentBoid.Velocity;
+	CurrentBoid.Acceleration += CorrectionVector * SPEED_CORRECTION_FORCE;
 }
 
 void UBoidManagerSubsystem::ApplyRecalculatedVelocity(float DeltaTime)
 {
 	for (int SpeciesIndex = 0; SpeciesIndex < BoidSpecies.Num(); SpeciesIndex++)
 	{
+		const FBoidsSpeciesPlainInfo& CurrentSpeciesInfo = BoidSpecies[SpeciesIndex]->SpeciesInfo;
+		
 		for (int BoidIndex = 0; BoidIndex < BoidSpecies[SpeciesIndex]->Num(); BoidIndex++)
 		{
 			FBoid& CurrentBoid = BoidSpecies[SpeciesIndex]->BoidPool[BoidIndex];
 		
 			CurrentBoid.Velocity += CurrentBoid.Acceleration * DeltaTime;
-			CurrentBoid.Velocity = CurrentBoid.Velocity.GetClampedToMaxSize(1.5f * BoidSpecies[SpeciesIndex]->SpeciesInfo.DesiredSpeed);
+			CurrentBoid.Velocity = CurrentBoid.Velocity.GetClampedToMaxSize(1.5f * CurrentSpeciesInfo.DesiredSpeed);
 			CurrentBoid.Update(DeltaTime);
 		}
 	}
