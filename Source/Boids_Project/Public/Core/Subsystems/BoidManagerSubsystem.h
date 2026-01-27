@@ -82,6 +82,7 @@ public:
 		return BoidSpecies[SpeciesIndex]->Num();
 	}
 
+
 private:
 		
 	void CreateVoxelGrids();
@@ -106,8 +107,7 @@ private:
 	void UpdateBoids(float DeltaTime);
 	
 	void RemakeBoidCollisionVoxelGrid();
-	void GetNeighborBoidsDifferentSpeciesSorted_TwoArrays(const FBoid& Boid, const int SpeciesID);
-	void GetNeighborBoidsDifferentSpeciesSorted_OneArray(const FBoid& Boid, const int SpeciesID);
+	void GetNeighborBoidsDifferentSpeciesVoxelGrid(const FBoid& Boid, const int SpeciesID);
 	
 	void GetNeighbourBoidsDifferentSpeciesSlow(const int32 SpeciesID, const int32 BoidID);
 	void HandleSameSpeciesNeighborSearch(const int32 SpeciesID, const int32 BoidID);
@@ -137,10 +137,8 @@ private:
 	TArray<int32> SameSpeciesNeighbors;
 	TArray<FBoidCollisionCellData> DifferentSpeciesNeighbors;
 	
-	TArray<uint16> SameNeighborsBoidDataSortedIf;
-	TArray<FBoidCollisionCellData> DifferentNeighborsBoidDataSortedIf;
 	
-	TArray<TArray<uint16>> NeighborsBoidDataSortedNoIf;
+	TArray<TArray<uint16>> NeighborsBoidData;
 	
 	/** Weak reference to the BoidDataManager for getting converted gameplay tag to array index. */
 	TWeakObjectPtr<UBoidDataManagerSubsystem> BoidDataManager;
@@ -150,8 +148,7 @@ private:
 
 	/** World collision bounds for boid to boid collision calculations. */
 	TUniquePtr<FBoidCollisionVoxelGrid> BoidCollisionVoxelGrid;
-	TUniquePtr<FBoidCollisionVoxelGrid> BoidCollisionVoxelGridTwo;
-	
+
 	
 #if WITH_EDITOR
 	void CheckForAnyBoidNumberUpdate();
