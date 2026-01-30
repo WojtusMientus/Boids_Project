@@ -36,10 +36,10 @@ public:
 		InternalVoxelGrid[GridIndex].Add(FBoidCollisionCellData(SpeciesID, BoidID));
 	}
 	
-	FORCEINLINE void GetNeighboringBoidInVoxelGrid(const FBoid& Boid, const FIntVector PerceptionDistance,
+	FORCEINLINE void GetNeighboringBoidInVoxelGrid(const FVector& BoidsPosition, const FIntVector PerceptionDistance,
 	                                    TArray<TArray<uint16>>& OutNeighbors)
 	{
-		const FIntVector SpatialIndex = FBoundsMath::ClampToNearestBoundIndices(Boid.Position, 
+		const FIntVector SpatialIndex = FBoundsMath::ClampToNearestBoundIndices(BoidsPosition, 
 			BoundsMin, VoxelCellSize, GridResolution);
 		
 		const FIntVector StartingIndices = FBoundsMath::ClampToBoundsResolution(SpatialIndex - PerceptionDistance,

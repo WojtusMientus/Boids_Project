@@ -18,26 +18,23 @@ public:
 	virtual void InitializeWorldCollisionVoxelGrid(const 
 		FEnvironmentCollisionVoxelGridData& EnvironmentCollisionVoxelGridData);
 	
-	FORCEINLINE FVector GetFinalCollisionVectorAtIndex(const int32 Index, 
-		const float EnvironmentCollisionMultiplier, const float BoundsCollisionMultiplier) const;
 	FORCEINLINE FVector GetFinalCollisionVectorAtLocation(const FVector& Location, 
-		const float EnvironmentCollisionMultiplier, const float BoundsCollisionMultiplier) const;
+	const float EnvironmentCollisionMultiplier, const float BoundsCollisionMultiplier) const
+	{
+		return GetFinalCollisionVectorAtIndex(PositionToArrayIndex(Location), 
+			EnvironmentCollisionMultiplier, BoundsCollisionMultiplier);
+	}
+	
+	FORCEINLINE FVector GetFinalCollisionVectorAtIndex(const int32 Index, 
+		const float EnvironmentCollisionMultiplier, const float BoundsCollisionMultiplier) const
+	{
+		const FEnvironmentCollisionCellData CollisionData = GetValueAtIndex(Index);
+		return CollisionData.EnvironmentCollisionForce * EnvironmentCollisionMultiplier + 
+			CollisionData.BoundsCollisionForce * BoundsCollisionMultiplier;
+	}
+	
+
 	
 	virtual FVector GetRandomPointInsideGrid() const override;
 
 };
-
-inline FVector FWorldCollisionVoxelGrid::GetFinalCollisionVectorAtIndex(const int32 Index, 
-	const float EnvironmentCollisionMultiplier, const float BoundsCollisionMultiplier) const
-{
-	const FEnvironmentCollisionCellData CollisionData = GetValueAtIndex(Index);
-	return CollisionData.EnvironmentCollisionForce * EnvironmentCollisionMultiplier + 
-		CollisionData.BoundsCollisionForce * BoundsCollisionMultiplier;
-}
-
-inline FVector FWorldCollisionVoxelGrid::GetFinalCollisionVectorAtLocation(const FVector& Location, 
-	const float EnvironmentCollisionMultiplier, const float BoundsCollisionMultiplier) const
-{
-	return GetFinalCollisionVectorAtIndex(PositionToArrayIndex(Location), 
-		EnvironmentCollisionMultiplier, BoundsCollisionMultiplier);
-}

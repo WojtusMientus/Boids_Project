@@ -33,7 +33,11 @@ public:
 	 * Returns T value at given index.
 	 * @param Index Index to sample on.
 	 */
-	FORCEINLINE const T& GetValueAtIndex(const int32 Index) const;
+	FORCEINLINE const T& GetValueAtIndex(const int32 Index) const
+	{
+		const int32 ClampedIndex = FMath::Clamp(Index, 0, InternalVoxelGrid.Num() - 1);
+		return InternalVoxelGrid[ClampedIndex];
+	}
 	
 	/** Returns number of voxel grid cells. */
 	FORCEINLINE int32 GetGridCellCount() const { return InternalVoxelGrid.Num(); }
@@ -86,13 +90,6 @@ const T& FVoxelGrid<T>::GetValueAtLocation(const FVector& Location) const
 {
 	const T& Value = GetValueAtIndex(PositionToArrayIndex(Location));
 	return Value;
-}
-
-template <class T>
-const T& FVoxelGrid<T>::GetValueAtIndex(const int32 Index) const
-{
-	const int32 ClampedIndex = FMath::Clamp(Index, 0, InternalVoxelGrid.Num() - 1);
-	return InternalVoxelGrid[ClampedIndex];
 }
 
 template <class T>

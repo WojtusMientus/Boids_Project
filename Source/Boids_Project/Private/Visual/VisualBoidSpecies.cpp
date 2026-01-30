@@ -46,10 +46,8 @@ void AVisualBoidSpecies::UpdateBoidTransform(const int32 BoidIndex, const FVecto
 
 void AVisualBoidSpecies::UpdateBoidTransforms()
 {
-	{
-		TRACE_CPUPROFILER_EVENT_SCOPE(BoidManager_BatchUpdate)
-		VisualBoidMeshes->BatchUpdateInstancesTransforms(0, VisualBoidTransforms, true, false, false);
-	}
+	VisualBoidMeshes->BatchUpdateInstancesTransforms(0, VisualBoidTransforms, true,
+		false, false);
 }
 
 void AVisualBoidSpecies::AddBoids(const TArray<FTransform>& NewBoidTransforms)
