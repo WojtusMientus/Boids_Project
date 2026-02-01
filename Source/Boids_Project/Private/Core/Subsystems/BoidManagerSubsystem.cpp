@@ -168,11 +168,10 @@ void UBoidManagerSubsystem::InitializeNeighbourArray()
 
 void UBoidManagerSubsystem::UpdateBoids(float DeltaTime)
 {
-	/*
+
 #if WITH_EDITOR
 	CheckForAnyBoidNumberUpdate();
 #endif
-	*/
 	
 	RemakeBoidCollisionVoxelGrid();
 
@@ -317,13 +316,32 @@ FVector UBoidManagerSubsystem::ComputeForceBetweenDifferentSpecies(const int32 S
 {
 	FVector FinalOtherSpeciesVector = FVector::ZeroVector;
 	const FVector& CurrentBoidPosition = BoidSpecies[SpeciesID]->BoidPool[BoidID].Position;
+	const FBoidsSpeciesPlainInfo& CurrentSpeciesInfo = BoidSpecies[SpeciesID]->SpeciesInfo;
+	
 	int32 OtherSpeciesID = (SpeciesID + 1) % BoidSpecies.Num();
 	int32 CumulativeNumberOfOtherSpeciesNeighbors = 0;
 	
 	while (OtherSpeciesID != SpeciesID)
 	{
-		AddForceBetweenDifferentSpecies(OtherSpeciesID, CurrentBoidPosition, FinalOtherSpeciesVector);
-		CumulativeNumberOfOtherSpeciesNeighbors += NeighborsBoidData[OtherSpeciesID].Num();
+		for (int32 Index = 0; Index < NeighborsBoidData[OtherSpeciesID].Num(); Index++)
+		{
+			const int32 NeighborBoidRealID = NeighborsBoidData[OtherSpeciesID][Index];
+			const FVector& NeighborBoidPosition = BoidSpecies[OtherSpeciesID]->BoidPool[NeighborBoidRealID].Position;
+			const FVector DirectionFromNeighbor = CurrentBoidPosition - NeighborBoidPosition;
+			const float DistanceSquared = DirectionFromNeighbor.SizeSquared();
+		
+			if (!IsWithinPerceptionRange(DistanceSquared, 
+				CurrentSpeciesInfo.PerceptionDistanceSquared)
+				|| DistanceSquared < UE_SMALL_NUMBER)
+			{
+				continue;
+			}
+			
+			const float Distance = FMath::Sqrt(DistanceSquared);
+			FinalOtherSpeciesVector += DirectionFromNeighbor / Distance;
+			CumulativeNumberOfOtherSpeciesNeighbors++;
+		}
+		
 		OtherSpeciesID = (OtherSpeciesID + 1) % BoidSpecies.Num();
 	}
 	
@@ -336,16 +354,6 @@ FVector UBoidManagerSubsystem::ComputeForceBetweenDifferentSpecies(const int32 S
 	return FinalOtherSpeciesVector;
 }
 
-void UBoidManagerSubsystem::AddForceBetweenDifferentSpecies(const float OtherSpeciesID, 
-	const FVector& CurrentBoidPosition, FVector& OtherSpeciesForceVector)
-{
-	for (int32 OtherBoidID = 0; OtherBoidID < NeighborsBoidData[OtherSpeciesID].Num(); OtherBoidID++)
-	{
-		const int32 NeighborBoidIndex = NeighborsBoidData[OtherSpeciesID][OtherBoidID];
-		OtherSpeciesForceVector += 
-			(CurrentBoidPosition - BoidSpecies[OtherSpeciesID]->BoidPool[NeighborBoidIndex].Position).GetSafeNormal();
-	}
-}
 
 void UBoidManagerSubsystem::ComputeFinalBetweenDifferentSpeciesForce(const int32 SpeciesID, 
 	const int32 CumulativeNumberOfOtherSpeciesNeighbors, FVector& DifferentSpeciesForceVector)

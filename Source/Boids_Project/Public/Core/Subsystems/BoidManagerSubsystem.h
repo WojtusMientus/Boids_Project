@@ -125,8 +125,6 @@ private:
 		FVector& CohesionVector, const int32 CumulativeNumberOfNeighbors);
 	
 	FVector ComputeForceBetweenDifferentSpecies(const int32 SpeciesID, const int32 BoidID);
-	void AddForceBetweenDifferentSpecies(const float OtherSpeciesID, const FVector& CurrentBoidPosition,
-		FVector& OtherSpeciesForceVector);
 	void ComputeFinalBetweenDifferentSpeciesForce(const int32 SpeciesID, 
 		const int32 CumulativeNumberOfOtherSpeciesNeighbors, FVector& DifferentSpeciesForceVector);
 	
