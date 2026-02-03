@@ -11,7 +11,7 @@ class UInstancedStaticMeshComponent;
 
 /**
  *  Runtime container for visual boids of a single species.
- *  Uses an Instanced Static Mesh Component to batch-render all boids.
+ *  Uses an Instanced Static Mesh Component to batch render all boids.
  */
 UCLASS()
 class BOIDS_PROJECT_API AVisualBoidSpecies : public AActor

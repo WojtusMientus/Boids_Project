@@ -42,10 +42,7 @@ void UBoidManagerSubsystem::Deinitialize()
 
 void UBoidManagerSubsystem::Tick(float DeltaTime)
 {
-	{
-		TRACE_CPUPROFILER_EVENT_SCOPE(BoidManager_Update)
-		UpdateBoids(DeltaTime);	
-	}
+	UpdateBoids(DeltaTime);	
 	OnBoidsUpdateFinish.Broadcast();
 }
 

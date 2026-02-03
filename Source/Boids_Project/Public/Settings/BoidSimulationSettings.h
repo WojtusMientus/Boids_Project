@@ -18,9 +18,6 @@ class BOIDS_PROJECT_API UBoidSimulationSettings: public UDeveloperSettings
 	GENERATED_BODY()
 	
 public:
-	   
-	UPROPERTY(Config, EditAnywhere)
-	TSubclassOf<AVisualBoid> VisualBoidClass = nullptr;
 	
 	UPROPERTY(Config, EditAnywhere)
 	TSoftObjectPtr<UStaticMesh> BoidMesh = nullptr;

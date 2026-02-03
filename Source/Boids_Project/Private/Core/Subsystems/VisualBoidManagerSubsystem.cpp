@@ -140,15 +140,11 @@ void UVisualBoidManagerSubsystem::InitializeBoidMaterials(UMaterialInstanceConst
 
 void UVisualBoidManagerSubsystem::HandleBoidsUpdate()
 {
-	{
-		TRACE_CPUPROFILER_EVENT_SCOPE(BoidManager_Update_Visual)
-		
-		ENSURE_ALWAYS_RETURN(BoidManagerSubsystem.IsValid())
+	ENSURE_ALWAYS_RETURN(BoidManagerSubsystem.IsValid())
 	
-		for (int SpeciesIndex = 0; SpeciesIndex < NewVisualBoidsSpecies.Num(); SpeciesIndex++)
-		{
-			UpdateBoidsTransformPerSpecies(SpeciesIndex);
-		}
+	for (int SpeciesIndex = 0; SpeciesIndex < NewVisualBoidsSpecies.Num(); SpeciesIndex++)
+	{
+		UpdateBoidsTransformPerSpecies(SpeciesIndex);
 	}
 }
 
