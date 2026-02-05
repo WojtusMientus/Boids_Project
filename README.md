@@ -42,7 +42,7 @@ My goal wasn't just to get something that looks cool, but to build a flexible, e
 
 ## So, What are Boids? 🤔
 
-Boids are basically simulated "bird-like objects." The cool part is that their complex, lifelike flocking behavior comes from just three simple rules that each boid follows on its own:
+Boids are basically simulated "bird-oid objects." The cool part is that their complex, lifelike flocking behavior comes from just three simple rules that each boid follows on its own:
 
 1. **Separation** – Steer to avoid crowding local flockmates.  
 2. **Alignment** – Steer towards the average heading of local flockmates.  
