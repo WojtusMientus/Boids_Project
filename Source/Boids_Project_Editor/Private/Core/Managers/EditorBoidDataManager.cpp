@@ -48,16 +48,23 @@ void FEditorBoidDataManager::SaveAllBoidsData(const TMap<FGameplayTag, FBoidsSpe
 	}
 }
 
+FCollisionBoundsPlainInfo FEditorBoidDataManager::GetCopyOfBoundsData() const
+{
+	return FCollisionBoundsPlainInfo(LoadedBoundsDataAsset);
+}
+
+TArray<FEnvironmentCollisionCellData> FEditorBoidDataManager::GetCopyOfEnvironmentCollisionData() const
+{
+ 	check(LoadedBoundsDataAsset);
+	return LoadedBoundsDataAsset->GetCollisionForcesArray();
+}
+
+
 void FEditorBoidDataManager::EnsureNecessarySimulationData()
 {
 	EnsureBoidSpeciesDataAssets();	
 	EnsureBoundsDataAssets();
 	EnsureMaterialAssets();
-}
-
-FCollisionBoundsPlainInfo FEditorBoidDataManager::GetCopyOfBoundsData() const
-{
-	return FCollisionBoundsPlainInfo(LoadedBoundsDataAsset);
 }
 
 TMap<FGameplayTag, FBoidsSpeciesPlainInfo> FEditorBoidDataManager::GetCopyOfBoidsData() const

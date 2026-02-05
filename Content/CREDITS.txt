@@ -1,0 +1,12 @@
+Low-poly Lighthouse:
+	- Author: Murriarty
+	- Source: https://sketchfab.com/3d-models/low-poly-lighthouse-1a3a243e153343eeb50cadca536b4e59
+	- License: CC Attribution
+	- Changes: Combined multiple meshes into a single mesh, scaled it down, adjusted pivot point
+
+
+Hot Air Balloon - Low Poly:
+	- Author: Styro
+	- Source: https://www.fab.com/pl/listings/0e6e0bb1-33be-4e58-b30a-d196269e348e
+	- License: Creative Commons Attribution (CC BY 4.0)
+	- Changes: Scaled the mesh down, added black & red as well as green & yellow material version

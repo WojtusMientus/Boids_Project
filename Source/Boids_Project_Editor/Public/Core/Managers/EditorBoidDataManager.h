@@ -28,11 +28,13 @@ public:
 	void SaveBoidsData(const FBoidsSpeciesPlainInfo& BoidsDataToSave);
 	void SaveAllBoidsData(const TMap<FGameplayTag, FBoidsSpeciesPlainInfo>& AllBoidsDataToSave);
 	
+	FCollisionBoundsPlainInfo GetCopyOfBoundsData() const;
+	TArray<FEnvironmentCollisionCellData> GetCopyOfEnvironmentCollisionData() const;
+	
 private:
 	
 	void EnsureNecessarySimulationData();
 	
-	FCollisionBoundsPlainInfo GetCopyOfBoundsData() const;
 	TMap<FGameplayTag, FBoidsSpeciesPlainInfo> GetCopyOfBoidsData() const;
 	
 	void EnsureBoidSpeciesDataAssets();

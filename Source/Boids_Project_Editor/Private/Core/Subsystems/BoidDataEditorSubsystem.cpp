@@ -19,6 +19,14 @@ void UBoidDataEditorSubsystem::InitializeNecessarySimulationData(FCollisionBound
 	BoidDataManager->InitializeBoidSimulationData(BoundsData, BoidsData);
 }
 
+void UBoidDataEditorSubsystem::HandleInitialVisualizationEvent()
+{
+	FCollisionData CollisionData;
+	CollisionData.CollisionBoundsData = BoidDataManager->GetCopyOfBoundsData();
+	CollisionData.CollisionForcesData = BoidDataManager->GetCopyOfEnvironmentCollisionData();
+	OnCollisionDataVisualization.Broadcast(CollisionData);
+}
+
 void UBoidDataEditorSubsystem::RegenerateCollisionDataAndSave(const FCollisionBoundsPlainInfo& CollisionBoundsData)
 {
 	ENSURE_ALWAYS_RETURN(BoidDataManager.IsValid())
@@ -26,9 +34,9 @@ void UBoidDataEditorSubsystem::RegenerateCollisionDataAndSave(const FCollisionBo
 	
 	FCollisionData CollisionData;
 	CollisionData.CollisionBoundsData = CollisionBoundsData;
-	CollisionDataGenerator->GenerateCollisionData_NEW(CollisionData);
+	CollisionDataGenerator->GenerateCollisionData(CollisionData);
 	BoidDataManager->SaveBoundsData(CollisionBoundsData, CollisionData.CollisionForcesData);
-	OnCollisionDataRegeneration.Broadcast(CollisionData);
+	OnCollisionDataVisualization.Broadcast(CollisionData);
 }
 
 void UBoidDataEditorSubsystem::SaveBoidsData(const FBoidsSpeciesPlainInfo& BoidsData)

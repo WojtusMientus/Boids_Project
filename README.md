@@ -1,24 +1,24 @@
 # Boids Simulation in Unreal Engine
 
-This project is my deep dive into the classic Boids flocking algorithm, which I've been fascinated by a couple of years and now is the time to finally explore them. In doing so, I will learn programming concepts like spatial partitioning and GPU-based compute shaders while simultaneously improving my skills in the Unreal Engine.
+This project is my deep dive into the classic Boids flocking algorithm, something I’ve been fascinated by for years and finally had the chance to explore properly. The focus was on building a real-time flocking simulation in Unreal Engine, with an emphasis on clean system architecture, spatial partitioning, and understanding where performance actually matters.
 
-My goal isn't just to get something that looks cool but also to develop an efficient system that can be adjusted and expanded upon.
+My goal wasn't just to get something that looks cool, but to build a flexible, efficient simulation that I could experiment with and really understand how it worked.
 
-![All Forces With Collision Bounding Box](Content/Assets/Github/Gifs/AllForcesWithCollision.gif)
+![Boids Hero Gif](Content/Assets/Github/Gifs/HeroGif.gif)
 
 ---
 
 ### Table of Contents
 
 1. [So, What are Boids? 🤔](#so-what-are-boids-)
-   - [Early Development & Boundary Handling](#early-development--boundary-handling)
 2. [Project Architecture and Class Structure](#project-architecture-and-class-structure)
    - [Core Simulation Layer](#core-simulation-layer)
    - [Visual Layer](#visual-layer)
    - [Data Management & Asset Pipeline](#data-management--asset-pipeline)
    - [Evolution of the Editor Tool](#evolution-of-the-editor-tool)
 3. [Spatial Partitioning: Voxel Grid vs. Octree](#spatial-partitioning-voxel-grid-vs-octree)
-4. [Optimization & Performance Comparison](#optimization--performance-comparison)
+4. [Environment Voxelization & Static Geometry Collision Handling](#environment-voxelization--static-geometry-collision-handling)
+5. [Optimization & Performance Comparison](#optimization--performance-comparison)
    - [Visual Update Optimization](#visual-update-optimization)
    - [Rebuilding vs. Incremental Grid Updates](#rebuilding-vs-incremental-grid-updates)
    - [Order-Dependent Benchmark Behavior](#order-dependent-benchmark-behavior)
@@ -29,14 +29,14 @@ My goal isn't just to get something that looks cool but also to develop an effic
       - [Brute Force Neighbor Search](#brute-force-neighbor-search)
       - [Voxel Grid Neighbor Search](#voxel-grid-neighbor-search)
       - [Key Takeaways](#key-takeaways)
-5. [From Simulation to a Game-Ready System](#from-simulation-to-a-game-ready-system)
+6. [From Simulation to a Game-Ready System](#from-simulation-to-a-game-ready-system)
    - [CPU Multithreading and Shaders](#cpu-multithreading-and-shaders)
    - [Group-Oriented Simulation](#group-oriented-simulation)
    - [Dynamic Spatial Partitioning](#dynamic-spatial-partitioning)
    - [Dynamic World Interaction](#dynamic-world-interaction)
    - [Math and Behavioral Approximation](#math-and-behavioral-approximation)
    - [Tooling Adjustments](#tooling-adjustments)
-6. [Future Development Roadmap](#future-development-roadmap)
+7. [Final Thoughts](#final-thoughts)
 
 ---
 
@@ -45,26 +45,10 @@ My goal isn't just to get something that looks cool but also to develop an effic
 Boids are basically simulated "bird-like objects." The cool part is that their complex, lifelike flocking behavior comes from just three simple rules that each boid follows on its own:
 
 1. **Separation** – Steer to avoid crowding local flockmates.  
-![Separation With Wrapping](Content/Assets/Github/Gifs/SeparationWithWrapping.gif)
 2. **Alignment** – Steer towards the average heading of local flockmates.  
-![Alignment With Wrapping](Content/Assets/Github/Gifs/AlignmentWithWrapping.gif)
 3. **Cohesion** – Steer to move toward the average position of local flockmates.  
-![Cohesion With Wrapping](Content/Assets/Github/Gifs/CohesionWithWrapping.gif)
 
 When you combine these rules, the pattern emerges which can be seen in real flocks of birds or schools of fish!
-
-
-### Early Development & Boundary Handling
-
-In the initial stages of development, the simulation had no collision boundaries. To keep the boids contained, I implemented a "wrapping" behavior where a boid exiting one side of the bounds would instantly teleport to the opposite side.
-
-Here's a look at boids with wrapping mechanic:
-![All Forces With Wrapping](Content/Assets/Github/Gifs/AllForcesWithWrapping.gif)
-
-This was later replaced by a "soft wall" collision system, which uses pre-computed force vectors to steer boids away from the boundaries, resulting in a more natural look.
-
-And here's with boundry collisions:
-![All Forces With Collision Bounding Box](Content/Assets/Github/Gifs/AllForcesWithCollision.gif)
 
 ---
 
@@ -196,7 +180,24 @@ To improve the neighbor search from a brute force `O(N²)` check, I looked into 
 
 I still do believe OctTrees are definitely a better alternative for very large and sparse areas, such as an open worlds.
 
-Here is first voxelized representation of the very basic terrain (Bounds Extent: 1000 per axis, Grid Resolution: 50 per axis):
+---
+
+## Environment Voxelization & Static Geometry Collision Handling
+
+To enable boids to interact with static world geometry, I needed a collision detection system. Many boids implementations rely on **per-boid line traces** to detect obstacles, but I intentionally avoided this approach. To clarify, I did not benchmark raycasting against my solution directly. Tracing from thousands of agents every frame simply didn’t feel like a scalable direction.
+
+Instead, I used **a precomputed collision representation** based on voxelization of the simulation area. During **editor time,** the environment within the simulation bounds is voxelized and stored as a data asset. Then it is loaded at startup and used as a fast lookup structure for collision forces. This approach almost entirely **removes runtime collision cost,** at the expense of additional memory usage.
+
+**The voxelization process works as follows:**
+
+1. The simulation space is represented as a 3D voxel grid, initially treated as fully blocked.
+2. A flood fill is performed from a known point inside the simulation bounds to identify reachable space.
+3. Voxels that intersect WorldStatic geometry are treated as walls, while reachable voxels are marked as valid simulation area.
+4. From these wall voxels, **a “soft wall”** region is generated by expanding outward for a fixed number of cells.
+
+**At runtime, boids sample the voxel grid at their current position and apply the stored force.** This still produces smooth, natural avoidance behavior without requiring any per-frame collision queries against the world geometry.
+
+Below are visualizations of the static simulation geometry, its voxelized representation, and the generated soft wall collision forces:
 
 ![Voxelized Terrain](Content/Assets/Github/Images/VoxelizedTerrain.png)
 
@@ -321,6 +322,7 @@ I measured only the logical simulation cost, specifically the execution time of 
 
 For the voxel grid solution, I additionally recorded the median, average, and maximum number of neighbors processed per boid in each interval. These values help explain how flock density and clustering directly affect execution time. This data was collected directly in C++ during the simulation and logged at the end of each run, split into 5-minute intervals.
 
+---
 
 #### Brute Force Neighbor Search
 
@@ -338,6 +340,7 @@ The table below shows the median of simulation frame execution time (in millisec
 
 As expected, execution time increases with boid count. Since every boid evaluates every other boid each frame, **the full O(N²) cost is paid from the very beginning of the simulation,** even before any clustering occurs.
 
+---
 
 #### Voxel Grid Neighbor Search
 
@@ -399,6 +402,7 @@ Across all tested boid counts, the voxel grid **significantly reduces execution 
 
 As the simulation progresses and boids begin to form denser clusters, neighbor counts increase, which is reflected in higher execution times. While extreme clustering reduces the efficiency of the voxel grid, it still maintains a clear performance advantage over the brute force solution in all tested scenarios.
 
+---
 
 #### Key Takeaways
 
@@ -448,17 +452,17 @@ This could include group level configuration, editable assets for flock paramete
 
 ---
 
-## Future Development Roadmap
+## Final Thoughts
 
-Since it is my main project, I structured it with clear roadmap goals to make it easier for me to track the progress:
+This project has been a significant challenge for me, especially in terms of system architecture. It is my largest project to date, and getting all of its moving parts to work together in a clean way was deeply satisfying.
 
-1. **Implement Tool UI:** Create the visual interface for the Editor Utility Widget.
-2. **Template Voxel Grid:** Develop a generic, reusable Voxel Grid class to optimize boid-to-boid collision and neighbor finding. I will also use this class in a future project on 3D pathfinding. Test performance between brute force solution - `O(N²)` and newly created VoxelGrid - `O(N * K)`.
-3. **Environment Collision Grid:** Set up the voxelized collision system for static geometry using the generic class.  
-4. **Data Integration:** Connect the Editor Tool and `UBoidManagerSubsystem` to save/load `UBoidsData` & `UBoundsData` assets.
-5. **Template Object Pool:** Create a generic object pool for managing `FBoid`, `AVisualBoid` actors, and Threads.  
-6. **Compute Shader (Boid Logic):** Major optimization target and personal minimal goal, shift the main boid update loop to a compute shader in order to take full advantage of extremely powerful GPUs. 
-7. **Compute Shader (Voxel Grid):** If time permits, move the Voxel Grid neighbor search to a compute shader as well for even further performance increases.
-8. **Compute Shader (Collision Generation):** As a final goal, transfer the pre-computation of the environment collision data into it as well.
+Revisiting spatial partitioning and exploring different approaches in a real-time simulation was particularly rewarding. Working on this showed me how critical early design decisions are when building a systems that needs to scale properly.
 
-If you've made it this far, thank you for taking the time to read through all of this. I have enjoyed this journey so far and look forward to pushing it to new heights.
+Compute shaders were an original goal, but due to time constraints and the amount of exploration they would have required, I chose to focus on pushing the existing system as far as I reasonably could. Multithreading is still something I may explore as a final learning step, but the project is ending here.
+
+I spent many evenings thinking through different approaches, questioning why one solution worked better than another, and iterating on systems until they behaved the way I wanted them to. Profiling, adjusting, and seeing measurable improvements while preserving the core behavior was one of the most enjoyable parts of the project.
+
+I’m proud of what I built and excited to carry these lessons into future projects.
+
+*If you’ve made it this far, thank you for taking the time to read through all of this. I’ve really enjoyed this journey.*
+

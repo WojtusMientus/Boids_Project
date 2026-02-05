@@ -6,7 +6,7 @@
 #include "Core/CollisionData.h"
 
 
-void FCollisionDataGenerator::GenerateCollisionData_NEW(FCollisionData& CollisionData)
+void FCollisionDataGenerator::GenerateCollisionData(FCollisionData& CollisionData)
 {
 	SetupStartingValues(CollisionData.CollisionBoundsData);
 	

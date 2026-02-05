@@ -10,7 +10,7 @@
 #include "BoidDataEditorSubsystem.generated.h"
 
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnCollisionDataRegenerationNewEvent, const FCollisionData& CollisionData)
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCollisionDataVisualizationEvent, const FCollisionData& CollisionData)
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSimulationBoundsChangedEvent, const FVector& NewCenter, 
 	const FVector& NewExtent)
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnAnySimulationBoundsDataVisibilityChangedEvent, 
@@ -31,7 +31,7 @@ class BOIDS_PROJECT_EDITOR_API UBoidDataEditorSubsystem : public UEditorSubsyste
 
 public:
 	
-	FOnCollisionDataRegenerationNewEvent OnCollisionDataRegeneration;
+	FOnCollisionDataVisualizationEvent OnCollisionDataVisualization;
 	
 	FOnSimulationBoundsChangedEvent OnSimulationBoundsChanged;
 	
@@ -47,6 +47,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void InitializeNecessarySimulationData(FCollisionBoundsPlainInfo& BoundsData, 
 		TMap<FGameplayTag, FBoidsSpeciesPlainInfo>& BoidsData);
+	
+	UFUNCTION(BlueprintCallable)
+	void HandleInitialVisualizationEvent();
 	
 	UFUNCTION(BlueprintCallable)
 	void RegenerateCollisionDataAndSave(const FCollisionBoundsPlainInfo& BoundsData);

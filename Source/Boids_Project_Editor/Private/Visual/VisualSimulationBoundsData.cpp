@@ -93,7 +93,7 @@ void AVisualSimulationBoundsData::TrySubscribeToSubsystemEvent()
 			OnBoundsChangedHandle = BoidDataEditorSubsystem->OnSimulationBoundsChanged.AddUObject(this, 
 				&AVisualSimulationBoundsData::HandleBoundsChanged);
 			
-			OnCollisionRegenerationHandle = BoidDataEditorSubsystem->OnCollisionDataRegeneration.AddUObject
+			OnCollisionRegenerationHandle = BoidDataEditorSubsystem->OnCollisionDataVisualization.AddUObject
 				(this, &AVisualSimulationBoundsData::HandleRegenerationCollisionData);
 			
 			OnAnyVisibilityChangedHandle = BoidDataEditorSubsystem->OnAnySimulationBoundsDataVisibilityChanged
@@ -114,7 +114,7 @@ void AVisualSimulationBoundsData::TryToUnsubscribeFromSubsystemEvent()
 		if (UBoidDataEditorSubsystem* BoidDataEditorSubsystem = GEditor->GetEditorSubsystem<UBoidDataEditorSubsystem>())
 		{
 			BoidDataEditorSubsystem->OnSimulationBoundsChanged.Remove(OnBoundsChangedHandle);
-			BoidDataEditorSubsystem->OnCollisionDataRegeneration.Remove(OnCollisionRegenerationHandle);
+			BoidDataEditorSubsystem->OnCollisionDataVisualization.Remove(OnCollisionRegenerationHandle);
 			BoidDataEditorSubsystem->OnAnySimulationBoundsDataVisibilityChanged.Remove(OnAnyVisibilityChangedHandle);
 			BoidDataEditorSubsystem->OnSimulationAreaVoxelChanged.Remove(OnSimulationAreaVoxelChangedHandle);
 			

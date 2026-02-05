@@ -16,7 +16,7 @@ class FCollisionDataGenerator
 	
 public:
 	
-	void GenerateCollisionData_NEW(FCollisionData& CollisionData);
+	void GenerateCollisionData(FCollisionData& CollisionData);
 	
 private:
 	
