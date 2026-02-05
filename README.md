@@ -165,8 +165,6 @@ And here is final design of the tool and the color picker:
 
 ![Tool Final Design](Content/Assets/Github/Images/BoidsToolFinal.png)
 
-![Color Picker Final Design](Content/Assets/Github/Images/CustomColorPickerFinal.png)
-
 ---
 
 ## Spatial Partitioning: Voxel Grid vs. Octree
