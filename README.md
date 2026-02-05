@@ -197,9 +197,9 @@ Instead, I used **a precomputed collision representation** based on voxelization
 
 **At runtime, boids sample the voxel grid at their current position and apply the stored force.** This still produces smooth, natural avoidance behavior without requiring any per-frame collision queries against the world geometry.
 
-Below are visualizations of the static simulation geometry, its voxelized representation, and the generated soft wall collision forces:
+Below are visualizations of the static simulation geometry, its voxelized representation, and the generated soft wall collision forces. Bounds extents are 2000 × 2000 × 2000, with a grid resolution of 80 × 80 × 80:
 
-![Voxelized Terrain](Content/Assets/Github/Images/VoxelizedTerrain.png)
+![Voxelized Terrain](Content/Assets/Github/Images/CollisionVisualization.png)
 
 ---
 
@@ -260,6 +260,7 @@ If I had to guess, this behavior is likely related to order of execution effects
 
 Since neither approach showed a consistent advantage once isolated, I chose the second implementation since it scales with the number of species rather than the number of neighbors.
 
+---
 
 ### Neighbor Search: Brute Force vs. Voxel Grid
 
