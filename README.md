@@ -67,7 +67,7 @@ C++ classes and structs that manage data without relying on Unreal's Actor frame
 * `FBoidPool`: Object pool managing my logical `FBoids`. Allows for dynamic addition and removal of boids.
 * `FBoidSpecies`: Struct storing `FBoidPool` for tracking currently simulated boids and `FBoidsSpeciesPlainInfo` for all necessary boid species related info.
 
-* `UBoidManagerSubsystem`: Core of the simulation. This `UTickableWorldSubsystem` manages a collection of `FBoidSpecies` and updates them every frame. Its responsibilities include:  
+* `UBoidManagerSubsystem`: Core of the simulation. This `UGameInstanceSubsystemBase` + `FTickableGameObject` initializes and manages a collection of `FBoidSpecies`, updating them every frame. Its responsibilities include:
 	* Calculating all boid forces (separation, alignment, cohesion, collision). 
 	* Handling parameter updates (force multipliers, speed or collision multipliers) received from the editor tools.
 	* Broadcasting delegates when simulation data changes. 

@@ -92,16 +92,12 @@ void UBoidManagerSubsystem::InitializeSimulation(const TArray<FBoidsSpeciesPlain
 void UBoidManagerSubsystem::InitializeDifferentBoidSpecies(const TArray<FBoidsSpeciesPlainInfo>& BoidsInfo)
 {
 	BoidSpecies.Reserve(BoidsInfo.Num());
-
-	int32 CumulativeNumberOfBoids = 0;
 	
 	for (int SpeciesIndex = 0; SpeciesIndex < BoidsInfo.Num(); SpeciesIndex++)
 	{
 		BoidSpecies.Add(MakeUnique<FBoidSpecies>(BoidsInfo[SpeciesIndex]));
 		check(BoidSpecies[SpeciesIndex]);
 		InitializeBoidSpecies(SpeciesIndex);
-		
-		CumulativeNumberOfBoids += BoidSpecies[SpeciesIndex]->BoidPool.Num();
 	}
 	
 	OnBoidsInitializationFinish.Broadcast();
@@ -236,7 +232,7 @@ void UBoidManagerSubsystem::ComputeBoidBehaviorForces(const int32 SpeciesID, con
 	const FBoidsSpeciesPlainInfo& CurrentSpeciesInfo = BoidSpecies[SpeciesID]->SpeciesInfo;
 	int32 CumulativeDistinctNeighbors = 0;
 	
-	for (const int32 NeighborBoidID: NeighborsBoidData[SpeciesID])
+	for (const int NeighborBoidID: NeighborsBoidData[SpeciesID])
 	{
 		const FBoid& NeighborBoid = BoidSpecies[SpeciesID]->BoidPool[NeighborBoidID];
 		const FVector DirectionToNeighbor = CurrentBoidPosition - NeighborBoid.Position;
@@ -320,7 +316,7 @@ FVector UBoidManagerSubsystem::ComputeForceBetweenDifferentSpecies(const int32 S
 	
 	while (OtherSpeciesID != SpeciesID)
 	{
-		for (int32 Index = 0; Index < NeighborsBoidData[OtherSpeciesID].Num(); Index++)
+		for (int Index = 0; Index < NeighborsBoidData[OtherSpeciesID].Num(); Index++)
 		{
 			const int32 NeighborBoidRealID = NeighborsBoidData[OtherSpeciesID][Index];
 			const FVector& NeighborBoidPosition = BoidSpecies[OtherSpeciesID]->BoidPool[NeighborBoidRealID].Position;
@@ -450,6 +446,7 @@ void UBoidManagerSubsystem::SubscribeToGlobalEditorDelegates()
 
 void UBoidManagerSubsystem::UnsubscribeFromGlobalEditorDelegates()
 {
+	BoidsDelegates::OnBoidNumberUpdate.Remove(OnBoidNumberUpdateHandle);
 	BoidsDelegates::OnBoidForceParametersChange.Remove(OnBoidForceParametersChangeHandle);
 	BoidsDelegates::OnBoidSpatialAwarenessParametersChange.Remove(OnBoidSpatialAwarenessParametersChangeHandle);
 	BoidsDelegates::OnBoidCollisionMultiplierChange.Remove(OnBoidCollisionMultiplierUpdateHandle);
