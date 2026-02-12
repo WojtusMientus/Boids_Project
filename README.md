@@ -205,7 +205,16 @@ Below are visualizations of the static simulation geometry, its voxelized repres
 
 From the start, I want to clarify that I **did not** benchmark a voxel grid against an octree implementation. Both data structures were considered during the design phase (as described earlier), but due to time limitations I focused on profiling and optimizing the chosen solution.
 
-All performance measurements were taken in a **Development build running in-editor and captured using Unreal Insights.**
+All performance measurements were captured using **Unreal Insights** in a Development build running in-editor on the following machine:
+
+| Component               | Specification           |
+| :---                    | :---                    |
+| **CPU**                 | Intel Core i5-10400F    |
+| **RAM**                 | 32 GB DDR4-2666 (CL16)  |
+| **GPU**                 | AMD Radeon RX 6600 XT   |
+| **Unreal Engine**       | 5.6.1                   |
+
+Performance results may vary on different hardware.
 
 
 ### Visual Update Optimization
@@ -217,7 +226,7 @@ To address this, I changed the representation from **per-boid actors to per-spec
 The transition from actors to ISMs was relatively straightforward and resulted in a substantial reduction in visual update cost. The table below shows median execution time (in milliseconds) of `UVisualBoidManagerSubsystem::HandleBoidsUpdate`:
 
 | Boid Count | Actor Update | ISM Update |
-| ---:       | ---:         | ---:       |
+| :---       | :---         | :---       |
 | 500        | 1.03         | 0.11       |
 | 1000       | 2.02         | 0.18       |
 | 1500       | 3.04         | 0.25       |
